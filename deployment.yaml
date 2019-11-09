@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-jupyter-test
+  labels:
+    app: pod-jupyter-test
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pod-jupyter-test
+  template:
+    metadata:
+      labels:
+        app: pod-jupyter-test
+    spec:
+    containers:
+    - name: testserver
+      image: bkandimalla/dandi-0.2.3
+      ports:
+      - containerPort: 8000
