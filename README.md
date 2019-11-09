@@ -1,2 +1,2 @@
-# dandihub-nginx
-hub.dandiarchive.org nginx setup files
+# dandihub
+hub.dandiarchive.org setup files
