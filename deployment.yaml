@@ -17,5 +17,12 @@ spec:
     containers:
     - name: testserver
       image: bkandimalla/dandi-0.2.3
+      volumeMounts:
+      - mountPath: /data
+        name: demo-data
       ports:
       - containerPort: 8000
+    volumes:
+    - name: demo-volume
+      awsElasticBlockStore:
+        volumeID: vol-0d3631773f2608e88
