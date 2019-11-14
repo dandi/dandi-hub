@@ -26,3 +26,4 @@ spec:
     - name: demo-volume
       awsElasticBlockStore:
         volumeID: vol-0d3631773f2608e88
+        fsType: xfs
