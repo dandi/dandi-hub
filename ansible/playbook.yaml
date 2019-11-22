@@ -42,7 +42,7 @@
 
   - name: Setup nginx - edit nginx file
     get_url:
-      url: https://raw.githubusercontent.com/kandimallab/dandihub/master/1hub.dandiarchive.org.conf
+      url: https://raw.githubusercontent.com/dandi/dandihub/master/ansible/1hub.dandiarchive.org.conf
       dest: /etc/nginx/sites-enabled/hub.dandiarchive.org
 
   - name: Setup nginx - restart nginx
@@ -90,7 +90,7 @@
 
   - name: Setup nginx - re-edit nginx file
     get_url:
-      url: https://raw.githubusercontent.com/kandimallab/dandihub/master/hub.dandiarchive.org.conf
+      url: https://raw.githubusercontent.com/kandimallab/dandihub/master/ansible/hub.dandiarchive.org.conf
       dest: /etc/nginx/sites-enabled/hub.dandiarchive.org
 
   - name: Install docker
