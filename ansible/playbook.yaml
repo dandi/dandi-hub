@@ -247,6 +247,7 @@
   - name: Launch kubernetes deployment
     shell:
       echo 'kubectl create -f deployment.yaml'
+      
 #  - name: Port-forward JupyterHub pod to run in background and create log and error log files
 #    shell:
 #      echo 'nohup kubectl port-forward --pod-running-timeout=15m pod/deployment-jupyter-test 8000:8000 > /home/ubuntu/nohup.out 2> /home/ubuntu/nohup.err &'
