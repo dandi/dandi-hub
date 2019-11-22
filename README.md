@@ -1,2 +1,2 @@
 # dandihub
-hub.dandiarchive.org setup files
+https://hub.dandiarchive.org setup files
