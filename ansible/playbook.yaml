@@ -240,7 +240,7 @@
 
   - name: Setup kubernetes deployment of JupyterHub - download deployment.yaml file
     shell:
-      wget https://raw.githubusercontent.com/kandimallab/dandihub/master/deployment.yaml
+      wget https://raw.githubusercontent.com/kandimallab/dandihub/master/ansible/deployment.yaml
     args:
       warn: false
 
