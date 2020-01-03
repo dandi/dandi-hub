@@ -33,7 +33,7 @@ To use this repo for dandi deployment:
 
 ```bash
 cd z2jh-aws-ansible
-cp -r ../dandi-info/. .
+rsync -auv ../dandi-info/. .
 ansible-playbook -i hosts z2jh.yml -v --vault-password-file ansible_password
 ansible-playbook -i hosts apply_github_auth.yml -v --vault-password-file ansible_password
 ```
