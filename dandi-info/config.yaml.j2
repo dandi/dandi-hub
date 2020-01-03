@@ -1,0 +1,40 @@
+proxy:
+  secretToken: "{{ os.stdout }}"
+  https:
+    enabled: true
+    type: offload
+  service:
+    annotations:
+      # Certificate ARN
+      service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "{{ aws_certificate_arn }}"
+      # The protocol to use on the backend, we use TCP since we're using websockets
+      service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+      # Which ports should use SSL
+      service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "3600"
+singleuser:
+  defaultUrl: "/lab"
+  image:
+    name: {{ singleuser_image_repo }}
+    tag: {{ singleuser_image_tag }}
+  storage:
+    type: "static"
+    static:
+      pvcName: "efs-persist"
+      subPath: 'home/{username}'
+  extraEnv:
+    CHOWN_HOME: 'yes'
+  uid: 0
+  fsGid: 0
+  cmd: "start-singleuser.sh"
+  lifecycleHooks:
+    postStart:
+      exec:
+        command:
+          - "sh"
+          - "-c"
+          - >
+            gitpuller https://github.com/flatironinstitute/ephys-viz master ephys-viz;
+            chown -R jovyan:users ephys-viz;
+            gitpuller https://github.com/NeurodataWithoutBorders/nwb-jupyter-widgets master nwb-jupyter-widgets;
+            chown -R jovyan:users nwb-jupyter-widgets
