@@ -26,8 +26,10 @@
                 callbackUrl: "{{ ingress }}/hub/oauth_callback"
                 org_whitelist:
                   - "dandi"
-                  - "nipype"
-                  - "repronim"
+              whitelist:
+                users:
+                  - wmayner
+                  - djarecka
               scopes:
                 - "read:org"
                 - "read:user"

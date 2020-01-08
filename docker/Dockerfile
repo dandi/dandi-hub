@@ -53,8 +53,8 @@ RUN apt-get update -qq \
 USER $NB_USER
 RUN pip install --no-cache-dir datalad[full] pydra
 RUN pip install --no-cache-dir https://github.com/dandi/dandi-cli/archive/master.zip
-RUN cd /data && datalad install ///labs/buzsaki/NWB/SenzaiNeuron2017 \
-    && datalad install -r ///allen-brain-observatory/
+RUN cd /data && datalad install -r ///labs/svoboda ///labs/buzsaki \
+    ///labs/churchland ///allen-brain-observatory/
 
 RUN gitpuller https://github.com/flatironinstitute/ephys-viz master ephys-viz
 RUN gitpuller https://github.com/NeurodataWithoutBorders/nwb-jupyter-widgets master nwb-jupyter-widgets
