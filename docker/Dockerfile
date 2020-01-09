@@ -1,6 +1,5 @@
 FROM jupyter/datascience-notebook:7a0c7325e470
 
-RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
 RUN pip install reactopya_jup==0.9.1
 RUN jupyter labextension install reactopya_jup@0.9.1
 RUN jupyter nbextension install --sys-prefix --py reactopya_jup
@@ -9,7 +8,8 @@ RUN jupyter nbextension enable reactopya_jup --py --sys-prefix
 RUN pip install ephys_viz==0.9.3
 RUN pip install nwbwidgets
 
-RUN jupyter lab build
+RUN rm /opt/conda/share/jupyter/lab/extensions/jupyter-matplotlib-0.4.?.tgz && \
+    jupyter lab build
 RUN pip install --no-cache-dir nbgitpuller
 
 USER root
@@ -53,8 +53,8 @@ RUN apt-get update -qq \
 USER $NB_USER
 RUN pip install --no-cache-dir datalad[full] pydra
 RUN pip install --no-cache-dir https://github.com/dandi/dandi-cli/archive/master.zip
-RUN cd /data && datalad install ///labs/buzsaki/NWB/SenzaiNeuron2017 \
-    && datalad install -r ///allen-brain-observatory/
+RUN cd /data && datalad install -r ///labs/svoboda ///labs/buzsaki \
+    ///labs/churchland ///allen-brain-observatory/
 
 RUN gitpuller https://github.com/flatironinstitute/ephys-viz master ephys-viz
 RUN gitpuller https://github.com/NeurodataWithoutBorders/nwb-jupyter-widgets master nwb-jupyter-widgets
