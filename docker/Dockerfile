@@ -44,14 +44,20 @@ RUN { \
 	echo '#deb-src http://neuro.debian.net/debian-devel trusty main'; \
 } > /etc/apt/sources.list.d/neurodebian.sources.list
 
+# From APT repositories install git-annex required by datalad,
+# singularity-container - so users could go all the way YODA within
+# this Docker, and a number of useful utilities which users could use
+# in their Terminal
 RUN apt-get update -qq \
     && apt-get install -y -q --no-install-recommends \
            git-annex-standalone \
+		   singularity-container \
+		   vim wget time ncdu curl procps pigz less tree \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 USER $NB_USER
-RUN pip install --no-cache-dir datalad[full] pydra
+RUN pip install --no-cache-dir datalad[full] datalad-container pydra
 RUN pip install --no-cache-dir https://github.com/dandi/dandi-cli/archive/master.zip
 RUN cd /data && datalad install -r ///labs/svoboda ///labs/buzsaki \
     ///labs/churchland ///allen-brain-observatory/
