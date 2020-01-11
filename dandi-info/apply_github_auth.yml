@@ -20,16 +20,22 @@
                 users:
                   - "satra"
                   - "yarikoptic"
+              whitelist:
+                users:
+                  - "wmayner"
+                  - "djarecka"
+                  - "jeromelecoq"
+                  - "CellAssembly"
+                  - "colleenjg"
+                  - "arokem"
+                  - "mgrauer"
+                  - "jcfr"
+                  - "thewtex"
+                  - "bendichter"
               github:
                 clientId: "{{ github_client_id }}"
                 clientSecret: "{{ github_client_secret }}"
                 callbackUrl: "{{ ingress }}/hub/oauth_callback"
-                org_whitelist:
-                  - "dandi"
-              whitelist:
-                users:
-                  - wmayner
-                  - djarecka
               scopes:
                 - "read:org"
                 - "read:user"
