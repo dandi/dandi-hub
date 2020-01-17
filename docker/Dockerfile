@@ -55,6 +55,7 @@ RUN pip install --no-cache-dir datalad[full] pydra
 RUN pip install --no-cache-dir https://github.com/dandi/dandi-cli/archive/master.zip
 RUN cd /data && datalad install -r ///labs/svoboda ///labs/buzsaki \
     ///labs/churchland ///allen-brain-observatory/
+RUN pip install --no-cache-dir allensdk
 
 RUN gitpuller https://github.com/flatironinstitute/ephys-viz master ephys-viz
 RUN gitpuller https://github.com/NeurodataWithoutBorders/nwb-jupyter-widgets master nwb-jupyter-widgets
