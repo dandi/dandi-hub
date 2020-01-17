@@ -37,7 +37,6 @@
                 clientSecret: "{{ github_client_secret }}"
                 callbackUrl: "{{ ingress }}/hub/oauth_callback"
               scopes:
-                - "read:org"
                 - "read:user"
             hub:
               extraConfig:
