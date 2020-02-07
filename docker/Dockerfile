@@ -8,8 +8,6 @@ RUN jupyter nbextension enable reactopya_jup --py --sys-prefix
 RUN pip install ephys_viz==0.9.3
 RUN pip install nwbwidgets
 
-RUN rm /opt/conda/share/jupyter/lab/extensions/jupyter-matplotlib-0.4.?.tgz && \
-    jupyter lab build
 RUN pip install --no-cache-dir nbgitpuller
 
 USER root
