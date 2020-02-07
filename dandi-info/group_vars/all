@@ -6,7 +6,7 @@ node_size: t3a.medium
 node_volume_size: 50
 jupyterhub_chart_version: 0.8.2
 singleuser_image_repo: satra/testnwb
-singleuser_image_tag: 3f0df0e7
+singleuser_image_tag: 2c021138
 helm_chart_repo_name: jupyterhub
 helm_chart_repo_url: https://jupyterhub.github.io/helm-chart/
 github_client_id: !vault |
