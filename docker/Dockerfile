@@ -46,16 +46,19 @@ RUN { \
 
 RUN apt-get update -qq \
     && apt-get install -y -q --no-install-recommends \
-           git-annex-standalone \
+           git-annex-standalone httpfs2 fuse \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 USER $NB_USER
-RUN pip install --no-cache-dir datalad[full] pydra
-RUN pip install --no-cache-dir https://github.com/dandi/dandi-cli/archive/master.zip
+RUN pip install --no-cache-dir datalad[full] zarr
+RUN pip install --no-cache-dir https://github.com/nipype/pydra/archive/c8ecd2965741065a98174576f1b82a8289adcd13.zip
+RUN pip install --no-cache-dir https://github.com/dandi/dandi-cli/archive/da557f231e5d211475d8aa3e1655845aebc1b43a.zip
 RUN cd /data && datalad install -r ///labs/svoboda ///labs/buzsaki \
     ///labs/churchland ///allen-brain-observatory/
 RUN pip install --no-cache-dir allensdk
+RUN pip install --no-cache-dir --upgrade pynwb
+RUN cd /opt/conda/bin/ && wget https://github.com/kahing/goofys/releases/latest/download/goofys && chmod +x goofys
 
 RUN gitpuller https://github.com/flatironinstitute/ephys-viz master ephys-viz
 RUN gitpuller https://github.com/NeurodataWithoutBorders/nwb-jupyter-widgets master nwb-jupyter-widgets
