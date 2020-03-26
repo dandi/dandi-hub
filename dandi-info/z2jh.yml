@@ -121,8 +121,8 @@
         command: kops create cluster {{ namespace }}.k8s.local \
           --zones {{ az_facts.availability_zones | map(attribute='zone_name') | list | join(',') }} \
           --authorization RBAC \
-          --master-size t2.micro \
-          --master-volume-size 10 \
+          --master-size t3a.medium \
+          --master-volume-size 20 \
           --node-size {{ node_size }} \
           --node-volume-size {{ node_volume_size }} \
           --node-count {{ node_count }} \
@@ -498,6 +498,8 @@
         when: helmver_result.stdout is undefined or
           helmver_result.stdout.find('Server') == -1
 
+      - name: Add spot termination
+        shell: helm install stable/k8s-spot-termination-handler --namespace kube-system
 
       - name: Install JupyterHub release
         shell: helm install {{ helm_chart_repo_name }}/jupyterhub \
