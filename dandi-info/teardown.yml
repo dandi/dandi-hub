@@ -1,0 +1,185 @@
+---
+  #### Jupyterhub to Zero #### tear down up through -> helm release of jupyterhub, kubernetes, aws fixtures
+  - hosts: all
+
+    user: ec2-user
+
+    environment:
+      - AWS_REGION: "{{ aws_region }}"
+      - KOPS_STATE_STORE: s3://{{ namespace }}-s3
+
+    tasks:
+      - name: Install boto3
+        pip:
+          name: boto3
+          executable: /usr/bin/pip
+        become: yes
+        tags: always
+
+      ## Fix issue with importing AliasedEventEmitter
+      - name: Upgrade awscli
+        pip:
+          name: awscli
+          executable: /usr/bin/pip
+        become: yes
+        tags: always
+
+      ## Idempotent delete helm release of JH
+      - name: Determine if Helm and Tiller are connected already
+        command: helm version --tiller-connection-timeout 30
+        failed_when: False
+        changed_when: False
+        register: helmver_result
+        async: 45
+        poll: 5
+        tags: always
+
+      - name: Determine if JH is currently installed.
+        command: helm status {{ namespace }}-jupyterhub
+        register: jh_installed_result
+        failed_when: False
+        changed_when: False
+        tags: always
+
+        # delete the Helm release. This deletes all resources that were created
+        # by Helm for your JupyterHub deployment
+      - name: Delete helm release
+        command: helm delete {{ namespace }}-jupyterhub --purge
+        when: helmver_result.stdout is defined and not helmver_result.rc and not jh_installed_result.rc
+        tags: always
+
+      - name: check if nodes yaml file exists
+        stat:
+          path: /home/ec2-user/cluster-autoscaler-multi-asg.yaml
+        register: autoscaler_yaml
+
+      - block:
+        # Need to remove the spot group and autoscaler as well
+        - name: Detach role policy
+          shell: aws iam detach-role-policy --policy-arn arn:aws:iam::278212569472:policy/ig-policy --role-name nodes.{{ namespace }}.k8s.local
+          register: aws_result
+          until: aws_result.stderr.find('ig-policy was not found') != -1
+          retries: 2
+          delay: 5
+          failed_when:
+            - aws_result.rc != 0
+            - '"ig-policy was not found" not in aws_result.stderr'
+
+        - name: Delete the nodes spec files
+          file:
+            path: "{{ item }}"
+            state: absent
+          with_items:
+            - /home/ec2-user/spot-ig.yaml
+            - /home/ec2-user/nodes.yaml
+            - /home/ec2-user/cluster-autoscaler-multi-asg.yaml
+        when: autoscaler_yaml.stat.exists == True
+        tags: always
+
+      - name: Check for kube namespace
+        command: kubectl get namespace {{ namespace }}
+        failed_when: False
+        changed_when: False
+        register: get_kube_namespace
+        tags:
+          - never
+          - kubernetes
+          - all-fixtures
+
+        # Next, delete the Kubernetes namespace the hub was installed in.
+        # This deletes any disks that may have been created to store user’s
+        # data, and any IP addresses that may have been provisioned.
+      - name: Delete kubernetes namespace
+        command: kubectl delete namespace {{ namespace }}
+        when: not get_kube_namespace.rc
+        tags:
+          - never
+          - kubernetes
+          - all-fixtures
+
+      - name: Gather EFS facts
+        efs_info:
+          name: "{{ namespace }}-efs"
+        tags:
+          - never
+          - kubernetes
+          - all-fixtures
+
+      - name: Remove EFS mount targets
+        command: aws efs delete-mount-target --region {{ aws_region }} --mount-target-id {{ item['mount_target_id'] }}
+        with_items:
+          "{{ efs[0]['mount_targets'] }}"
+        tags:
+          - never
+          - kubernetes
+          - all-fixtures
+        when: efs[0] is defined
+
+      ## For example, only delete the EFS if you specifically run with tag 'all-fixtures' or 'fixture-efs'
+      - name: Delete EFS fs
+        efs:
+          state: absent
+          name: "{{ namespace }}-efs"
+        tags:
+          - all-fixtures
+          - fixture-efs
+          - never
+
+      # delete security groups
+      - name: Delete NFS Security Group
+        ec2_group:
+          name: "{{ namespace }}.nfs"
+          state: absent
+        tags:
+          - all-fixtures
+          - kubernetes
+          - never
+
+      - name: Determine if cluster exists
+        shell: kops get clusters
+        tags:
+          - all-fixtures
+          - kubernetes
+          - never
+        failed_when: False
+        changed_when: False
+        register: get_cluster
+
+      - name: Delete kubernetes
+        shell: kops delete cluster {{ namespace }}.k8s.local --yes
+        tags:
+          - all-fixtures
+          - kubernetes
+          - never
+        when: not get_cluster.rc
+
+      - name: Delete S3 bucket
+        aws_s3:
+          bucket: "{{ namespace }}-s3"
+          mode: delete
+          # ec2_url: ec2-54-172-77-177.compute-1.amazonaws.com
+        register: s3_log
+        tags:
+          - all-fixtures
+          - fixture-s3
+          - never
+
+      - name: Gather EC2 Facts
+        ec2_instance_info:
+          filters:
+            "tag:Name": "{{ namespace }}-ci"
+        register: ec2_facts
+        tags:
+          - all-fixtures
+          - fixture-ci
+          - never
+
+      - name: Delete CI node
+        ec2:
+          state: absent
+          instance_ids: "{{ ec2_facts['instances'][0]['instance_id'] }}"
+        tags:
+          - all-fixtures
+          - fixture-ci
+          - never
+        when: ec2_facts['instances'][0] is defined

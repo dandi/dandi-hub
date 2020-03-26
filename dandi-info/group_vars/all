@@ -4,9 +4,10 @@ aws_region: us-east-2
 ansible_ssh_private_key_file: ~/.ssh/dandi-satra.pem
 node_size: t3a.medium
 node_volume_size: 50
+node_count: 1
 jupyterhub_chart_version: 0.8.2
-singleuser_image_repo: satra/testnwb
-singleuser_image_tag: 2c021138
+singleuser_image_repo: satra/dandihub
+singleuser_image_tag: fe5a02ae
 helm_chart_repo_name: jupyterhub
 helm_chart_repo_url: https://jupyterhub.github.io/helm-chart/
 github_client_id: !vault |
