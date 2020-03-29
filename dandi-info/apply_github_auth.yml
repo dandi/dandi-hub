@@ -38,6 +38,7 @@
                   - "rly"
                   - "nandchandravadia"
                   - "urut"
+                  - "farznaj"
               github:
                 clientId: "{{ github_client_id }}"
                 clientSecret: "{{ github_client_secret }}"
