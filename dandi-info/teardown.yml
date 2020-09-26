@@ -52,6 +52,7 @@
         stat:
           path: /home/ec2-user/cluster-autoscaler-multi-asg.yaml
         register: autoscaler_yaml
+        tags: always
 
       - block:
         # Need to remove the spot group and autoscaler as well
