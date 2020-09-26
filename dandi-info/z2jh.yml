@@ -114,7 +114,7 @@
         changed_when: False
         register: kci_log
 
-      - aws_az_facts:
+      - aws_az_info:
         register: az_facts
 
       - name: Create Kubernetes cluster
@@ -141,17 +141,6 @@
         retries: 20
         delay: 30
         changed_when: False
-
-
-
-      # Enable dynamic storage on your Kubernetes cluster
-      - name: Create storageclass.yaml config file
-        template:
-          src: storageclass.yaml.j2
-          dest: /home/ec2-user/storageclass.yaml
-
-      - name: Apply storageclass config file
-        command: kubectl apply -f /home/ec2-user/storageclass.yaml
 
       # Create filesystem for k8s
       - ec2_group_info:
