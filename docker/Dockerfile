@@ -10,5 +10,6 @@ RUN HDF5_DIR=/opt/conda BLOSC_DIR=/opt/conda LZO_DIR=/opt/conda BZIP2_DIR=/opt/c
 RUN /opt/conda/envs/allen/bin/pip install --no-cache-dir ipfx
 RUN conda clean -tipsy
 
+RUN jupyter lab build
 RUN pip install --no-cache-dir nbgitpuller
 RUN gitpuller https://github.com/dandi/example-notebooks master dandi-notebooks
