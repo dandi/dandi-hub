@@ -75,7 +75,10 @@
             - /home/ec2-user/nodes.yaml
             - /home/ec2-user/cluster-autoscaler-multi-asg.yaml
         when: autoscaler_yaml.stat.exists == True
-        tags: always
+        tags:
+          - never
+          - kubernetes
+          - all-fixtures
 
       - name: Check for kube namespace
         command: kubectl get namespace {{ namespace }}
@@ -158,7 +161,6 @@
         aws_s3:
           bucket: "{{ namespace }}-s3"
           mode: delete
-          # ec2_url: ec2-54-172-77-177.compute-1.amazonaws.com
         register: s3_log
         tags:
           - all-fixtures
