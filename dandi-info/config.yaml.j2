@@ -12,13 +12,77 @@ proxy:
       # Which ports should use SSL
       service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "3600"
+hub:
+  extraConfig:
+    myConfig: |
+      from kubernetes import client
+      def modify_pod_hook(spawner, pod):
+          pod.spec.containers[0].security_context = client.V1SecurityContext(
+              privileged=True
+          )
+          return pod
+      c.KubeSpawner.modify_pod_hook = modify_pod_hook
+      from oauthenticator.github import GitHubOAuthenticator
+      c.JupyterHub.authenticator_class = GitHubOAuthenticator
+auth:
+  type: github
+  admin:
+    access: false
+    users:
+      - "satra"
+      - "yarikoptic"
+      - "dandibot"
+  whitelist:
+    users:
+      - "mgrauer"
+      - "thewtex"
+      - "bendichter"
+  github:
+    clientId: "{{ github_client_id }}"
+    clientSecret: "{{ github_client_secret }}"
+    callbackUrl: "{{ ingress }}/hub/oauth_callback"
+  scopes:
+    - "read:user"
+
+scheduling:
+  userScheduler:
+    enabled: true
+  podPriority:
+    enabled: true
+  userPlaceholder:
+    enabled: true
+    replicas: 2
+
+cull:
+  enabled: true
+  timeout: 3600
+  every: 300
+
 singleuser:
   defaultUrl: "/lab"
   image:
     name: {{ singleuser_image_repo }}
     tag: {{ singleuser_image_tag }}
+  memory:
+    limit: 8G
+    guarantee: 4G
+  cpu:
+    limit: 2
+    guarantee: 1
   storage:
     type: none
+    extraVolumes:
+      - name: fuse
+        hostPath:
+          path: /dev/fuse
+      - name: shm-volume
+        emptyDir:
+          medium: Memory
+    extraVolumeMounts:
+      - name: fuse
+        mountPath: /dev/fuse
+      - name: shm-volume
+        mountPath: /dev/shm
   cmd: "start-singleuser.sh"
   lifecycleHooks:
     postStart:

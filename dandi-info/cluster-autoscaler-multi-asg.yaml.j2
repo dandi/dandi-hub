@@ -138,7 +138,7 @@ spec:
     spec:
       serviceAccountName: cluster-autoscaler
       containers:
-        - image: k8s.gcr.io/cluster-autoscaler:v1.18.2
+        - image: k8s.gcr.io/autoscaling/cluster-autoscaler:v1.18.2
           name: cluster-autoscaler
           resources:
             limits:
@@ -155,7 +155,7 @@ spec:
             - --skip-nodes-with-local-storage=false
             - --expander=least-waste
             - --nodes=1:5:nodes.{{ namespace }}.k8s.local
-            - --nodes=1:10:spot-ig.{{ namespace }}.k8s.local
+            - --nodes=1:60:spot-ig.{{ namespace }}.k8s.local
           volumeMounts:
             - name: ssl-certs
               mountPath: /etc/ssl/certs/ca-certificates.crt

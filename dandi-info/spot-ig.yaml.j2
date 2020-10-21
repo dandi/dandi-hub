@@ -13,12 +13,13 @@ spec:
   image: kope.io/k8s-1.16-debian-stretch-amd64-hvm-ebs-2020-01-17
   machineType: t3a.xlarge
   maxPrice: "0.08"
-  maxSize: 10
+  maxSize: 60
   minSize: 1
   nodeLabels:
     kops.k8s.io/instancegroup: spot-ig
     on-demand: "false"
   role: Node
+  rootVolumeSize: {{ node_volume_size }}
   subnets:
   - us-east-2a
   - us-east-2b

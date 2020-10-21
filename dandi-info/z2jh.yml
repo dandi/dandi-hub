@@ -226,17 +226,72 @@
         args:
           chdir: /home/ec2-user
 
+      - name: check if nodes yaml file exists
+        stat:
+          path: /home/ec2-user/nodes.yaml
+        register: nodes_yaml
+
+      - block:
+        - name: Create spot-ig file
+          template:
+            src: spot-ig.yaml.j2
+            dest: /home/ec2-user/spot-ig.yaml
+
+        - name: Apply spot-ig config
+          command: kops create -f /home/ec2-user/spot-ig.yaml
+          args:
+            chdir: /home/ec2-user
+
+        - name: Create nodes file
+          template:
+            src: nodes.yaml.j2
+            dest: /home/ec2-user/nodes.yaml
+
+        - name: Apply nodes config
+          command: kops replace -f /home/ec2-user/nodes.yaml
+          args:
+            chdir: /home/ec2-user
+
+        - name: Apply update to cluster
+          command: kops update cluster {{ namespace}}.k8s.local --yes
+          args:
+            chdir: /home/ec2-user
+
+        - name: Apply rolling update to cluster
+          command: kops rolling-update cluster --yes
+          register: kops_ru_result
+          until: kops_ru_result.stdout.find('Rolling update completed for cluster') != -1
+          retries: 5
+          delay: 60 # this value
+          args:
+            chdir: /home/ec2-user
+          failed_when:
+            - kops_ru_result != 0
+            - '"No rolling-update required." not in kops_ru_result.stdout'
+        when: nodes_yaml.stat.exists == False
+
+      ## Check and configure persistent volume ##
       - name: Check for persistent volume
         command: kubectl get pv
         register: pv_log
         changed_when: False
 
-      ## Configure persistent volume ##
       - block:
         - name: Create pv_efs.yaml config file
           template:
             src: pv_efs.yaml.j2
             dest: /home/ec2-user/pv_efs.yaml
+
+        - name: Install CSI EFS driver
+          command: kubectl apply -k "github.com/kubernetes-sigs/aws-efs-csi-driver/deploy/kubernetes/overlays/stable/?ref=release-1.0"
+
+        - name: Create storageclass.yaml config file
+          template:
+            src: storageclass.yaml.j2
+            dest: /home/ec2-user/storageclass.yaml
+
+        - name: Apply storageclass config file
+          command: kubectl apply -f /home/ec2-user/storageclass.yaml
 
         - name: Apply kube pv config
           command: kubectl --namespace={{ namespace }} apply -f /home/ec2-user/pv_efs.yaml
@@ -310,6 +365,29 @@
         when: helmver_result.stdout is undefined or
           helmver_result.stdout.find('Server') == -1
 
+      - name: check if autoscaler yaml file exists
+        stat:
+          path: /home/ec2-user/cluster-autoscaler-multi-asg.yaml
+        register: autoscaler_yaml
+
+      - block:
+        - name: Attach policy to nodes
+          command: aws iam attach-role-policy --policy-arn arn:aws:iam::278212569472:policy/ig-policy --role-name nodes.{{ namespace }}.k8s.local
+
+        - name: Create autoscale config file
+          template:
+            src: cluster-autoscaler-multi-asg.yaml.j2
+            dest: /home/ec2-user/cluster-autoscaler-multi-asg.yaml
+
+        - name: Apply autoscaling to cluster
+          command: kubectl apply -f /home/ec2-user/cluster-autoscaler-multi-asg.yaml
+          args:
+            chdir: /home/ec2-user
+        when: autoscaler_yaml.stat.exists == False
+
+      - name: Add spot termination
+        shell: helm install stable/k8s-spot-termination-handler --namespace kube-system
+
       # configure and create jupyterhub
       - name: Create security token
         command: openssl rand -hex 32
@@ -357,158 +435,8 @@
         wait_for: timeout=30
         delegate_to: localhost
 
-      ## Idempotent delete helm release of JH
-      - name: Determine if Helm and Tiller are connected already
-        command: helm version --tiller-connection-timeout 30
-        failed_when: False
-        changed_when: False
-        register: helmver_result
-        async: 45
-        poll: 5
-        tags: always
-
-      - name: Determine if JH is currently installed.
-        command: helm status {{ namespace }}-jupyterhub
-        register: jh_installed_result
-        failed_when: False
-        changed_when: False
-        tags: always
-
-      - name: Delete helm release
-        command: helm delete {{ namespace }}-jupyterhub --purge
-        when: helmver_result.stdout is defined and not helmver_result.rc and not jh_installed_result.rc
-        tags: always
-
-      - name: check if nodes yaml file exists
-        stat:
-          path: /home/ec2-user/nodes.yaml
-        register: nodes_yaml
-
-      - block:
-        - name: Create spot-ig file
-          template:
-            src: spot-ig.yaml.j2
-            dest: /home/ec2-user/spot-ig.yaml
-
-        - name: Apply spot-ig config
-          command: kops create -f /home/ec2-user/spot-ig.yaml
-          args:
-            chdir: /home/ec2-user
-
-        - name: Create nodes file
-          template:
-            src: nodes.yaml.j2
-            dest: /home/ec2-user/nodes.yaml
-
-        - name: Apply nodes config
-          command: kops replace -f /home/ec2-user/nodes.yaml
-          args:
-            chdir: /home/ec2-user
-
-        - name: Apply update to cluster
-          command: kops update cluster {{ namespace}}.k8s.local --yes
-          args:
-            chdir: /home/ec2-user
-
-        - name: Apply rolling update to cluster
-          command: kops rolling-update cluster --yes
-          register: kops_ru_result
-          until: kops_ru_result.stdout.find('Rolling update completed for cluster') != -1
-          retries: 5
-          delay: 60 # this value
-          args:
-            chdir: /home/ec2-user
-          failed_when:
-            - kops_ru_result != 0
-            - '"No rolling-update required." not in kops_ru_result.stdout'
-        when: nodes_yaml.stat.exists == False
-
-      - name: check if nodes yaml file exists
-        stat:
-          path: /home/ec2-user/cluster-autoscaler-multi-asg.yaml
-        register: autoscaler_yaml
-
-      - block:
-        - name: Attach policy to nodes
-          command: aws iam attach-role-policy --policy-arn arn:aws:iam::278212569472:policy/ig-policy --role-name nodes.{{ namespace }}.k8s.local
-
-        - name: Create autoscale config file
-          template:
-            src: cluster-autoscaler-multi-asg.yaml.j2
-            dest: /home/ec2-user/cluster-autoscaler-multi-asg.yaml
-
-        - name: Apply autoscaling to cluster
-          command: kubectl apply -f /home/ec2-user/cluster-autoscaler-multi-asg.yaml
-          args:
-            chdir: /home/ec2-user
-        when: autoscaler_yaml.stat.exists == False
-
-      ## Connect helm/tiller
-      - name: Determine if Helm and Tiller are connected already
-        command: helm version --tiller-connection-timeout 30
-        failed_when: False
-        changed_when: False
-        register: helmver_result
-        async: 45
-        poll: 5
-
-        ## Create Tiller Account ##
-      - block:
-          - name: Create tiller account
-            command: kubectl --namespace kube-system create serviceaccount tiller
-            args:
-              chdir: /home/ec2-user
-
-          - name: Create clusterrolebinding for tiller
-            command: kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
-            args:
-              chdir: /home/ec2-user
-
-          - name: Initialize tiller
-            command: helm init --service-account tiller
-            args:
-              chdir: /home/ec2-user
-
-          - name: Verify that helm and tiller have connected
-            command: helm version --tiller-connection-timeout 5
-            register: cmd_result
-            until: cmd_result.stdout.find('Server') != -1
-            retries: 20
-            delay: 60 # this value
-            args:
-              chdir: /home/ec2-user
-
-          - name: Ensure that Tiller is secure from access inside the cluster
-            shell: |
-              kubectl --namespace=kube-system patch deployment tiller-deploy --type=json --patch='[{"op": "add", "path": "/spec/template/spec/containers/0/command", "value": ["/tiller", "--listen=localhost:44134"]}]'
-            args:
-              chdir: /home/ec2-user
-
-        when: helmver_result.stdout is undefined or
-          helmver_result.stdout.find('Server') == -1
-
-      - name: Add spot termination
-        shell: helm install stable/k8s-spot-termination-handler --namespace kube-system
-
-      - name: Install JupyterHub release
-        shell: helm install {{ helm_chart_repo_name }}/jupyterhub \
-          --debug \
-          --version={{ jupyterhub_chart_version }} \
-          --name={{ namespace }}-jupyterhub \
-          --namespace={{ namespace }} \
-          --timeout=600
-          -f config.yaml
-        args:
-          chdir: /home/ec2-user
-        when: hl_log.stdout.find(namespace + '-jupyterhub') == -1
-
-      ## Wait for proxy to spin up ##
-      - name: sleep for 30 seconds and continue with play
-        wait_for: timeout=30
-        delegate_to: localhost
-
       - name: Get URL for public proxy
         command: kubectl --namespace={{ namespace }} describe svc proxy-public
         register: pp_log
 
-      - debug: msg="Navigate browser to {{ pp_log.stdout_lines[11] }} to begin using JupyterHub!"
+      - debug: msg="Navigate browser to {{ pp_log.stdout_lines[14] }} to begin using JupyterHub!"
