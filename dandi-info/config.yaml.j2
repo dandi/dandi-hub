@@ -92,4 +92,5 @@ singleuser:
           - "-c"
           - >
             gitpuller https://github.com/dandi/example-notebooks master dandi-notebooks;
-            chown -R jovyan:users dandi-notebooks
+            chown -R jovyan:users dandi-notebooks;
+            datalad install https://github.com/dandi/dandisets

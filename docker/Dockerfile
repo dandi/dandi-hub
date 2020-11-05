@@ -27,7 +27,7 @@ USER root
 COPY --from=builder /usr/local/singularity /usr/local/singularity
 ENV PATH="/usr/local/singularity/bin:$PATH"
 RUN apt-get update && apt-get install -y ca-certificates libseccomp2 \
-   squashfs-tools fuse s3fs git-annex rclone \
+   squashfs-tools fuse s3fs git-annex rclone httpfs2 \
     && rm -rf /tmp/*
 
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
