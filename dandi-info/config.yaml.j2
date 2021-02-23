@@ -24,25 +24,26 @@ hub:
       c.KubeSpawner.modify_pod_hook = modify_pod_hook
       from oauthenticator.github import GitHubOAuthenticator
       c.JupyterHub.authenticator_class = GitHubOAuthenticator
-auth:
-  type: github
-  admin:
-    access: false
-    users:
-      - "satra"
-      - "yarikoptic"
-      - "dandibot"
-  whitelist:
-    users:
-      - "mgrauer"
-      - "thewtex"
-      - "bendichter"
-  github:
-    clientId: "{{ github_client_id }}"
-    clientSecret: "{{ github_client_secret }}"
-    callbackUrl: "{{ ingress }}/hub/oauth_callback"
-  scopes:
-    - "read:user"
+  config:
+    Authenticator:
+      admin_users:
+      - satra
+      - yarikoptic
+      - dandibot
+      allowed_users:
+      - mgrauer
+      - thewtex
+      - bendichter
+    GitHubOAuthenticator:
+      client_id: "{{ github_client_id }}"
+      client_secret: "{{ github_client_secret }}"
+      oauth_callback_url: "{{ ingress }}/hub/oauth_callback"
+    JupyterHub:
+      admin_access: false
+      authenticator_class: github
+    OAuthenticator:
+      scope:
+      - read:user
 
 scheduling:
   userScheduler:

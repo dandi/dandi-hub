@@ -46,7 +46,7 @@
 
       - block:
         - name: Download kops
-          shell: wget -O kops https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
+          shell: wget -O kops https://github.com/kubernetes/kops/releases/download/v1.18.3/kops-linux-amd64
           args:
             chdir: /home/ec2-user
             creates: kops
@@ -384,6 +384,11 @@
           args:
             chdir: /home/ec2-user
         when: autoscaler_yaml.stat.exists == False
+
+      ## Avoid 'unable to find ready tiller pod' error ##
+      - name: sleep for 60 seconds and continue with play
+        wait_for: timeout=60
+        delegate_to: localhost
 
       - name: Add spot termination
         shell: helm install stable/k8s-spot-termination-handler --namespace kube-system

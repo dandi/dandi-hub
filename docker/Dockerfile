@@ -1,6 +1,6 @@
 FROM golang:1.15.2 as builder
 
-ARG SINGULARITY_COMMITISH="master"
+ARG SINGULARITY_COMMITISH="v3.7.1"
 
 WORKDIR $GOPATH/src/github.com/sylabs
 RUN apt-get update && apt-get install -y \
@@ -21,36 +21,66 @@ RUN git clone https://github.com/sylabs/singularity.git \
     && make \
     && make install
 
-FROM jupyter/datascience-notebook:4a112c0f11eb
+FROM jupyter/datascience-notebook:016833b15ceb
 
 USER root
 COPY --from=builder /usr/local/singularity /usr/local/singularity
 ENV PATH="/usr/local/singularity/bin:$PATH"
 RUN apt-get update && apt-get install -y ca-certificates libseccomp2 \
-   squashfs-tools fuse s3fs git-annex rclone httpfs2 \
+   squashfs-tools fuse s3fs netbase less parallel \
+   && rm -rf /tmp/*
+
+RUN apt-get update && apt-get install -y ca-certificates libseccomp2 \
+   squashfs-tools fuse s3fs git-annex rclone httpfs2 netbase \
     && rm -rf /tmp/*
 
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+RUN curl --silent "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
   -o "awscliv2.zip" && unzip awscliv2.zip \
   && ./aws/install && rm -rf ./aws awscliv2.zip
 
-RUN wget https://github.com/kahing/goofys/releases/download/v0.24.0/goofys \
+RUN wget --quiet https://github.com/kahing/goofys/releases/download/v0.24.0/goofys \
   && chmod +x goofys && mv goofys /usr/local/bin
 
 USER $NB_USER
 
-RUN pip install --no-cache-dir itkwidgets==0.32.0
-RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-matplotlib jupyterlab-datawidgets itkwidgets@0.32.0
-
-RUN pip install --no-cache-dir nwbwidgets zarr pydra dandi spikeinterface
-
+# Install Allen SDK
 RUN conda create -n allen python=3.8 pip numpy cython numexpr ipykernel
-RUN HDF5_DIR=/opt/conda BLOSC_DIR=/opt/conda LZO_DIR=/opt/conda BZIP2_DIR=/opt/conda /opt/conda/envs/allen/bin/pip install tables==3.5.1
+RUN HDF5_DIR=/opt/conda BLOSC_DIR=/opt/conda LZO_DIR=/opt/conda \
+  BZIP2_DIR=/opt/conda /opt/conda/envs/allen/bin/pip install tables==3.5.1
 RUN /opt/conda/envs/allen/bin/pip install --no-cache-dir ipfx
+RUN /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen \
+  --display-name="Allen SDK"
 RUN conda clean -tipsy
 
-RUN jupyter lab build
-RUN pip install --no-cache-dir nbgitpuller nibabel pybids pydra-ml \
-  datalad datalad-container nilearn
+RUN pip install --no-cache-dir itkwidgets==0.32.0 jupytext plotly pyvista
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager \
+  jupyter-matplotlib jupyterlab-datawidgets itkwidgets@0.32.0 jupyterlab-plotly \
+  plotlywidget jupyter-threejs --no-build \
+  && export NODE_OPTIONS=--max-old-space-size=4096 \
+  && jupyter lab build && rm -rf /tmp/*
+
+RUN pip install --no-cache-dir nbgitpuller nibabel nilearn pybids zarr \
+  spikeinterface neo
+
+RUN conda create -n ros3 -c conda-forge hdf5=1.12.0 ipykernel zarr pip \
+  matplotlib numpy && conda clean -tipsy
+RUN HDF5_DIR=/opt/conda/envs/ros3 /opt/conda/envs/ros3/bin/pip install \
+  --no-cache-dir --force-reinstall --no-binary=h5py \
+  git+https://github.com/h5py/h5py.git && \
+  /opt/conda/envs/ros3/bin/python -m ipykernel install --user --name ros3 \
+  --display-name="Streaming NWB"
+
+RUN conda install --yes datalad rclone \
+  && conda clean -tipsy \
+  && wget https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.6/git-annex-remote-rclone \
+  && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin
 
 RUN gitpuller https://github.com/dandi/example-notebooks master dandi-notebooks
+RUN pip install --no-cache-dir \
+  git+https://github.com/dandi/dandi-cli.git \
+  git+https://github.com/nipype/pydra.git \
+  datalad datalad-container datalad-osf nwbwidgets
+RUN /opt/conda/envs/ros3/bin/pip install --no-cache-dir \
+  git+https://github.com/satra/hdmf.git@enh/h5py3 \
+  git+https://github.com/NeurodataWithoutBorders/pynwb.git@ros3v2 \
+  nwbwidgets
