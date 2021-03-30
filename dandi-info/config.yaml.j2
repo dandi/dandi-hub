@@ -27,13 +27,146 @@ hub:
   config:
     Authenticator:
       admin_users:
-      - satra
-      - yarikoptic
-      - dandibot
+      - "satra"
+      - "yarikoptic"
+      - "dandibot"
       allowed_users:
-      - mgrauer
-      - thewtex
-      - bendichter
+      - "aabbasi89"
+      - "abbydichter"
+      - "alan"
+      - "alandegenhart"
+      - "alanoudalsubhi"
+      - "alejoe91"
+      - "alexandrepsq"
+      - "almightyyakob"
+      - "annechurchland"
+      - "anukratinigam"
+      - "aojie1997"
+      - "arokem"
+      - "arsenyf"
+      - "asurkis99"
+      - "balbasty"
+      - "bekalmbach"
+      - "bendichter"
+      - "benefron"
+      - "bgomes94"
+      - "bittu-k"
+      - "bmbohannon"
+      - "borrepp"
+      - "brandon"
+      - "brianhelba"
+      - "byee4"
+      - "carolth"
+      - "ccmaco"
+      - "chockalingam31"
+      - "chrisvdt"
+      - "codewander94"
+      - "codycbakerphd"
+      - "colleenjg"
+      - "cornua1"
+      - "courtnie2894"
+      - "da5nsy"
+      - "danielsf"
+      - "danlamanna"
+      - "daskandalis"
+      - "dchiquit"
+      - "deeptimittal12"
+      - "delhayeben"
+      - "djarecka"
+      - "doya-oist"
+      - "drbkimmel"
+      - "eduardacenteno"
+      - "emilyasterjones"
+      - "emmanuelwilson"
+      - "everythingevolves"
+      - "ezavitz"
+      - "fangxia1997"
+      - "farznaj"
+      - "felixp8"
+      - "filippomc"
+      - "flavia0310"
+      - "francopestilli"
+      - "georginjacob"
+      - "gmazzamuto"
+      - "guangwei-zhang"
+      - "iryna.yavorska"
+      - "jajo"
+      - "jeiglesias"
+      - "jellywang-3"
+      - "jeromelecoq"
+      - "jiaxx"
+      - "jitenderk304"
+      - "jocelynmora"
+      - "jryang"
+      - "jtomeck"
+      - "juliasprenger"
+      - "jwodder"
+      - "jylb"
+      - "kaeldai"
+      - "lawrencen"
+      - "ldreyes08"
+      - "leebrianr"
+      - "leekamentsky"
+      - "lmanubens"
+      - "luiztauffer"
+      - "lukko45"
+      - "lydiang"
+      - "macasal"
+      - "markplitt"
+      - "matthewma"
+      - "maxpmx"
+      - "mgrauer"
+      - "mhhennig"
+      - "michaelfeyerabend"
+      - "mikhailberezin"
+      - "mpompolas"
+      - "mrglea002"
+      - "mvandenburgh"
+      - "mvdm"
+      - "nandchandravadia"
+      - "nbonacchi"
+      - "nicolocin"
+      - "nilegraddis"
+      - "nmtimme"
+      - "nsteinme"
+      - "oruebel"
+      - "osbornepb"
+      - "petralenzini"
+      - "pgleeson"
+      - "plain"
+      - "publish"
+      - "rachaelgarner"
+      - "rly1"
+      - "saksham20"
+      - "saskiad"
+      - "seqasim"
+      - "servillej"
+      - "sgratiy"
+      - "shaunc"
+      - "shobel"
+      - "soichih"
+      - "stripathy"
+      - "subdavis"
+      - "superiorvii"
+      - "tclarke"
+      - "t-b"
+      - "tmchartrand"
+      - "transedward"
+      - "trile965"
+      - "ttngu207"
+      - "ucdnjj"
+      - "urut"
+      - "visakhmr"
+      - "vmg55"
+      - "waxlamp"
+      - "wbwakeman"
+      - "wclee"
+      - "yavorska-iryna"
+      - "ybernaerts"
+      - "yonkatz"
+      - "yshaeri"
+      - "zachmullen"
+      - "zpkilpat"
     GitHubOAuthenticator:
       client_id: "{{ github_client_id }}"
       client_secret: "{{ github_client_secret }}"
@@ -51,8 +184,8 @@ scheduling:
   podPriority:
     enabled: true
   userPlaceholder:
-    enabled: true
-    replicas: 2
+    enabled: false
+    replicas: 4
 
 cull:
   enabled: true
@@ -65,11 +198,45 @@ singleuser:
     name: {{ singleuser_image_repo }}
     tag: {{ singleuser_image_tag }}
   memory:
-    limit: 8G
-    guarantee: 4G
+    limit: 16G
+    guarantee: 1G
   cpu:
-    limit: 2
-    guarantee: 1
+    limit: 12
+    guarantee: 0.5
+  profileList:
+    - display_name: "tiny"
+      description: "0.5 CPU / 1 GB"
+      kubespawner_override:
+        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+        cpu_limit: 2
+        cpu_guarantee: 0.5
+        mem_limit: 2G
+        mem_guarantee: 1G
+    - display_name: "base"
+      description: "6 CPU / 16 GB"
+      default: true
+      kubespawner_override:
+        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+        cpu_limit: 6
+        cpu_guarantee: 6
+        mem_limit: 16G
+        mem_guarantee: 16G
+    - display_name: "large"
+      description: "36 CPU / 96 GB"
+      kubespawner_override:
+        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+        cpu_limit: 36
+        cpu_guarantee: 36
+        mem_limit: 96G
+        mem_guarantee: 96G
+    - display_name: "extra large"
+      description: "60 CPU / 160 GB"
+      kubespawner_override:
+        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+        cpu_limit: 60
+        cpu_guarantee: 60
+        mem_limit: 160G
+        mem_guarantee: 160G
   storage:
     type: none
     extraVolumes:
@@ -79,11 +246,40 @@ singleuser:
       - name: shm-volume
         emptyDir:
           medium: Memory
+      - name: persistent-storage
+        persistentVolumeClaim:
+          claimName: efs-claim
     extraVolumeMounts:
       - name: fuse
         mountPath: /dev/fuse
       - name: shm-volume
         mountPath: /dev/shm
+      - name: persistent-storage
+        mountPath: '/home/jovyan'
+        subPath: 'home/{username}'
+      - name: persistent-storage
+        mountPath: '/shared'
+        subPath: 'shared'
+  initContainers:
+    - name: nfs-fixer
+      image: alpine
+      securityContext:
+        runAsUser: 0
+      volumeMounts:
+      - name: persistent-storage
+        mountPath: /nfs
+        subPath: 'home/{username}'
+      - name: persistent-storage
+        mountPath: /shared
+        subPath: 'shared'
+      command:
+      - sh
+      - -c
+      - >
+        chmod 0775 /nfs;
+        chown 1000:100 /nfs;
+        chmod 0775 /shared;
+        chown 1000:100 /shared
   cmd: "start-singleuser.sh"
   lifecycleHooks:
     postStart:

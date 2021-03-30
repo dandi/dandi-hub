@@ -27,14 +27,10 @@ USER root
 COPY --from=builder /usr/local/singularity /usr/local/singularity
 ENV PATH="/usr/local/singularity/bin:$PATH"
 RUN apt-get update && apt-get install -y ca-certificates libseccomp2 \
-   squashfs-tools fuse s3fs netbase less parallel \
+   squashfs-tools fuse s3fs netbase less parallel tmux vim \
    && rm -rf /tmp/*
 
-RUN apt-get update && apt-get install -y ca-certificates libseccomp2 \
-   squashfs-tools fuse s3fs git-annex rclone httpfs2 netbase \
-    && rm -rf /tmp/*
-
-RUN curl --silent "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+RUN curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
   -o "awscliv2.zip" && unzip awscliv2.zip \
   && ./aws/install && rm -rf ./aws awscliv2.zip
 
@@ -72,7 +68,7 @@ RUN HDF5_DIR=/opt/conda/envs/ros3 /opt/conda/envs/ros3/bin/pip install \
 
 RUN conda install --yes datalad rclone \
   && conda clean -tipsy \
-  && wget https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.6/git-annex-remote-rclone \
+  && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.6/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin
 
 RUN gitpuller https://github.com/dandi/example-notebooks master dandi-notebooks
@@ -82,5 +78,5 @@ RUN pip install --no-cache-dir \
   datalad datalad-container datalad-osf nwbwidgets
 RUN /opt/conda/envs/ros3/bin/pip install --no-cache-dir \
   git+https://github.com/satra/hdmf.git@enh/h5py3 \
-  git+https://github.com/NeurodataWithoutBorders/pynwb.git@ros3v2 \
+  git+https://github.com/NeurodataWithoutBorders/pynwb.git@ros3v2\
   nwbwidgets
