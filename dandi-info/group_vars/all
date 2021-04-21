@@ -8,7 +8,7 @@ spot_volume_size: 200
 node_count: 1
 jupyterhub_chart_version: 0.11.1
 singleuser_image_repo: satra/dandihub
-singleuser_image_tag: 6edc729a
+singleuser_image_tag: e3b52ec0
 helm_chart_repo_name: jupyterhub
 helm_chart_repo_url: https://jupyterhub.github.io/helm-chart/
 github_client_id: !vault |
