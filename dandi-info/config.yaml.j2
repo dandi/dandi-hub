@@ -290,4 +290,6 @@ singleuser:
           - >
             gitpuller https://github.com/dandi/example-notebooks master dandi-notebooks;
             chown -R jovyan:users dandi-notebooks;
-            datalad install https://github.com/dandi/dandisets
+            datalad install https://github.com/dandi/dandisets;
+            /opt/conda/bin/pip install --upgrade dandi;
+            /opt/conda/envs/ros3/bin/python -m ipykernel install --user --name ros3 --display-name "Python (Streaming support)"

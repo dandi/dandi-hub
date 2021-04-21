@@ -58,11 +58,8 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager \
 RUN pip install --no-cache-dir nbgitpuller nibabel nilearn pybids zarr \
   spikeinterface neo
 
-RUN conda create -n ros3 -c conda-forge hdf5=1.12.0 ipykernel zarr pip \
-  matplotlib numpy && conda clean -tipsy
-RUN HDF5_DIR=/opt/conda/envs/ros3 /opt/conda/envs/ros3/bin/pip install \
-  --no-cache-dir --force-reinstall --no-binary=h5py \
-  git+https://github.com/h5py/h5py.git && \
+RUN conda create -n ros3 -c conda-forge hdf5 h5py ipykernel pip numpy \
+  matplotlib && conda clean -tipsy && \
   /opt/conda/envs/ros3/bin/python -m ipykernel install --user --name ros3 \
   --display-name="Streaming NWB"
 
@@ -77,6 +74,6 @@ RUN pip install --no-cache-dir \
   git+https://github.com/nipype/pydra.git \
   datalad datalad-container datalad-osf nwbwidgets
 RUN /opt/conda/envs/ros3/bin/pip install --no-cache-dir \
-  git+https://github.com/satra/hdmf.git@enh/h5py3 \
-  git+https://github.com/NeurodataWithoutBorders/pynwb.git@ros3v2\
+  git+https://github.com/hdmf-dev/hdmf.git@enh/h5py3 \
+  git+https://github.com/NeurodataWithoutBorders/pynwb.git \
   nwbwidgets
