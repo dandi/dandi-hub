@@ -77,4 +77,4 @@ RUN /opt/conda/envs/ros3/bin/pip install --no-cache-dir \
   git+https://github.com/hdmf-dev/hdmf.git@enh/h5py3 \
   git+https://github.com/NeurodataWithoutBorders/pynwb.git \
   nwbwidgets
-RUN /opt/conda/condabin/conda install -n ros3 -y h5py=3.2.1
+RUN conda install -n ros3 -c conda-forge h5py=3.2.1
