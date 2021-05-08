@@ -58,7 +58,7 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager \
 RUN pip install --no-cache-dir nbgitpuller nibabel nilearn pybids zarr \
   spikeinterface neo
 
-RUN conda create -n ros3 -c conda-forge hdf5 h5py ipykernel pip numpy \
+RUN conda create -n ros3 -c conda-forge python=3.8 hdf5 h5py ipykernel pip numpy \
   matplotlib && conda clean -tipsy && \
   /opt/conda/envs/ros3/bin/python -m ipykernel install --user --name ros3 \
   --display-name="Streaming NWB"
