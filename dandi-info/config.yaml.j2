@@ -22,8 +22,36 @@ hub:
           )
           return pod
       c.KubeSpawner.modify_pod_hook = modify_pod_hook
+
+      # Based on <https://github.com/jupyterhub/oauthenticator/blob/master/examples/auth_state/jupyterhub_config.py>:
+      import os
+      import warnings
+
       from oauthenticator.github import GitHubOAuthenticator
-      c.JupyterHub.authenticator_class = GitHubOAuthenticator
+
+      # define our OAuthenticator with `.pre_spawn_start`
+      # for passing auth_state into the user environment
+
+      class GitHubEnvAuthenticator(GitHubOAuthenticator):
+
+          async def pre_spawn_start(self, user, spawner):
+              auth_state = await user.get_auth_state()
+              import pprint
+              pprint.pprint(auth_state)
+              if not auth_state:
+                  # user has no auth state
+                  return
+              # define some environment variables from auth_state
+              spawner.environment['GITHUB_TOKEN'] = auth_state['access_token']
+              spawner.environment['GITHUB_USER'] = auth_state['github_user']['login']
+              spawner.environment['GITHUB_EMAIL'] = auth_state['github_user']['email']
+
+      c.GitHubOAuthenticator.scope = ['gist', 'user:email']
+      c.JupyterHub.authenticator_class = GitHubEnvAuthenticator
+
+      # enable authentication state
+      c.GitHubOAuthenticator.enable_auth_state = True
+
   config:
     Authenticator:
       admin_users:
