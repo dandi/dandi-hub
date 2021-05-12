@@ -23,7 +23,7 @@ hub:
           return pod
       c.KubeSpawner.modify_pod_hook = modify_pod_hook
 
-      # Taken from <https://github.com/jupyterhub/oauthenticator/blob/master/examples/auth_state/jupyterhub_config.py>:
+      # Based on <https://github.com/jupyterhub/oauthenticator/blob/master/examples/auth_state/jupyterhub_config.py>:
       import os
       import warnings
 
@@ -35,9 +35,8 @@ hub:
 
       class GitHubEnvAuthenticator(GitHubOAuthenticator):
 
-          @gen.coroutine
-          def pre_spawn_start(self, user, spawner):
-              auth_state = yield user.get_auth_state()
+          async def pre_spawn_start(self, user, spawner):
+              auth_state = await user.get_auth_state()
               import pprint
               pprint.pprint(auth_state)
               if not auth_state:
@@ -60,10 +59,6 @@ hub:
               "    export JUPYTERHUB_CRYPT_KEY=$(openssl rand -hex 32)"
           )
           c.CryptKeeper.keys = [ os.urandom(32) ]
-
-      # launch with Docker
-      c.JupyterHub.spawner_class = 'simplespawner.DockerSpawner'
-      c.JupyterHub.hub_ip = '0.0.0.0'
 
   config:
     Authenticator:
