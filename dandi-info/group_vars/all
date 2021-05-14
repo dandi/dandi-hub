@@ -3,10 +3,12 @@ namespace: dandihub
 aws_region: us-east-2
 ansible_ssh_private_key_file: ~/.ssh/dandi-satra.pem
 node_size: t3a.medium
-node_volume_size: 50
-spot_volume_size: 200
+node_volume_size: 30
+spot_volume_size: 100
 node_count: 1
-jupyterhub_chart_version: 0.11.1
+max_node: 5
+max_spot: 30
+jupyterhub_chart_version: 0.11.1-n479.hecce1f6b
 singleuser_image_repo: dandiarchive/dandihub
 singleuser_image_tag: latest
 helm_chart_repo_name: jupyterhub

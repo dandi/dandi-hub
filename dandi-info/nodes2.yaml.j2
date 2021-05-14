@@ -1,25 +1,26 @@
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
-  creationTimestamp: "2020-03-25T17:25:18Z"
+  creationTimestamp: "2020-03-25T17:00:35Z"
   generation: 2
   labels:
     kops.k8s.io/cluster: {{ namespace }}.k8s.local
-  name: spot-ig
+  name: nodes-us-east-2b
 spec:
   cloudLabels:
     k8s.io/cluster-autoscaler/enabled: ""
     k8s.io/cluster-autoscaler/{{ namespace }}.k8s.local: ""
     k8s.io/cluster-autoscaler/node-template/label: ""
   image: kope.io/k8s-1.16-debian-stretch-amd64-hvm-ebs-2020-01-17
-  machineType: c5n.18xlarge
-  maxPrice: "0.80"
-  maxSize: {{ max_spot }}
+  machineType: {{ node_size }}
+  maxSize: {{ max_node }}
   minSize: 0
   nodeLabels:
-    kops.k8s.io/instancegroup: spot-ig
-    on-demand: "false"
+    kops.k8s.io/instancegroup: nodes-us-east-2b
+    on-demand: "true"
   role: Node
-  rootVolumeSize: {{ spot_volume_size }}
+  rootVolumeSize: {{ node_volume_size }}
   subnets:
-  - us-east-2a
+  - us-east-2b
+  taints:
+  - on-demand=true:PreferNoSchedule

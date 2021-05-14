@@ -46,7 +46,7 @@
 
       - block:
         - name: Download kops
-          shell: wget -O kops https://github.com/kubernetes/kops/releases/download/v1.18.3/kops-linux-amd64
+          shell: wget -O kops https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
           args:
             chdir: /home/ec2-user
             creates: kops
@@ -93,7 +93,7 @@
         register: helm
 
       - name: Install helm
-        shell: curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
+        shell: curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get-helm-3 | bash
         when: helm.rc
 
       ## Create kubernetes (k8s) cluster
@@ -119,13 +119,12 @@
 
       - name: Create Kubernetes cluster
         command: kops create cluster {{ namespace }}.k8s.local \
-          --zones {{ az_facts.availability_zones | map(attribute='zone_name') | list | join(',') }} \
           --authorization RBAC \
           --master-size t3a.medium \
           --master-volume-size 20 \
           --node-size {{ node_size }} \
+          --zones {{ az_facts.availability_zones | map(attribute='zone_name') | list | join(',') }} \
           --node-volume-size {{ node_volume_size }} \
-          --node-count {{ node_count }} \
           --yes
         args:
           chdir: /home/ec2-user
@@ -228,7 +227,7 @@
 
       - name: check if nodes yaml file exists
         stat:
-          path: /home/ec2-user/nodes.yaml
+          path: /home/ec2-user/nodes1.yaml
         register: nodes_yaml
 
       - block:
@@ -244,11 +243,31 @@
 
         - name: Create nodes file
           template:
-            src: nodes.yaml.j2
-            dest: /home/ec2-user/nodes.yaml
+            src: nodes1.yaml.j2
+            dest: /home/ec2-user/nodes1.yaml
+
+        - name: Create nodes file
+          template:
+            src: nodes2.yaml.j2
+            dest: /home/ec2-user/nodes2.yaml
+
+        - name: Create nodes file
+          template:
+            src: nodes3.yaml.j2
+            dest: /home/ec2-user/nodes3.yaml
 
         - name: Apply nodes config
-          command: kops replace -f /home/ec2-user/nodes.yaml
+          command: kops replace -f /home/ec2-user/nodes1.yaml
+          args:
+            chdir: /home/ec2-user
+
+        - name: Apply nodes config
+          command: kops replace -f /home/ec2-user/nodes2.yaml
+          args:
+            chdir: /home/ec2-user
+
+        - name: Apply nodes config
+          command: kops replace -f /home/ec2-user/nodes3.yaml
           args:
             chdir: /home/ec2-user
 
@@ -283,7 +302,7 @@
             dest: /home/ec2-user/pv_efs.yaml
 
         - name: Install CSI EFS driver
-          command: kubectl apply -k "github.com/kubernetes-sigs/aws-efs-csi-driver/deploy/kubernetes/overlays/stable/?ref=release-1.0"
+          command: kubectl apply -k "github.com/kubernetes-sigs/aws-efs-csi-driver/deploy/kubernetes/overlays/dev/?ref=master"
 
         - name: Create storageclass.yaml config file
           template:
@@ -308,6 +327,11 @@
 
       ## Configure persistent volume claim ##
       - block:
+        - name: add pod file
+          template:
+            src: pod.yaml.j2
+            dest: /home/ec2-user/pod.yaml
+
         - name: Create pvc_efs.yaml config file
           template:
             src: pvc_efs.yaml.j2
@@ -320,50 +344,6 @@
           args:
             chdir: /home/ec2-user
         when: pvc_log.stdout.find('efs-persist') == -1
-
-      ## Connect helm/tiller
-      - name: Determine if Helm and Tiller are connected already
-        command: helm version --tiller-connection-timeout 30
-        failed_when: False
-        changed_when: False
-        register: helmver_result
-        async: 45
-        poll: 5
-
-        ## Create Tiller Account ##
-      - block:
-          - name: Create tiller account
-            command: kubectl --namespace kube-system create serviceaccount tiller
-            args:
-              chdir: /home/ec2-user
-
-          - name: Create clusterrolebinding for tiller
-            command: kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
-            args:
-              chdir: /home/ec2-user
-
-          - name: Initialize tiller
-            command: helm init --service-account tiller
-            args:
-              chdir: /home/ec2-user
-
-          - name: Verify that helm and tiller have connected
-            command: helm version --tiller-connection-timeout 5
-            register: cmd_result
-            until: cmd_result.stdout.find('Server') != -1
-            retries: 20
-            delay: 60 # this value
-            args:
-              chdir: /home/ec2-user
-
-          - name: Ensure that Tiller is secure from access inside the cluster
-            shell: |
-              kubectl --namespace=kube-system patch deployment tiller-deploy --type=json --patch='[{"op": "add", "path": "/spec/template/spec/containers/0/command", "value": ["/tiller", "--listen=localhost:44134"]}]'
-            args:
-              chdir: /home/ec2-user
-
-        when: helmver_result.stdout is undefined or
-          helmver_result.stdout.find('Server') == -1
 
       - name: check if autoscaler yaml file exists
         stat:
@@ -385,13 +365,20 @@
             chdir: /home/ec2-user
         when: autoscaler_yaml.stat.exists == False
 
-      ## Avoid 'unable to find ready tiller pod' error ##
-      - name: sleep for 60 seconds and continue with play
-        wait_for: timeout=60
-        delegate_to: localhost
+      - name: Add eks charts
+        command: helm repo add eks https://aws.github.io/eks-charts
+        args:
+          chdir: /home/ec2-user
 
-      - name: Add spot termination
-        shell: helm install stable/k8s-spot-termination-handler --namespace kube-system
+      - name: Update Helm chart repos
+        command: helm repo update
+        args:
+          chdir: /home/ec2-user
+
+      - name: Add termination handler
+        shell: helm upgrade --install aws-node-termination-handler \
+          --namespace kube-system \
+          eks/aws-node-termination-handler
 
       # configure and create jupyterhub
       - name: Create security token
@@ -413,23 +400,17 @@
         args:
           chdir: /home/ec2-user
 
-      ## Avoid 'unable to find ready tiller pod' error ##
-      - name: sleep for 60 seconds and continue with play
-        wait_for: timeout=60
-        delegate_to: localhost
-
       - name: Check for JupyterHub helm release
         command: helm list
         register: hl_log
         changed_when: False
 
       - name: Install JupyterHub release
-        shell: helm install {{ helm_chart_repo_name }}/jupyterhub \
+        shell: helm install {{ namespace }}-jupyterhub {{ helm_chart_repo_name }}/jupyterhub \
           --debug \
           --version={{ jupyterhub_chart_version }} \
-          --name={{ namespace }}-jupyterhub \
           --namespace={{ namespace }} \
-          --timeout=600
+          --timeout=10m
           -f config.yaml
         args:
           chdir: /home/ec2-user
@@ -444,4 +425,4 @@
         command: kubectl --namespace={{ namespace }} describe svc proxy-public
         register: pp_log
 
-      - debug: msg="Navigate browser to {{ pp_log.stdout_lines[14] }} to begin using JupyterHub!"
+      - debug: msg="Navigate browser to {{ pp_log.stdout_lines[19] }} to begin using JupyterHub!"

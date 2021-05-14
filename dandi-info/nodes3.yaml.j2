@@ -5,23 +5,22 @@ metadata:
   generation: 2
   labels:
     kops.k8s.io/cluster: {{ namespace }}.k8s.local
-  name: nodes
+  name: nodes-us-east-2c
 spec:
   cloudLabels:
     k8s.io/cluster-autoscaler/enabled: ""
+    k8s.io/cluster-autoscaler/{{ namespace }}.k8s.local: ""
     k8s.io/cluster-autoscaler/node-template/label: ""
   image: kope.io/k8s-1.16-debian-stretch-amd64-hvm-ebs-2020-01-17
   machineType: {{ node_size }}
-  maxSize: 1
-  minSize: 1
+  maxSize: {{ max_node }}
+  minSize: 0
   nodeLabels:
-    kops.k8s.io/instancegroup: nodes
+    kops.k8s.io/instancegroup: nodes-us-east-2c
     on-demand: "true"
   role: Node
   rootVolumeSize: {{ node_volume_size }}
   subnets:
-  - us-east-2a
-  - us-east-2b
   - us-east-2c
   taints:
   - on-demand=true:PreferNoSchedule
