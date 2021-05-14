@@ -25,15 +25,6 @@
         tags: always
 
       ## Idempotent delete helm release of JH
-      - name: Determine if Helm and Tiller are connected already
-        command: helm version --tiller-connection-timeout 30
-        failed_when: False
-        changed_when: False
-        register: helmver_result
-        async: 45
-        poll: 5
-        tags: always
-
       - name: Determine if JH is currently installed.
         command: helm status {{ namespace }}-jupyterhub
         register: jh_installed_result
@@ -44,7 +35,7 @@
         # delete the Helm release. This deletes all resources that were created
         # by Helm for your JupyterHub deployment
       - name: Delete helm release
-        command: helm delete {{ namespace }}-jupyterhub --purge
+        command: helm delete {{ namespace }}-jupyterhub --namespace {{ namespace }}
         when: helmver_result.stdout is defined and not helmver_result.rc and not jh_installed_result.rc
         tags: always
 
@@ -72,7 +63,10 @@
             state: absent
           with_items:
             - /home/ec2-user/spot-ig.yaml
-            - /home/ec2-user/nodes.yaml
+            - /home/ec2-user/pod.yaml
+            - /home/ec2-user/nodes1.yaml
+            - /home/ec2-user/nodes2.yaml
+            - /home/ec2-user/nodes3.yaml
             - /home/ec2-user/cluster-autoscaler-multi-asg.yaml
         when: autoscaler_yaml.stat.exists == True
         tags:

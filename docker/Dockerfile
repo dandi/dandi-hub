@@ -21,7 +21,7 @@ RUN git clone https://github.com/sylabs/singularity.git \
     && make \
     && make install
 
-FROM jupyter/datascience-notebook:016833b15ceb
+FROM jupyter/datascience-notebook:59c973d16bca
 
 USER root
 COPY --from=builder /usr/local/singularity /usr/local/singularity
@@ -40,41 +40,46 @@ RUN wget --quiet https://github.com/kahing/goofys/releases/download/v0.24.0/goof
 USER $NB_USER
 
 # Install Allen SDK
-RUN conda create -n allen python=3.8 pip numpy cython numexpr ipykernel
-RUN HDF5_DIR=/opt/conda BLOSC_DIR=/opt/conda LZO_DIR=/opt/conda \
-  BZIP2_DIR=/opt/conda /opt/conda/envs/allen/bin/pip install tables==3.5.1
-RUN /opt/conda/envs/allen/bin/pip install --no-cache-dir ipfx
-RUN /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen \
-  --display-name="Allen SDK"
-RUN conda clean -tipsy
+RUN conda create -n allen python=3.8 pip numpy cython numexpr ipykernel \
+  && HDF5_DIR=/opt/conda BLOSC_DIR=/opt/conda LZO_DIR=/opt/conda \
+  BZIP2_DIR=/opt/conda /opt/conda/envs/allen/bin/pip install tables==3.5.1 \
+  && /opt/conda/envs/allen/bin/pip install --no-cache-dir ipfx \
+  && /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen \
+  --display-name="Allen SDK" \
+  && conda clean -tipsy && rm -rf /tmp/*
 
-RUN pip install --no-cache-dir itkwidgets==0.32.0 jupytext plotly pyvista
+# Install packages into base env
+RUN conda install --yes datalad rclone \
+  && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.6/git-annex-remote-rclone \
+  && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
+  && pip install --no-cache-dir itkwidgets==0.32.0 jupytext plotly \
+  nbgitpuller nibabel nilearn pybids zarr spikeinterface neo \
+  git+https://github.com/dandi/dandi-cli.git \
+  git+https://github.com/nipype/pydra.git \
+  datalad-container datalad-osf nwbwidgets \
+  && conda clean -tipsy && rm -rf /tmp/*
+
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager \
   jupyter-matplotlib jupyterlab-datawidgets itkwidgets@0.32.0 jupyterlab-plotly \
   plotlywidget jupyter-threejs --no-build \
   && export NODE_OPTIONS=--max-old-space-size=4096 \
-  && jupyter lab build && rm -rf /tmp/*
+  && jupyter lab build && \
+     jupyter lab clean && \
+     jlpm cache clean && \
+     npm cache clean --force && \
+     rm -rf $HOME/.node-gyp && \
+     rm -rf $HOME/.local && rm -rf /tmp/*
 
-RUN pip install --no-cache-dir nbgitpuller nibabel nilearn pybids zarr \
-  spikeinterface neo
-
-RUN conda create -n ros3 -c conda-forge python=3.8 hdf5 h5py ipykernel pip numpy \
-  matplotlib && conda clean -tipsy && \
-  /opt/conda/envs/ros3/bin/python -m ipykernel install --user --name ros3 \
-  --display-name="Streaming NWB"
-
-RUN conda install --yes datalad rclone \
-  && conda clean -tipsy \
-  && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.6/git-annex-remote-rclone \
-  && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin
-
-RUN gitpuller https://github.com/dandi/example-notebooks master dandi-notebooks
-RUN pip install --no-cache-dir \
-  git+https://github.com/dandi/dandi-cli.git \
-  git+https://github.com/nipype/pydra.git \
-  datalad datalad-container datalad-osf nwbwidgets
-RUN /opt/conda/envs/ros3/bin/pip install --no-cache-dir \
+# Create streaming NWB environment
+RUN conda create -n ros3 -c conda-forge python=3.8 hdf5 h5py ipykernel pip \
+  numpy matplotlib \
+  && /opt/conda/envs/ros3/bin/python -m ipykernel install --user --name ros3 \
+  --display-name="Streaming NWB" \
+  && /opt/conda/envs/ros3/bin/pip install --no-cache-dir \
   git+https://github.com/hdmf-dev/hdmf.git@enh/h5py3 \
   git+https://github.com/NeurodataWithoutBorders/pynwb.git \
-  nwbwidgets
-RUN conda install -n ros3 -c conda-forge --force-reinstall h5py=3.2.1
+  nwbwidgets \
+  && conda install -n ros3 -c conda-forge --force-reinstall h5py=3.2.1 \
+  && conda clean -tipsy && rm -rf /tmp/*
+
+RUN gitpuller https://github.com/dandi/example-notebooks master dandi-notebooks

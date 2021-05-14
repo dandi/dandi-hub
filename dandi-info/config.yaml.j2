@@ -46,7 +46,7 @@ hub:
               spawner.environment['GITHUB_USER'] = auth_state['github_user']['login']
               spawner.environment['GITHUB_EMAIL'] = auth_state['github_user']['email']
 
-      c.GitHubOAuthenticator.scope = ['gist', 'user:email']
+      c.GitHubOAuthenticator.scope = ['read:user', 'gist', 'user:email']
       c.JupyterHub.authenticator_class = GitHubEnvAuthenticator
 
       # enable authentication state
@@ -111,6 +111,7 @@ hub:
     OAuthenticator:
       scope:
       - read:user
+      - user:email
 
 scheduling:
   userScheduler:
@@ -138,16 +139,16 @@ singleuser:
     limit: 12
     guarantee: 0.5
   profileList:
-    - display_name: "tiny"
+    - display_name: "tiny. Useful for many quick things"
       description: "0.5 CPU / 1 GB"
       kubespawner_override:
         singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
         cpu_limit: 2
-        cpu_guarantee: 0.5
+        cpu_guarantee: 0.25
         mem_limit: 2G
-        mem_guarantee: 1G
+        mem_guarantee: 0.5G
     - display_name: "base"
-      description: "6 CPU / 16 GB"
+      description: "6 CPU / 16 GB. May take up to 5 mins to start."
       default: true
       kubespawner_override:
         singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
@@ -156,7 +157,7 @@ singleuser:
         mem_limit: 16G
         mem_guarantee: 16G
     - display_name: "large"
-      description: "36 CPU / 96 GB"
+      description: "36 CPU / 96 GB. May take up to 5 mins to start."
       kubespawner_override:
         singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
         cpu_limit: 36
@@ -164,7 +165,7 @@ singleuser:
         mem_limit: 96G
         mem_guarantee: 96G
     - display_name: "extra large"
-      description: "60 CPU / 160 GB"
+      description: "60 CPU / 160 GB. May take up to 5 mins to start."
       kubespawner_override:
         singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
         cpu_limit: 60
