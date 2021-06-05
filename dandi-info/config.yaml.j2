@@ -1,5 +1,5 @@
 proxy:
-  secretToken: "{{ os1.stdout }}"
+  secretToken: "{{ os.stdout }}"
   https:
     enabled: true
     type: offload
@@ -13,8 +13,6 @@ proxy:
       service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "3600"
 hub:
-  extraEnv:
-    JUPYTERHUB_CRYPT_KEY: {{ os2.stdout }}
   extraConfig:
     myConfig: |
       from kubernetes import client
@@ -231,5 +229,7 @@ singleuser:
             gitpuller https://github.com/dandi/example-notebooks master dandi-notebooks;
             chown -R jovyan:users dandi-notebooks;
             datalad install https://github.com/dandi/dandisets;
-            /opt/conda/bin/pip install --upgrade dandi;
-            /opt/conda/envs/ros3/bin/python -m ipykernel install --user --name ros3 --display-name "Python (Streaming support)"
+            /opt/conda/envs/ros3/bin/python -m ipykernel install --user --name ros3 --display-name "Python (NWBstream)";
+            /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen --display-name "Python (Allen SDK)";
+            /opt/conda/envs/dandi/bin/python -m ipykernel install --user --name dandi --display-name "Python (DANDI)";
+            /opt/conda/envs/dandi/bin/pip install --upgrade dandi

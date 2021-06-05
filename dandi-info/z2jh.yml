@@ -383,11 +383,7 @@
       # configure and create jupyterhub
       - name: Create security token
         command: openssl rand -hex 32
-        register: os1
-
-      - name: Create security token
-        command: openssl rand -hex 32
-        register: os2
+        register: os
 
       - name: Create config file for JupyterHub
         template:
