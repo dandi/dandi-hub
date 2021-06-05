@@ -25,8 +25,15 @@
         tags: always
 
       ## Idempotent delete helm release of JH
+      - name: Determine if Helm is available
+        command: helm version
+        failed_when: False
+        changed_when: False
+        register: helmver_result
+        tags: always
+
       - name: Determine if JH is currently installed.
-        command: helm status {{ namespace }}-jupyterhub
+        command: helm status --namespace {{ namespace }} {{ namespace }}-jupyterhub
         register: jh_installed_result
         failed_when: False
         changed_when: False

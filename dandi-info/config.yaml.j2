@@ -27,17 +27,43 @@ hub:
       import os
       import warnings
 
-      from oauthenticator.github import GitHubOAuthenticator
+      from oauthenticator.github import GitHubOAuthenticator, _api_headers
+      from tornado.httpclient import HTTPRequest, HTTPClientError, AsyncHTTPClient
+      import json
 
       # define our OAuthenticator with `.pre_spawn_start`
       # for passing auth_state into the user environment
 
       class GitHubEnvAuthenticator(GitHubOAuthenticator):
 
+          async def authenticate(self, handler, data=None):
+              userdict = await super().authenticate(handler, data=data)
+              if userdict is None:
+                  return userdict
+              req = HTTPRequest(
+                          f"https://api.dandiarchive.org/api/users/search/?username={userdict['name']}",
+                          method="GET",
+                          headers={"Accept": "application/json",
+                                   "User-Agent": "JupyterHub",
+                                   "Authorization": "token {{ danditoken }}"},
+                          validate_cert=self.validate_server_cert,
+                     )
+              try:
+                  client = AsyncHTTPClient()
+                  resp = await client.fetch(req)
+                  # resp_json = await self.fetch(req, "checking users")
+              except HTTPClientError:
+                  return None
+              else:
+                  if resp.body:
+                      resp_json = json.loads(resp.body.decode('utf8', 'replace'))
+                      for val in resp_json:
+                          if val["username"] == userdict["name"]:
+                              return userdict
+              return None
+
           async def pre_spawn_start(self, user, spawner):
               auth_state = await user.get_auth_state()
-              import pprint
-              pprint.pprint(auth_state)
               if not auth_state:
                   # user has no auth state
                   return
@@ -45,6 +71,26 @@ hub:
               spawner.environment['GITHUB_TOKEN'] = auth_state['access_token']
               spawner.environment['GITHUB_USER'] = auth_state['github_user']['login']
               spawner.environment['GITHUB_EMAIL'] = auth_state['github_user']['email']
+              if auth_state['github_user']['email']:
+                  return
+              req = HTTPRequest(
+                          self.github_api + "/user/emails",
+                          method="GET",
+                          headers=_api_headers(auth_state['access_token']),
+                          validate_cert=self.validate_server_cert,
+                     )
+              try:
+                  client = AsyncHTTPClient()
+                  resp = await client.fetch(req)
+                  # resp_json = await self.fetch(req, "fetching user emails")
+              except HTTPClientError:
+                  pass
+              else:
+                  if resp.body:
+                      resp_json = json.loads(resp.body.decode('utf8', 'replace'))
+                      for val in resp_json:
+                          if val["primary"]:
+                              spawner.environment['GITHUB_EMAIL'] = val['email']
 
       c.GitHubOAuthenticator.scope = ['read:user', 'gist', 'user:email']
       c.JupyterHub.authenticator_class = GitHubEnvAuthenticator
@@ -58,49 +104,6 @@ hub:
       - "satra"
       - "yarikoptic"
       - "dandibot"
-      allowed_users:
-      - "AlmightyYakob"
-      - "CodyCBakerPhD"
-      - "GMCadode"
-      - "JiaruiYang"
-      - "MShreyasStanford"
-      - "Saksham20"
-      - "bendichter"
-      - "borrepp"
-      - "borrepp"
-      - "caitlinmallory"
-      - "colleenjg"
-      - "dchiquito"
-      - "dieloz"
-      - "djarecka"
-      - "eskuebler"
-      - "faiza-a"
-      - "gmazzamuto"
-      - "gmbcrazy"
-      - "jbeezley"
-      - "jiaxx"
-      - "jocelynmora"
-      - "jwodder"
-      - "lfrank"
-      - "lmorgan6"
-      - "malinINCF"
-      - "mgrauer"
-      - "mhhennig"
-      - "nsteinme"
-      - "pgleeson"
-      - "sanjayankur31"
-      - "sanuann"
-      - "saskiad"
-      - "soichih"
-      - "soychae93"
-      - "stepeter"
-      - "subdavis"
-      - "t-b"
-      - "visakhmr"
-      - "waxlamp"
-      - "wbwakeman"
-      - "yarikoptic-test"
-      - "ybernaerts"
     GitHubOAuthenticator:
       client_id: "{{ github_client_id }}"
       client_secret: "{{ github_client_secret }}"
@@ -226,5 +229,7 @@ singleuser:
             gitpuller https://github.com/dandi/example-notebooks master dandi-notebooks;
             chown -R jovyan:users dandi-notebooks;
             datalad install https://github.com/dandi/dandisets;
-            /opt/conda/bin/pip install --upgrade dandi;
-            /opt/conda/envs/ros3/bin/python -m ipykernel install --user --name ros3 --display-name "Python (Streaming support)"
+            /opt/conda/envs/ros3/bin/python -m ipykernel install --user --name ros3 --display-name "Python (NWBstream)";
+            /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen --display-name "Python (Allen SDK)";
+            /opt/conda/envs/dandi/bin/python -m ipykernel install --user --name dandi --display-name "Python (DANDI)";
+            /opt/conda/envs/dandi/bin/pip install --upgrade dandi
