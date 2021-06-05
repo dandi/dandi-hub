@@ -8,7 +8,7 @@ spot_volume_size: 100
 node_count: 1
 max_node: 5
 max_spot: 30
-jupyterhub_chart_version: 1.0.0-beta.1.n002.hc2a417f6
+jupyterhub_chart_version: 1.0.0-beta.1.n004.h8ae542c7
 singleuser_image_repo: dandiarchive/dandihub
 singleuser_image_tag: latest
 helm_chart_repo_name: jupyterhub
