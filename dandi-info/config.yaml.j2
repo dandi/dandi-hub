@@ -13,6 +13,8 @@ proxy:
       service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "3600"
 hub:
+  extraEnv:
+    JUPYTERHUB_CRYPT_KEY: {{ os.stdout }}
   extraConfig:
     myConfig: |
       from kubernetes import client
@@ -27,17 +29,34 @@ hub:
       import os
       import warnings
 
-      from oauthenticator.github import GitHubOAuthenticator
+      from oauthenticator.github import GitHubOAuthenticator, _api_headers
+      from tornado.httpclient import HTTPRequest
 
       # define our OAuthenticator with `.pre_spawn_start`
       # for passing auth_state into the user environment
 
       class GitHubEnvAuthenticator(GitHubOAuthenticator):
 
+          async def authenticate(self, handler, data=None):
+              userdict = await super().authenticate(handler, data=data)
+              if userdict is None:
+                  return userdict
+              req = HTTPRequest(
+                          f"https://api.dandiarchive.org/api/users/search/?username={userdict['name']}",
+                          method="GET",
+                          headers={"Accept": "application/json",
+                                   "User-Agent": "JupyterHub",
+                                   "Authorization": "token {{ danditoken }}"},
+                          validate_cert=self.validate_server_cert,
+                     )
+              resp_json = await self.fetch(req, "checking users")
+              for val in resp_json:
+                  if val["username"] == userdict["name"]:
+                      return userdict
+              return None
+
           async def pre_spawn_start(self, user, spawner):
               auth_state = await user.get_auth_state()
-              import pprint
-              pprint.pprint(auth_state)
               if not auth_state:
                   # user has no auth state
                   return
@@ -45,6 +64,16 @@ hub:
               spawner.environment['GITHUB_TOKEN'] = auth_state['access_token']
               spawner.environment['GITHUB_USER'] = auth_state['github_user']['login']
               spawner.environment['GITHUB_EMAIL'] = auth_state['github_user']['email']
+              req = HTTPRequest(
+                          self.github_api + "/user/emails",
+                          method="GET",
+                          headers=_api_headers(auth['access_token']),
+                          validate_cert=self.validate_server_cert,
+                     )
+              resp_json = await self.fetch(req, "fetching user emails")
+              for val in resp_json:
+                  if val["primary"]:
+                      spawner.environment['GITHUB_EMAIL'] = val['email']
 
       c.GitHubOAuthenticator.scope = ['read:user', 'gist', 'user:email']
       c.JupyterHub.authenticator_class = GitHubEnvAuthenticator
