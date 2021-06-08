@@ -71,7 +71,7 @@ RUN conda create -n ros3 -c conda-forge python=3.8 hdf5 h5py=3.2 ipykernel pip \
   numpy matplotlib \
   && /opt/conda/envs/ros3/bin/pip install --no-cache-dir \
   git+https://github.com/hdmf-dev/hdmf.git@enh/h5py3 \
-  && git clone --depth 1 https://github.com/NeurodataWithoutBorders/pynwb.git \
+  && git clone --recurse-submodules --depth 1 https://github.com/NeurodataWithoutBorders/pynwb.git \
   && sed -i s/'h5py>=2.9,<3'/'h5py>3'/g pynwb/setup.py \
   && /opt/conda/envs/ros3/bin/pip install --no-cache-dir pynwb/. \
   && rm -rf pynwb \
