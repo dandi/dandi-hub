@@ -52,12 +52,12 @@ RUN conda install --yes datalad rclone \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.6/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && pip install --no-cache-dir jupytext nbgitpuller datalad-container \
-     datalad-osf \
+     datalad-osf jupyterlab_hdf \
   && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager \
   jupyter-matplotlib jupyterlab-datawidgets itkwidgets@0.32.0 jupyterlab-plotly \
-  plotlywidget jupyter-threejs --no-build \
+  plotlywidget jupyter-threejs @jupyterlab/hdf5 --no-build \
   && export NODE_OPTIONS=--max-old-space-size=4096 \
   && jupyter lab build && \
      jupyter lab clean && \
