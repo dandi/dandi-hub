@@ -67,12 +67,11 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager \
      rm -rf $HOME/.local && rm -rf /tmp/*
 
 # Install NWBstream env
-RUN conda create -n ros3 -c conda-forge python=3.8 hdf5 h5py=3.2 ipykernel pip \
-  numpy matplotlib \
-  && /opt/conda/envs/ros3/bin/pip install --no-cache-dir \
-  git+https://github.com/hdmf-dev/hdmf.git@enh/h5py3 \
-  && git clone --recurse-submodules --depth 1 https://github.com/NeurodataWithoutBorders/pynwb.git \
-  && sed -i s/'h5py>=2.9,<3'/'h5py>3'/g pynwb/setup.py \
+RUN conda create -n ros3 -c conda-forge python=3.8 'h5py>3.2=mpi*' ipykernel pip \
+  numpy matplotlib zarr blosc \
+  && /opt/conda/envs/ros3/bin/pip install --no-cache-dir hdmf hdf5plugin \
+  && git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git \
+  && cd pynwb && git checkout rc/2.0.0 && cd .. \
   && /opt/conda/envs/ros3/bin/pip install --no-cache-dir pynwb/. \
   && rm -rf pynwb \
   && /opt/conda/envs/ros3/bin/pip install --no-cache-dir \
