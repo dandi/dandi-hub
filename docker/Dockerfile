@@ -1,6 +1,6 @@
-FROM golang:1.15.2 as builder
+FROM golang:1.17.0 as builder
 
-ARG SINGULARITY_COMMITISH="v3.7.4"
+ARG SINGULARITY_COMMITISH="v3.8.1"
 
 WORKDIR $GOPATH/src/github.com/sylabs
 RUN apt-get update && apt-get install -y \
@@ -21,7 +21,7 @@ RUN git clone https://github.com/sylabs/singularity.git \
     && make \
     && make install
 
-FROM jupyter/datascience-notebook:2492e8be8a11
+FROM jupyter/datascience-notebook:70178b8e48d7
 
 USER root
 COPY --from=builder /usr/local/singularity /usr/local/singularity
@@ -41,18 +41,12 @@ RUN conda create -n allen -c conda-forge python=3.8 pip ipykernel \
   && /opt/conda/envs/allen/bin/pip install --no-cache-dir ipfx \
   && conda clean --all -f -y && rm -rf /tmp/*
 
-# Install DANDI env
-RUN conda create -n dandi -c conda-forge python=3.8 pip ipykernel \
-  && /opt/conda/envs/dandi/bin/pip install --no-cache-dir dandi \
-  nibabel nilearn pybids zarr spikeinterface neo pydra nwbwidgets jupytext \
-  plotly itkwidgets==0.32.0 \
-  && conda clean --all -f -y && rm -rf /tmp/*
-
-RUN conda install --yes datalad rclone \
+RUN conda install --yes datalad rclone 'h5py>3.2=mpi*' ipykernel zarr blosc \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.6/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && pip install --no-cache-dir jupytext nbgitpuller datalad-container \
-     datalad-osf \
+     datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
+     pydra nwbwidgets 'pynwb>=2.0.0' plotly itkwidgets==0.32.0 \
   && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager \
@@ -65,18 +59,6 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager \
      npm cache clean --force && \
      rm -rf $HOME/.node-gyp && \
      rm -rf $HOME/.local && rm -rf /tmp/*
-
-# Install NWBstream env
-RUN conda create -n ros3 -c conda-forge python=3.8 'h5py>3.2=mpi*' ipykernel pip \
-  numpy matplotlib zarr blosc \
-  && /opt/conda/envs/ros3/bin/pip install --no-cache-dir hdmf hdf5plugin \
-  && git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git \
-  && cd pynwb && git checkout rc/2.0.0 && cd .. \
-  && /opt/conda/envs/ros3/bin/pip install --no-cache-dir pynwb/. \
-  && rm -rf pynwb \
-  && /opt/conda/envs/ros3/bin/pip install --no-cache-dir \
-  nwbwidgets jupytext plotly itkwidgets==0.32.0 \
-  && conda clean --all -f -y && rm -rf /tmp/*
 
 # Install jupyter server proxy and desktop
 USER root
@@ -113,9 +95,5 @@ RUN cd /opt/extras && \
     conda clean --all -f -y && rm -rf /tmp/*
 
 RUN /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen \
-    --display-name="Allen SDK" \
-    && /opt/conda/envs/dandi/bin/python -m ipykernel install --user --name dandi \
-    --display-name="DANDI" \
-    && /opt/conda/envs/ros3/bin/python -m ipykernel install --user --name ros3 \
-    --display-name="NWBstream"
+    --display-name="Allen SDK"
 
