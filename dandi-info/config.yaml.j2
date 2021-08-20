@@ -229,7 +229,5 @@ singleuser:
             gitpuller https://github.com/dandi/example-notebooks master dandi-notebooks;
             chown -R jovyan:users dandi-notebooks;
             datalad install https://github.com/dandi/dandisets;
-            /opt/conda/envs/ros3/bin/python -m ipykernel install --user --name ros3 --display-name "Python (NWBstream)";
             /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen --display-name "Python (Allen SDK)";
-            /opt/conda/envs/dandi/bin/python -m ipykernel install --user --name dandi --display-name "Python (DANDI)";
-            /opt/conda/envs/dandi/bin/pip install --upgrade dandi
+            /opt/conda/envs/bin/pip install --upgrade dandi
