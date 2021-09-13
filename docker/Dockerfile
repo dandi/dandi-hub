@@ -46,7 +46,7 @@ RUN conda install --yes datalad rclone 'h5py>3.2=mpi*' ipykernel zarr blosc \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && pip install --no-cache-dir jupytext nbgitpuller datalad-container \
      datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
-     pydra nwbwidgets 'pynwb>=2.0.0' plotly itkwidgets==0.32.0 \
+     pydra nwbwidgets 'pynwb>=2.0.0' plotly itkwidgets==0.32.0 hdf5plugin \
   && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager \
