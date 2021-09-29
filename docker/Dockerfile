@@ -41,12 +41,13 @@ RUN conda create -n allen -c conda-forge python=3.8 pip ipykernel \
   && /opt/conda/envs/allen/bin/pip install --no-cache-dir ipfx \
   && conda clean --all -f -y && rm -rf /tmp/*
 
-RUN conda install --yes datalad rclone 'h5py>3.2=mpi*' ipykernel zarr blosc \
+RUN conda install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.6/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && pip install --no-cache-dir jupytext nbgitpuller datalad-container \
      datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
      pydra nwbwidgets 'pynwb>=2.0.0' plotly itkwidgets==0.32.0 hdf5plugin \
+     h5netcdf "xarray[io]" https://github.com/intake/fsspec-reference-maker/archive/fda8a5318e307c23ef656257c0bc78262bcb9a6f.zip \
   && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager \
