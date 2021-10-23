@@ -70,7 +70,7 @@ hub:
       c.GitHubOAuthenticator.enable_auth_state = True
 
       c.JupyterHub.authenticator_class = "dummy"
-      c.DummyAuthenticator.password = ""
+      c.DummyAuthenticator.password = "{{ dummypass }}"
 
   config:
     Authenticator:
