@@ -255,16 +255,6 @@
         set_fact:
           efs_id: "{{ efs_log['efs']['mount_targets'][0]['file_system_id'] }}"
 
-      - name: Add nvidia operator
-        command: helm repo add nvidia https://nvidia.github.io/gpu-operator
-        args:
-          chdir: /home/ec2-user/{{ namespace }}
-
-      - name: Update Helm chart repos
-        command: helm repo update
-        args:
-          chdir: /home/ec2-user/{{ namespace }}
-
       - name: Check for kube namespace
         command: kubectl get namespace {{ namespace }}
         failed_when: False
