@@ -79,8 +79,8 @@ hub:
       - "yarikoptic"
       - "dandibot"
     GitHubOAuthenticator:
-      client_id: "{{ github_client_id }}"
-      client_secret: "{{ github_client_secret }}"
+      client_id: "{{ test_github_client_id }}"
+      client_secret: "{{ test_github_client_secret }}"
       oauth_callback_url: "{{ ingress }}/hub/oauth_callback"
     JupyterHub:
       admin_access: false
@@ -152,7 +152,7 @@ singleuser:
     - display_name: "T4 GPU for inference"
       description: "8 CPU / 30 GB / 1 T4 GPU. May take up to 5 mins to start."
       kubespawner_override:
-        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-gpu'
         cpu_limit: 8
         cpu_guarantee: 2
         mem_limit: 30G
