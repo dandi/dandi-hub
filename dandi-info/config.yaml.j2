@@ -69,8 +69,8 @@ hub:
       # enable authentication state
       c.GitHubOAuthenticator.enable_auth_state = True
 
-      c.JupyterHub.authenticator_class = "dummy"
-      c.DummyAuthenticator.password = "{{ dummypass }}"
+      # c.JupyterHub.authenticator_class = "dummy"
+      # c.DummyAuthenticator.password = "{{ dummypass }}"
 
   config:
     Authenticator:
@@ -150,12 +150,12 @@ singleuser:
         mem_limit: 160G
         mem_guarantee: 160G
     - display_name: "T4 GPU for inference"
-      description: "8 CPU / 30 GB / 1 T4 GPU. May take up to 5 mins to start."
+      description: "4 CPU / 15 GB / 1 T4 GPU. May take up to 10 mins to start."
       kubespawner_override:
         singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-gpu'
-        cpu_limit: 8
+        cpu_limit: 4
         cpu_guarantee: 2
-        mem_limit: 30G
+        mem_limit: 15G
         mem_guarantee: 10G
         extra_resource_limits:
           nvidia.com/gpu: "1"

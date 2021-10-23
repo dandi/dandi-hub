@@ -476,5 +476,8 @@
       - name: Get URL for public proxy
         command: kubectl --namespace={{ namespace }} describe svc proxy-public
         register: pp_log
+        until: pp_log.stdout.find('Ensured load balancer') != -1
+        retries: 10
+        delay: 60
 
-      - debug: msg="Navigate browser to {{ pp_log.stdout_lines[19] }} to begin using JupyterHub!"
+      - debug: msg="Navigate browser to {{ pp_log.stdout_lines[20] }} to begin using JupyterHub!"

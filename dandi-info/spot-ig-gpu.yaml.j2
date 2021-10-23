@@ -12,7 +12,7 @@ spec:
     k8s.io/cluster-autoscaler/{{ namespace }}.k8s.local: ""
     k8s.io/cluster-autoscaler/node-template/label: ""
   image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20211001
-  machineType: g4dn.2xlarge
+  machineType: g4dn.xlarge
   maxSize: {{ max_spot_gpu }}
   minSize: 0
   nodeLabels:
