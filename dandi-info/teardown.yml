@@ -48,7 +48,7 @@
 
       - name: check if nodes yaml file exists
         stat:
-          path: /home/ec2-user/cluster-autoscaler-multi-asg.yaml
+          path: /home/ec2-user/{{ namespace }}/cluster-autoscaler-multi-asg.yaml
         register: autoscaler_yaml
         tags: always
 
@@ -69,17 +69,23 @@
             path: "{{ item }}"
             state: absent
           with_items:
-            - /home/ec2-user/spot-ig.yaml
-            - /home/ec2-user/pod.yaml
-            - /home/ec2-user/nodes1.yaml
-            - /home/ec2-user/nodes2.yaml
-            - /home/ec2-user/nodes3.yaml
-            - /home/ec2-user/cluster-autoscaler-multi-asg.yaml
+            - /home/ec2-user/{{ namespace }}/spot-ig.yaml
+            - /home/ec2-user/{{ namespace }}/spot-ig-gpu.yaml
+            - /home/ec2-user/{{ namespace }}/pod.yaml
+            - /home/ec2-user/{{ namespace }}/nodes1.yaml
+            - /home/ec2-user/{{ namespace }}/nodes2.yaml
+            - /home/ec2-user/{{ namespace }}/nodes3.yaml
+            - /home/ec2-user/{{ namespace }}/cluster-autoscaler-multi-asg.yaml
         when: autoscaler_yaml.stat.exists == True
         tags:
           - never
           - kubernetes
           - all-fixtures
+
+      - name: Set kubectl context
+        command: kops export kubecfg --admin --name {{ namespace }}.k8s.local
+        ignore_errors: yes
+        tags: always
 
       - name: Check for kube namespace
         command: kubectl get namespace {{ namespace }}

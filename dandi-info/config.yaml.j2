@@ -62,41 +62,15 @@ hub:
                               return userdict
               return None
 
-          async def pre_spawn_start(self, user, spawner):
-              auth_state = await user.get_auth_state()
-              if not auth_state:
-                  # user has no auth state
-                  return
-              # define some environment variables from auth_state
-              spawner.environment['GITHUB_TOKEN'] = auth_state['access_token']
-              spawner.environment['GITHUB_USER'] = auth_state['github_user']['login']
-              spawner.environment['GITHUB_EMAIL'] = auth_state['github_user']['email']
-              if auth_state['github_user']['email']:
-                  return
-              req = HTTPRequest(
-                          self.github_api + "/user/emails",
-                          method="GET",
-                          headers=_api_headers(auth_state['access_token']),
-                          validate_cert=self.validate_server_cert,
-                     )
-              try:
-                  client = AsyncHTTPClient()
-                  resp = await client.fetch(req)
-                  # resp_json = await self.fetch(req, "fetching user emails")
-              except HTTPClientError:
-                  pass
-              else:
-                  if resp.body:
-                      resp_json = json.loads(resp.body.decode('utf8', 'replace'))
-                      for val in resp_json:
-                          if val["primary"]:
-                              spawner.environment['GITHUB_EMAIL'] = val['email']
 
       c.GitHubOAuthenticator.scope = ['read:user', 'gist', 'user:email']
       c.JupyterHub.authenticator_class = GitHubEnvAuthenticator
 
       # enable authentication state
       c.GitHubOAuthenticator.enable_auth_state = True
+
+      c.JupyterHub.authenticator_class = "dummy"
+      c.DummyAuthenticator.password = ""
 
   config:
     Authenticator:
@@ -142,7 +116,7 @@ singleuser:
     limit: 12
     guarantee: 0.5
   profileList:
-    - display_name: "tiny. Useful for many quick things"
+    - display_name: "Tiny. Useful for many quick things"
       description: "0.5 CPU / 1 GB"
       kubespawner_override:
         singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
@@ -150,7 +124,7 @@ singleuser:
         cpu_guarantee: 0.25
         mem_limit: 2G
         mem_guarantee: 0.5G
-    - display_name: "base"
+    - display_name: "Base"
       description: "6 CPU / 16 GB. May take up to 5 mins to start."
       default: true
       kubespawner_override:
@@ -159,7 +133,7 @@ singleuser:
         cpu_guarantee: 6
         mem_limit: 16G
         mem_guarantee: 16G
-    - display_name: "large"
+    - display_name: "Large"
       description: "36 CPU / 96 GB. May take up to 5 mins to start."
       kubespawner_override:
         singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
@@ -167,7 +141,7 @@ singleuser:
         cpu_guarantee: 36
         mem_limit: 96G
         mem_guarantee: 96G
-    - display_name: "extra large"
+    - display_name: "Extra large"
       description: "60 CPU / 160 GB. May take up to 5 mins to start."
       kubespawner_override:
         singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
@@ -175,6 +149,18 @@ singleuser:
         cpu_guarantee: 60
         mem_limit: 160G
         mem_guarantee: 160G
+    - display_name: "T4 GPU for inference"
+      description: "8 CPU / 30 GB / 1 T4 GPU. May take up to 5 mins to start."
+      kubespawner_override:
+        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+        cpu_limit: 8
+        cpu_guarantee: 2
+        mem_limit: 30G
+        mem_guarantee: 10G
+        extra_resource_limits:
+          nvidia.com/gpu: "1"
+        extra_pod_config:
+          runtimeClassName: nvidia
   storage:
     type: none
     extraVolumes:

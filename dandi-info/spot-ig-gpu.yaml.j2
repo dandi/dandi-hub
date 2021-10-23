@@ -1,26 +1,25 @@
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
-  creationTimestamp: "2020-03-25T17:00:35Z"
+  creationTimestamp: "2020-03-25T17:25:18Z"
   generation: 2
   labels:
     kops.k8s.io/cluster: {{ namespace }}.k8s.local
-  name: nodes-us-east-2c
+  name: spot-ig-gpu
 spec:
   cloudLabels:
     k8s.io/cluster-autoscaler/enabled: ""
     k8s.io/cluster-autoscaler/{{ namespace }}.k8s.local: ""
     k8s.io/cluster-autoscaler/node-template/label: ""
   image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20211001
-  machineType: {{ node_size }}
-  maxSize: {{ max_node }}
+  machineType: g4dn.2xlarge
+  maxSize: {{ max_spot_gpu }}
   minSize: 0
   nodeLabels:
-    kops.k8s.io/instancegroup: nodes-us-east-2c
-    on-demand: "true"
+    kops.k8s.io/instancegroup: spot-ig-gpu
+    k8s.amazonaws.com/accelerator: nvidia-tesla-t4
+    on-demand: "false"
   role: Node
-  rootVolumeSize: {{ node_volume_size }}
+  rootVolumeSize: {{ spot_volume_size }}
   subnets:
-  - us-east-2c
-  taints:
-  - on-demand=true:PreferNoSchedule
+  - us-east-2b
