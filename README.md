@@ -18,11 +18,14 @@ This has been based on:
 2. Create the GitHub App id/token. 
    We have it done through a bot github user account (dandibot).
 3. Setup AWS CI instance with authorized roles. (see the blog post for details)
-   - AmazonEC2FullAccess
-   - IAMFullAccess
-   - AmazonS3FullAccess
-   - AmazonVPCFullAccess
-   - AmazonElasticFileSystemFullAccess
+    - AmazonEC2FullAccess
+    - AmazonSQSFullAccess
+    - IAMFullAccess
+    - AmazonS3FullAccess
+    - AmazonVPCFullAccess
+    - AmazonElasticFileSystemFullAccess
+    - AmazonRoute53FullAccess
+    - AmazonEventBridgeFullAccess
    and then add the public dns name to the hosts file
    **also install git in the CI instance.**
 4. Install ansible locally and create a password for ansible to encrypt some of 
@@ -46,8 +49,10 @@ This has been based on:
                 "autoscaling:DescribeAutoScalingGroups",
                 "autoscaling:DescribeAutoScalingInstances",
                 "autoscaling:DescribeLaunchConfigurations",
+                "autoscaling:DescribeTags",
                 "autoscaling:SetDesiredCapacity",
-                "autoscaling:TerminateInstanceInAutoScalingGroup"
+                "autoscaling:TerminateInstanceInAutoScalingGroup",
+                "ec2:DescribeLaunchTemplateVersions"
             ],
             "Resource": "*"
         }
@@ -73,3 +78,14 @@ To teardown
 ```bash
 ansible-playbook -i hosts teardown.yml -v --vault-password-file ansible_password -t all-fixtures
 ```
+
+To remove kubernetes without removing shared EFS:
+```bash
+ansible-playbook -i hosts teardown.yml -v --vault-password-file ansible_password -t kubernetes
+```
+
+Notes: keeping EFS around 
+- Removing VPC mount targets does not work.
+- The instance roles associated with the hub also don't get removed.
+Both have to be manually removed.
+  
