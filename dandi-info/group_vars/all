@@ -1,5 +1,5 @@
 ---
-namespace: testhub
+namespace: dandihub
 aws_region: us-east-2
 ansible_ssh_private_key_file: ~/.ssh/dandi-satra.pem
 node_size: t3a.medium
@@ -7,7 +7,7 @@ node_volume_size: 30
 spot_volume_size: 100
 node_count: 1
 max_node: 5
-max_spot: 30
+max_spot: 50
 max_spot_gpu: 50
 jupyterhub_chart_version: 1.1.3-n037.h02262a2e
 singleuser_image_repo: dandiarchive/dandihub
@@ -44,7 +44,7 @@ test_github_client_secret: !vault |
           3765383531323137340a653438616163633837643035336330646430303231393266653736366531
           37333965393463376265303636353134313162633865646235646536623239333836366663396235
           6431313031366234623333666436656433353638623736303436
-ingress: https://testhub.dandiarchive.org
+ingress: https://hub.dandiarchive.org
 aws_certificate_arn: !vault |
           $ANSIBLE_VAULT;1.1;AES256
           37396338623632313534326161633435326265373136326632626462633638616137336336336562
