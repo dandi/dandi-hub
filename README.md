@@ -59,7 +59,7 @@ This has been based on:
     ]
 }
 ```
-7. update z2jh.yaml to reflect new policy arn.
+7. update `z2jh.yaml` to reflect new policy arn.
 
 #### Deployment steps
 1. `ansible-playbook -i hosts z2jh.yml -v --vault-password-file ansible_password`
@@ -88,4 +88,19 @@ Notes: keeping EFS around
 - Removing VPC mount targets does not work.
 - The instance roles associated with the hub also don't get removed.
 Both have to be manually removed.
-  
+
+#### Files under dandi-info
+
+- `group_vars/all`: ansible file contains variables for various templates
+- `cluster-autoscaler-multi-asg.yaml.j2`: k8s cluster autoscaler spec
+- `config.yaml.j2`: z2jh jupyterhub configuration
+- `hosts`: ansible provides IP of control host
+- `nodes[1-3].yaml.j2`: k8s node specs for on demand nodes in multiple zones 
+- `pod.yaml.j2`: k8s pod for introspecting shared storage
+- `pv_efs.yaml.j2`: k8s persistent volume spec for EFS
+- `pvc_efs.yaml.j2`: k8s persistent volume claim for EFS
+- `spot-ig.yaml.j2`: k8s non-GPU spec for compute nodes
+- `spot-ig-gpu.yaml.j2`: k8s GPU spec for compute nodes
+- `storageclass.yaml.j2`: k8s EFS storageclass
+- `teardown.yml`: ansible file for tearing down the cluster
+- `z2jh.yml`: ansible file for starting up the cluster
