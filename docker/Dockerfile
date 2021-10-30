@@ -98,3 +98,4 @@ RUN cd /opt/extras && \
 RUN /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen \
     --display-name="Allen SDK"
 
+RUN pip install --no-cache-dir neuroglancer
