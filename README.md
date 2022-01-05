@@ -85,9 +85,9 @@ ansible-playbook -i hosts teardown.yml -v --vault-password-file ansible_password
 ```
 
 Notes: keeping EFS around 
-- Removing VPC mount targets does not work.
-- The instance roles associated with the hub also don't get removed.
-Both have to be manually removed.
+- Removing VPC mount targets does not work. Go to EFS, network, manage. Remove 
+  security groups for each mount target, and then remove each target.
+- Re-run the anisble teardown command.
 
 #### Files under dandi-info
 
