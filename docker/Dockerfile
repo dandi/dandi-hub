@@ -99,4 +99,6 @@ RUN cd /opt/extras && \
 RUN /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen \
     --display-name="Allen SDK"
 
-RUN pip install --no-cache-dir neuroglancer tifffile cloud-volume ome-zarr
+RUN pip install --no-cache-dir neuroglancer tifffile cloud-volume
+RUN pip install --no-cache-dir ome-zarr
+RUN pip install --no-cache-dir --upgrade boto3 s3fs
