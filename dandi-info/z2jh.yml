@@ -16,7 +16,7 @@
 
       ## install packages ##
       - name: Check to see if pip is already installed
-        command: "/usr/bin/pip --version"
+        command: "/usr/bin/pip-3 --version"
         ignore_errors: true
         register: pip_is_installed
         changed_when: false
@@ -41,7 +41,7 @@
       - name: Install boto3
         pip:
           name: boto3
-          executable: /usr/bin/pip
+          executable: /usr/bin/pip-3
         become: yes
 
       - name: Check for kops package

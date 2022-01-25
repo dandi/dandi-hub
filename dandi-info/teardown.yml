@@ -12,7 +12,7 @@
       - name: Install boto3
         pip:
           name: boto3
-          executable: /usr/bin/pip
+          executable: /usr/bin/pip-3
         become: yes
         tags: always
 
@@ -20,7 +20,7 @@
       - name: Upgrade awscli
         pip:
           name: awscli
-          executable: /usr/bin/pip
+          executable: /usr/bin/pip-3
         become: yes
         tags: always
 
@@ -116,6 +116,8 @@
           - kubernetes
           - all-fixtures
 
+      - debug: msg="EFS details {{ efs }}"
+
       - name: Remove EFS mount targets
         command: aws efs delete-mount-target --region {{ aws_region }} --mount-target-id {{ item['mount_target_id'] }}
         with_items:
@@ -185,7 +187,7 @@
           - never
 
       - name: Delete CI node
-        ec2:
+        ec2_instance:
           state: absent
           instance_ids: "{{ ec2_facts['instances'][0]['instance_id'] }}"
         tags:
