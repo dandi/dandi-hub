@@ -144,7 +144,7 @@ singleuser:
   cpu:
     limit: 12
     guarantee: 0.5
-  startTimeout: 600
+  startTimeout: 1200
   profileList:
     - display_name: "Tiny. Useful for many quick things"
       description: "0.5 CPU / 1 GB"
@@ -156,7 +156,7 @@ singleuser:
         mem_limit: 2G
         mem_guarantee: 0.5G
     - display_name: "Base"
-      description: "6 CPU / 16 GB. May take up to 5 mins to start."
+      description: "6 CPU / 16 GB. May take up to 15 mins to start."
       default: true
       kubespawner_override:
         singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
@@ -166,7 +166,7 @@ singleuser:
         mem_limit: 16G
         mem_guarantee: 16G
     - display_name: "Large"
-      description: "36 CPU / 96 GB. May take up to 5 mins to start."
+      description: "36 CPU / 96 GB. May take up to 15 mins to start."
       kubespawner_override:
         singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
         image_pull_policy: Always
@@ -175,7 +175,7 @@ singleuser:
         mem_limit: 96G
         mem_guarantee: 96G
     - display_name: "Extra large"
-      description: "60 CPU / 160 GB. May take up to 5 mins to start."
+      description: "60 CPU / 160 GB. May take up to 15 mins to start."
       kubespawner_override:
         singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
         image_pull_policy: Always
@@ -184,7 +184,7 @@ singleuser:
         mem_limit: 160G
         mem_guarantee: 160G
     - display_name: "T4 GPU for inference"
-      description: "4 CPU / 15 GB / 1 T4 GPU. May take up to 10 mins to start."
+      description: "4 CPU / 15 GB / 1 T4 GPU. May take up to 15 mins to start."
       kubespawner_override:
         singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-gpu'
         image_pull_policy: Always
