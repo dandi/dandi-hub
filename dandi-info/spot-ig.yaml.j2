@@ -12,17 +12,18 @@ spec:
     k8s.io/cluster-autoscaler/{{ namespace }}.k8s.local: ""
     k8s.io/cluster-autoscaler/node-template/label: ""
   image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20211001
-  machineType: c5.18xlarge
+  machineType: c5a.24xlarge
   maxPrice: "1.50"
   maxSize: {{ max_spot }}
   minSize: 0
   mixedInstancesPolicy:
     instances:
-    - c5.18xlarge
+    - c5a.24xlarge
     - c5.24xlarge
-    - c5d.18xlarge
+    - c5.metal
+    - c5ad.24xlarge
     - c5d.24xlarge
-    - c5n.18xlarge
+    - c5d.metal
     onDemandAboveBase: 0
     onDemandBase: 0
     spotAllocationStrategy: capacity-optimized

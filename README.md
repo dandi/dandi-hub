@@ -52,7 +52,8 @@ This has been based on:
                 "autoscaling:DescribeTags",
                 "autoscaling:SetDesiredCapacity",
                 "autoscaling:TerminateInstanceInAutoScalingGroup",
-                "ec2:DescribeLaunchTemplateVersions"
+                "ec2:DescribeLaunchTemplateVersions",
+                "ec2:DescribeInstanceTypes"
             ],
             "Resource": "*"
         }
@@ -83,11 +84,6 @@ To remove kubernetes without removing shared EFS:
 ```bash
 ansible-playbook -i hosts teardown.yml -v --vault-password-file ansible_password -t kubernetes
 ```
-
-Notes: keeping EFS around 
-- Removing VPC mount targets does not work. Go to EFS, network, manage. Remove 
-  security groups for each mount target, and then remove each target.
-- Re-run the anisble teardown command.
 
 #### Files under dandi-info
 
