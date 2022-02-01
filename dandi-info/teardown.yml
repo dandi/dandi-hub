@@ -147,6 +147,10 @@
       - name: sleep for 15 seconds and continue with play
         wait_for: timeout=15
         delegate_to: localhost
+        tags:
+          - never
+          - kubernetes
+          - all-fixtures
 
       # delete security groups
       - name: Delete NFS Security Group
