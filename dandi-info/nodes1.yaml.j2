@@ -14,7 +14,7 @@ spec:
   image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20211001
   machineType: {{ node_size }}
   maxSize: {{ max_node }}
-  minSize: 1
+  minSize: 0
   nodeLabels:
     kops.k8s.io/instancegroup: nodes-us-east-2a
     on-demand: "true"
