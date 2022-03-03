@@ -1,6 +1,6 @@
 FROM golang:1.17.0 as builder
 
-ARG SINGULARITY_COMMITISH="v3.8.1"
+ARG SINGULARITY_COMMITISH="v3.8.6"
 
 WORKDIR $GOPATH/src/github.com/sylabs
 RUN apt-get update && apt-get install -y \
@@ -21,7 +21,7 @@ RUN git clone https://github.com/sylabs/singularity.git \
     && make \
     && make install
 
-FROM jupyter/datascience-notebook:c2278456c664
+FROM jupyter/datascience-notebook:2022-03-02
 
 USER root
 COPY --from=builder /usr/local/singularity /usr/local/singularity
