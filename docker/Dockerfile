@@ -36,8 +36,8 @@ RUN curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x8
 USER $NB_USER
 
 # Install Allen SDK
-RUN conda create -n allen -c conda-forge python=3.8 pip ipykernel \
-  && /opt/conda/envs/allen/bin/pip install --no-cache-dir ipfx \
+RUN conda create -n allen -c conda-forge python=3.8 pip ipykernel 'h5py>=3.4=mpi*' \
+  && /opt/conda/envs/allen/bin/pip install --no-cache-dir allensdk \
   && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN conda install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc \
