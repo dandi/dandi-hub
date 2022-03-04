@@ -1,8 +1,8 @@
-FROM golang:1.17.0 as builder
+FROM golang:1.17.7 as builder
 
-ARG SINGULARITY_COMMITISH="v3.8.6"
+ARG VERSION="1.0.0"
 
-WORKDIR $GOPATH/src/github.com/sylabs
+WORKDIR $GOPATH/src/github.com/apptainer
 RUN apt-get update && apt-get install -y \
     build-essential \
     uuid-dev \
@@ -13,21 +13,20 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     git \
     cryptsetup-bin
-RUN git clone https://github.com/sylabs/singularity.git \
-    && cd singularity \
-    && git checkout "$SINGULARITY_COMMITISH" \
-    && ./mconfig -p /usr/local/singularity \
-    && cd builddir \
-    && make \
-    && make install
+RUN wget https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer-${VERSION}.tar.gz && \
+    tar -xzf apptainer-${VERSION}.tar.gz && \
+    cd apptainer-${VERSION} && \
+    ./mconfig --prefix=/opt/apptainer && \
+    make -C ./builddir && \
+    make -C ./builddir install
 
 FROM jupyter/datascience-notebook:2022-03-02
 
 USER root
-COPY --from=builder /usr/local/singularity /usr/local/singularity
-ENV PATH="/usr/local/singularity/bin:$PATH"
+COPY --from=builder /opt/apptainer /opt/apptainer
+ENV PATH="/opt/apptainer/bin:$PATH"
 RUN apt-get update && apt-get install -y ca-certificates libseccomp2 \
-   squashfs-tools fuse s3fs netbase less parallel tmux vim \
+   squashfs-tools fuse s3fs netbase less parallel tmux screen vim htop \
    && rm -rf /tmp/*
 
 RUN curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
@@ -44,7 +43,7 @@ RUN conda create -n allen -c conda-forge python=3.8 pip ipykernel \
 RUN conda install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.6/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
-  && pip install --no-cache-dir jupytext nbgitpuller datalad-container \
+  && pip install --no-cache-dir jupytext nbgitpuller datalad_container \
      datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
      'pydra>=0.17' nwbwidgets 'pynwb>=2.0.0' plotly itkwidgets==0.32.0 hdf5plugin s3fs \
      h5netcdf "xarray[io]" https://github.com/intake/fsspec-reference-maker/archive/fda8a5318e307c23ef656257c0bc78262bcb9a6f.zip \
