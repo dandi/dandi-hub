@@ -104,3 +104,4 @@ RUN pip install --no-cache-dir --upgrade boto3 s3fs
 RUN mamba install --yes napari && \
     pip install --no-cache-dir napari-ome-zarr && \
     conda clean --all -f -y && rm -rf /tmp/*
+RUN pip install --no-cache-dir --upgrade webio_jupyter_extension

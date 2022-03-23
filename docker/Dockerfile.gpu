@@ -108,3 +108,5 @@ RUN mamba install --yes napari && \
 RUN mamba install --yes -c rapidsai-nightly jupyterlab-nvdashboard && \
     conda clean --all -f -y && rm -rf /tmp/*
 ENV LD_LIBRARY_PATH /opt/conda/lib/
+
+RUN pip install --no-cache-dir --upgrade webio_jupyter_extension
