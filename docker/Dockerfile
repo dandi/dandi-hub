@@ -46,7 +46,7 @@ RUN conda install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc \
   && pip install --no-cache-dir jupytext nbgitpuller datalad_container \
      datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
      'pydra>=0.17' nwbwidgets 'pynwb>=2.0.0' plotly itkwidgets==0.32.0 hdf5plugin s3fs \
-     h5netcdf "xarray[io]" https://github.com/intake/fsspec-reference-maker/archive/fda8a5318e307c23ef656257c0bc78262bcb9a6f.zip \
+     h5netcdf "xarray[io]" aicsimageio kerchunk
   && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager \
