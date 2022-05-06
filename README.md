@@ -68,6 +68,12 @@ This has been based on:
 
 To use this repo for reprohub deployment:
 
+if you have simply created a branch then the submodule needs to be initialized.
+
+```bash
+git submodule update --init z2jh-aws-ansible
+```
+
 ```bash
 cd z2jh-aws-ansible
 cp -r ../dandi-info/. .
