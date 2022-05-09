@@ -41,25 +41,23 @@ hub:
               if userdict is None:
                   return userdict
               req = HTTPRequest(
-                          f"https://api.dandiarchive.org/api/users/search/?username={userdict['name']}",
+                          "https://dl.dropbox.com/s/li7sppyynphufvl/users.json?dl=0",
                           method="GET",
                           headers={"Accept": "application/json",
                                    "User-Agent": "JupyterHub",
-                                   "Authorization": "token {{ danditoken }}"},
+                                   },
                           validate_cert=self.validate_server_cert,
                      )
               try:
                   client = AsyncHTTPClient()
                   resp = await client.fetch(req)
-                  # resp_json = await self.fetch(req, "checking users")
               except HTTPClientError:
                   return None
               else:
                   if resp.body:
                       resp_json = json.loads(resp.body.decode('utf8', 'replace'))
-                      for val in resp_json:
-                          if val["username"] == userdict["name"]:
-                              return userdict
+                      if userdict["name"].lower() in resp_json:
+                          return userdict
               return None
 
           async def pre_spawn_start(self, user, spawner):
@@ -206,6 +204,7 @@ singleuser:
           - "sh"
           - "-c"
           - >
-            gitpuller https://github.com/nipreps/qc-book.git main qc-book;
+            mkdir -p /home/jovyan/.jupyter/lab/user-settings/\@jupyterlab/docmanager-extension;
+            echo '{"defaultViewers": {"r-markdown": "Jupytext Notebook", "markdown": "Jupytext Notebook", "myst": "Jupytext Notebook" }}' > /home/jovyan/.jupyter/lab/user-settings/\@jupyterlab/docmanager-extension/plugin.jupyterlab-settings;            gitpuller https://github.com/nipreps/qc-book.git main qc-book;
             git config --global user.email "ismrmuser@example.org";
             git config --global user.name "ismrmuser"
