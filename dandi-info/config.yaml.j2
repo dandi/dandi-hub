@@ -90,14 +90,14 @@ hub:
                           if val["primary"]:
                               spawner.environment['GITHUB_EMAIL'] = val['email']
 
-      c.GitHubOAuthenticator.scope = ['read:user', 'gist', 'user:email']
-      # c.JupyterHub.authenticator_class = GitHubEnvAuthenticator
+      c.GitHubOAuthenticator.scope = ['read:user', 'user:email']
+      c.JupyterHub.authenticator_class = GitHubEnvAuthenticator
 
       # enable authentication state
-      # c.GitHubOAuthenticator.enable_auth_state = True
+      c.GitHubOAuthenticator.enable_auth_state = True
 
-      c.JupyterHub.authenticator_class = "dummy"
-      c.DummyAuthenticator.password = "{{ dummypass }}"
+      # c.JupyterHub.authenticator_class = "dummy"
+      # c.DummyAuthenticator.password = "{{ dummypass }}"
 
   config:
     Authenticator:
