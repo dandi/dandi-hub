@@ -33,6 +33,14 @@ RUN curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x8
   -o "awscliv2.zip" && unzip awscliv2.zip \
   && ./aws/install && rm -rf ./aws awscliv2.zip
 
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin \
+    && mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600 \
+    && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub \
+    && add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" \
+    && apt-get update \
+    && apt-get -y install cuda \
+    && rm -rf /tmp/*
+
 USER $NB_USER
 
 # Install Allen SDK
@@ -40,7 +48,7 @@ RUN conda create -n allen -c conda-forge python=3.8 pip ipykernel 'h5py>=3.4=mpi
   && /opt/conda/envs/allen/bin/pip install --no-cache-dir allensdk \
   && conda clean --all -f -y && rm -rf /tmp/*
 
-RUN conda install --yes datalad rclone 'h5py>=3.4=mpi*' ipykernel zarr blosc \
+RUN conda install --yes 'datalad>=0.16.6' rclone 'h5py>=3.4=mpi*' ipykernel zarr blosc \
      cudatoolkit cudnn \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.6/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
