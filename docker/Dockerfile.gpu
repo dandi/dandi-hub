@@ -33,16 +33,6 @@ RUN curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x8
   -o "awscliv2.zip" && unzip awscliv2.zip \
   && ./aws/install && rm -rf ./aws awscliv2.zip
 
-RUN apt-get update && apt-get install -y gnupg software-properties-common
-
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin \
-    && mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600 \
-    && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub \
-    && add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" \
-    && apt-get update \
-    && apt-get -y install cuda \
-    && rm -rf /tmp/*
-
 USER $NB_USER
 
 # Install Allen SDK
@@ -109,7 +99,7 @@ RUN cd /opt/extras && \
 RUN /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen \
     --display-name="Allen SDK"
 
-RUN pip install --no-cache-dir neuroglancer tifffile cloud-volume
+RUN pip install --no-cache-dir 'neuroglancer>=2.28' tifffile cloud-volume
 RUN pip install --no-cache-dir ome-zarr
 RUN pip install --no-cache-dir --upgrade boto3 s3fs
 RUN mamba install --yes napari && \
@@ -120,3 +110,5 @@ RUN mamba install --yes -c rapidsai-nightly jupyterlab-nvdashboard && \
 ENV LD_LIBRARY_PATH /opt/conda/lib/
 
 RUN pip install --no-cache-dir --upgrade webio_jupyter_extension
+RUN pip install --no-cache-dir --upgrade multiscale_spatial_image dask_image \
+    https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip
