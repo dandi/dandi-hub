@@ -98,10 +98,12 @@ RUN cd /opt/extras && \
 RUN /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen \
     --display-name="Allen SDK"
 
-RUN pip install --no-cache-dir neuroglancer tifffile cloud-volume
+RUN pip install --no-cache-dir 'neuroglancer>=2.28' tifffile cloud-volume
 RUN pip install --no-cache-dir ome-zarr
 RUN pip install --no-cache-dir --upgrade boto3 s3fs
 RUN mamba install --yes napari && \
     pip install --no-cache-dir napari-ome-zarr && \
     conda clean --all -f -y && rm -rf /tmp/*
 RUN pip install --no-cache-dir --upgrade webio_jupyter_extension
+RUN pip install --no-cache-dir --upgrade multiscale_spatial_image dask_image \
+    https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip
