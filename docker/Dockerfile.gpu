@@ -1,6 +1,6 @@
 FROM golang:1.17.7 as builder
 
-ARG VERSION="1.0.0"
+ARG VERSION="1.1.0"
 
 WORKDIR $GOPATH/src/github.com/apptainer
 RUN apt-get update && apt-get install -y \
@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
 RUN wget https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer-${VERSION}.tar.gz && \
     tar -xzf apptainer-${VERSION}.tar.gz && \
     cd apptainer-${VERSION} && \
-    ./mconfig --prefix=/opt/apptainer && \
+    ./mconfig --prefix=/opt/apptainer --without-suid && \
     make -C ./builddir && \
     make -C ./builddir install
 
@@ -46,12 +46,12 @@ RUN conda install --yes 'datalad>=0.16' rclone 'h5py>=3.4=mpi*' ipykernel zarr b
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && pip install --no-cache-dir jupytext nbgitpuller datalad_container \
      datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
-     'pydra>=0.17' nwbwidgets 'pynwb>=2.0.0' plotly itkwidgets==0.32.0 hdf5plugin s3fs \
+     'pydra>=0.17' nwbwidgets 'pynwb>=2.0.0' plotly 'itkwidgets[lab]>=1.0a8' hdf5plugin s3fs \
      h5netcdf "xarray[io]" aicsimageio kerchunk \
   && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager \
-  jupyter-matplotlib jupyterlab-datawidgets itkwidgets@0.32.0 jupyterlab-plotly \
+  jupyter-matplotlib jupyterlab-datawidgets jupyterlab-plotly \
   plotlywidget jupyter-threejs --no-build \
   && export NODE_OPTIONS=--max-old-space-size=4096 \
   && jupyter lab build && \
