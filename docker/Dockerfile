@@ -3,17 +3,20 @@ FROM golang:1.17.7 as builder
 ARG VERSION="1.1.0"
 
 WORKDIR $GOPATH/src/github.com/apptainer
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     build-essential \
-    uuid-dev \
-    libgpgme-dev \
-    squashfs-tools \
     libseccomp-dev \
-    wget \
     pkg-config \
-    git \
-    cryptsetup-bin
-RUN wget https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer-${VERSION}.tar.gz && \
+    uidmap \
+    squashfs-tools \
+    squashfuse \
+    fuse2fs \
+    fuse-overlayfs \
+    fakeroot \
+    cryptsetup \
+    curl wget git
+RUN wget -q https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer-${VERSION}.tar.gz && \
     tar -xzf apptainer-${VERSION}.tar.gz && \
     cd apptainer-${VERSION} && \
     ./mconfig --prefix=/opt/apptainer --without-suid && \
@@ -26,7 +29,8 @@ USER root
 COPY --from=builder /opt/apptainer /opt/apptainer
 ENV PATH="/opt/apptainer/bin:$PATH"
 RUN apt-get update && apt-get install -y ca-certificates libseccomp2 \
-   squashfs-tools fuse s3fs netbase less parallel tmux screen vim htop \
+   uidmap squashfs-tools squashfuse fuse2fs fuse-overlayfs fakeroot \
+   fuse s3fs netbase less parallel tmux screen vim htop curl \
    && rm -rf /tmp/*
 
 RUN curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
@@ -36,11 +40,11 @@ RUN curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x8
 USER $NB_USER
 
 # Install Allen SDK
-RUN conda create -n allen -c conda-forge python=3.8 pip ipykernel 'h5py>=3.4=mpi*' \
+RUN mamba create -n allen -c conda-forge python=3.8 pip ipykernel 'h5py>=3.4=mpi*' \
   && /opt/conda/envs/allen/bin/pip install --no-cache-dir allensdk \
   && conda clean --all -f -y && rm -rf /tmp/*
 
-RUN conda install --yes 'datalad>=0.16' rclone 'h5py>3.3=mpi*' ipykernel zarr blosc jupyter_bokeh \
+RUN mamba install --yes 'datalad>=0.16' rclone 'h5py>3.3=mpi*' ipykernel zarr blosc jupyter_bokeh \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.6/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && pip install --no-cache-dir jupytext nbgitpuller datalad_container \

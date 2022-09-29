@@ -3,17 +3,20 @@ FROM golang:1.17.7 as builder
 ARG VERSION="1.1.0"
 
 WORKDIR $GOPATH/src/github.com/apptainer
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     build-essential \
-    uuid-dev \
-    libgpgme-dev \
-    squashfs-tools \
     libseccomp-dev \
-    wget \
     pkg-config \
-    git \
-    cryptsetup-bin
-RUN wget https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer-${VERSION}.tar.gz && \
+    uidmap \
+    squashfs-tools \
+    squashfuse \
+    fuse2fs \
+    fuse-overlayfs \
+    fakeroot \
+    cryptsetup \
+    curl wget git
+RUN wget -q https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer-${VERSION}.tar.gz && \
     tar -xzf apptainer-${VERSION}.tar.gz && \
     cd apptainer-${VERSION} && \
     ./mconfig --prefix=/opt/apptainer --without-suid && \
@@ -26,8 +29,8 @@ USER root
 COPY --from=builder /opt/apptainer /opt/apptainer
 ENV PATH="/opt/apptainer/bin:$PATH"
 RUN apt-get update && apt-get install -y ca-certificates libseccomp2 \
-   squashfs-tools fuse s3fs netbase less parallel tmux screen vim htop \
-   curl \
+   uidmap squashfs-tools squashfuse fuse2fs fuse-overlayfs fakeroot \
+   fuse s3fs netbase less parallel tmux screen vim htop curl \
    && rm -rf /tmp/*
 
 RUN curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
