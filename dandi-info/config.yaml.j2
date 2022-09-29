@@ -196,6 +196,15 @@ singleuser:
           nvidia.com/gpu: "1"
         extra_pod_config:
           runtimeClassName: nvidia
+    - display_name: "Base (MATLAB)"
+      description: "6 CPU / 16 GB upto 12C/32G. May take up to 15 mins to start. This requires your own license."
+      kubespawner_override:
+        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-matlab'
+        image_pull_policy: Always
+        cpu_limit: 12
+        cpu_guarantee: 6
+        mem_limit: 32G
+        mem_guarantee: 16G
   storage:
     type: none
     extraVolumes:
