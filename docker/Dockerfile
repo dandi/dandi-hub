@@ -20,7 +20,7 @@ RUN wget https://github.com/apptainer/apptainer/releases/download/v${VERSION}/ap
     make -C ./builddir && \
     make -C ./builddir install
 
-FROM jupyter/datascience-notebook:2022-03-02
+FROM jupyter/datascience-notebook:2022-09-27
 
 USER root
 COPY --from=builder /opt/apptainer /opt/apptainer
