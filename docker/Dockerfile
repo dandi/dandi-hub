@@ -23,7 +23,7 @@ RUN wget -q https://github.com/apptainer/apptainer/releases/download/v${VERSION}
     make -C ./builddir && \
     make -C ./builddir install
 
-FROM jupyter/datascience-notebook:2022-05-28
+FROM jupyter/datascience-notebook:2022-09-27
 
 USER root
 COPY --from=builder /opt/apptainer /opt/apptainer
@@ -54,8 +54,7 @@ RUN mamba install --yes 'datalad>=0.16' rclone 'h5py>3.3=mpi*' ipykernel zarr bl
   && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager \
-  jupyter-matplotlib jupyterlab-datawidgets jupyterlab-plotly \
-  plotlywidget jupyter-threejs --no-build \
+  jupyter-matplotlib jupyterlab-datawidgets jupyter-threejs --no-build \
   && export NODE_OPTIONS=--max-old-space-size=4096 \
   && jupyter lab build && \
      jupyter lab clean && \
