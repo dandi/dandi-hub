@@ -49,7 +49,7 @@ RUN mamba install --yes 'datalad>=0.16' rclone 'h5py>3.3=mpi*' ipykernel zarr bl
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && pip install --no-cache-dir jupytext nbgitpuller datalad_container \
      datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
-     'pydra>=0.17' nwbwidgets 'pynwb>=2.0.0' plotly 'itkwidgets[lab]>=1.0a8' hdf5plugin s3fs \
+     'pydra>=0.17' 'nwbwidgets>=0.9.0' 'pynwb>=2.0.0' plotly 'itkwidgets[lab]>=1.0a8' hdf5plugin s3fs \
      h5netcdf "xarray[io]" aicsimageio kerchunk \
   && conda clean --all -f -y && rm -rf /tmp/*
 
