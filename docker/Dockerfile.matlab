@@ -43,9 +43,11 @@ RUN mamba install --yes 'datalad>=0.16' rclone 'h5py>3.3=mpi*' ipykernel zarr bl
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.6/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && pip install --no-cache-dir jupytext nbgitpuller datalad_container \
-     datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
-     'pydra>=0.17' 'nwbwidgets>=0.9.0' 'pynwb>=2.0.0' plotly 'itkwidgets[lab]>=1.0a8' hdf5plugin s3fs \
-     h5netcdf "xarray[io]" aicsimageio kerchunk \
+     datalad-osf dandi nibabel nilearn pybids spikeinterface neo plotly 'itkwidgets[lab]>=1.0a8' \
+     'pydra>=0.17' 'pynwb>=2.0.0' hdf5plugin s3fs h5netcdf "xarray[io]" \
+     aicsimageio kerchunk \
+  && pip install --no-cache-dir https://github.com/bloomberg/ipydatagrid/archive/d5d99ae2fdefbf5c8da2f5f6f3649f2c4a8a89d9.zip \
+    'nwbwidgets>=0.9.0' \
   && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager \
@@ -100,5 +102,4 @@ RUN mamba install --yes napari && \
     pip install --no-cache-dir napari-ome-zarr && \
     conda clean --all -f -y && rm -rf /tmp/*
 RUN pip install --no-cache-dir --upgrade webio_jupyter_extension
-RUN pip install --no-cache-dir --upgrade multiscale_spatial_image dask_image \
-    https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip
+RUN pip install --no-cache-dir --upgrade https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip
