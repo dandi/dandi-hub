@@ -31,6 +31,7 @@ ENV PATH="/opt/apptainer/bin:$PATH"
 RUN apt-get update && apt-get install -y ca-certificates libseccomp2 \
    uidmap squashfs-tools squashfuse fuse2fs fuse-overlayfs fakeroot \
    s3fs netbase less parallel tmux screen vim htop curl \
+   git \
    && rm -rf /tmp/*
 
 RUN curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
