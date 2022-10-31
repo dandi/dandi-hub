@@ -96,3 +96,4 @@ ENV LD_LIBRARY_PATH /opt/conda/lib/
 
 RUN pip install --no-cache-dir --upgrade webio_jupyter_extension
 RUN pip install --no-cache-dir --upgrade https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip
+RUN pip install --no-cache-dir --upgrade brainrender

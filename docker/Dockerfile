@@ -92,3 +92,4 @@ RUN pip install --no-cache-dir ome-zarr
 RUN pip install --no-cache-dir --upgrade boto3
 RUN pip install --no-cache-dir --upgrade webio_jupyter_extension
 RUN pip install --no-cache-dir --upgrade https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip
+RUN pip install --no-cache-dir --upgrade brainrender
