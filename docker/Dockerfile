@@ -1,6 +1,6 @@
-FROM golang:1.17.7 as builder
+FROM golang:1.19.3 as builder
 
-ARG VERSION="1.1.0"
+ARG VERSION="1.1.3"
 
 WORKDIR $GOPATH/src/github.com/apptainer
 ENV DEBIAN_FRONTEND=noninteractive
@@ -76,7 +76,7 @@ RUN mamba create -n allen -c conda-forge python=3.8 pip ipykernel 'h5py>=3.4=mpi
   && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN mamba install --yes 'datalad>=0.16' rclone 'h5py>3.3=mpi*' ipykernel zarr blosc eccodes \
-  && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.6/git-annex-remote-rclone \
+  && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.7/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && conda clean --all -f -y && rm -rf /tmp/*
 
@@ -84,12 +84,9 @@ RUN /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen \
     --display-name="Allen SDK"
 
 RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad_container \
-    datalad-osf dandi nibabel nilearn pybids spikeinterface neo 'itkwidgets[lab]>=1.0a8' \
+    datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
     'pydra>=0.17' 'pynwb>=2.0.0' 'nwbwidgets>=0.9.0' hdf5plugin s3fs h5netcdf "xarray[io]"  \
-    aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume 'ipywidgets<8'
+    aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume 'ipywidgets<8' ome-zarr \
+    webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip  \
 
-RUN pip install --no-cache-dir ome-zarr
-RUN pip install --no-cache-dir --upgrade boto3
-RUN pip install --no-cache-dir --upgrade webio_jupyter_extension
-RUN pip install --no-cache-dir --upgrade https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip
-RUN pip install --no-cache-dir --upgrade brainrender
+RUN pip install --no-cache-dir brainrender
