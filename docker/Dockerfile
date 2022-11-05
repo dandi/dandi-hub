@@ -87,6 +87,6 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
     datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
     'pydra>=0.17' 'pynwb>=2.0.0' 'nwbwidgets>=0.9.0' hdf5plugin s3fs h5netcdf "xarray[io]"  \
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume 'ipywidgets<8' ome-zarr \
-    webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip  \
+    webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip
 
 RUN pip install --no-cache-dir brainrender
