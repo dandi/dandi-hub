@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
 RUN wget -q https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer-${VERSION}.tar.gz && \
     tar -xzf apptainer-${VERSION}.tar.gz && \
     cd apptainer-${VERSION} && \
-    ./mconfig --prefix=/opt/apptainer --without-suid && \
+    ./mconfig --prefix=/opt/apptainer --with-suid && \
     make -C ./builddir && \
     make -C ./builddir install
 
