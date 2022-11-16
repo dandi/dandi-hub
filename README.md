@@ -5,7 +5,7 @@ https://hub.dandiarchive.org
 This has been based on:
 - [this blog post](https://mast-labs.stsci.io/2019/02/zero-to-jupyterhub-with-ansible)
  and [this corresponding repo](https://github.com/spacetelescope/z2jh-aws-ansible).
-- [this blog post on autoscaling and spot pricing](https://www.replex.io/blog/the-ultimate-guide-to-deploying-kubernetes-cluster-on-aws-ec2-spot-instances-using-kops-and-eks#walkthrough)
+- [this blog post on autoscaling and spot pricing]( https://web.archive.org/web/20220127043940/https://www.replex.io/blog/the-ultimate-guide-to-deploying-kubernetes-cluster-on-aws-ec2-spot-instances-using-kops-and-eks)
 
 Please note that the original MAST setup is now significantly outdated.
 
