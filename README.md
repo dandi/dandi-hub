@@ -13,7 +13,7 @@ This information in this README is based on:
 
 ## Deployment
 
-Follow the steps below to deploy DANDI Jupyter Hub. 
+Follow the steps below to deploy DANDI JupyterHub. 
 
 **Note**: Be sure to perform all the operations in the same AWS zone 
 that you will use in 
