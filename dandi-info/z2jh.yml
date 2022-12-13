@@ -441,7 +441,7 @@
       - name: Add termination handler
         shell: helm upgrade --install aws-node-termination-handler \
           --namespace kube-system \
-          eks/aws-node-termination-handler
+          eks/aws-node-termination-handler --set rbac.pspEnabled=false
 
       # configure and create jupyterhub
       - name: Create security token
