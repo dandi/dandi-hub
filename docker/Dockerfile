@@ -19,20 +19,19 @@ RUN apt-get update && apt-get install -y \
 RUN wget -q https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer-${VERSION}.tar.gz && \
     tar -xzf apptainer-${VERSION}.tar.gz && \
     cd apptainer-${VERSION} && \
-    ./mconfig --prefix=/opt/apptainer --without-suid && \
+    ./mconfig --prefix=/opt/apptainer --with-suid && \
     make -C ./builddir && \
     make -C ./builddir install
-
 FROM jupyter/datascience-notebook:2022-08-15
 
 USER root
 COPY --from=builder /opt/apptainer /opt/apptainer
 ENV PATH="/opt/apptainer/bin:$PATH"
 RUN apt-get update && apt-get install -y ca-certificates libseccomp2 \
-   uidmap squashfs-tools squashfuse fuse2fs fuse-overlayfs fakeroot \
+   uidmap squashfs-tools squashfuse fuse2fs fuse-overlayfs fakeroot iptables \
    s3fs netbase less parallel tmux screen vim htop curl \
    && rm -rf /tmp/*
-
+RUN    singularity config fakeroot --add jovyan
 RUN curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
   -o "awscliv2.zip" && unzip awscliv2.zip \
   && ./aws/install && rm -rf ./aws awscliv2.zip
