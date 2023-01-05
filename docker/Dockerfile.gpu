@@ -89,8 +89,4 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume 'ipywidgets<8' ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip
 
-RUN mamba install --yes -c rapidsai-nightly jupyterlab-nvdashboard && \
-    conda clean --all -f -y && rm -rf /tmp/*
-ENV LD_LIBRARY_PATH /opt/conda/lib/
-
-RUN pip install --no-cache-dir --upgrade brainrender
+RUN pip install --no-cache-dir --upgrade brainrender jupyterlab-nvdashboard
