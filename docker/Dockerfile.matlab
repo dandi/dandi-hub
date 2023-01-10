@@ -72,6 +72,7 @@ RUN cd /opt/extras && \
     conda clean --all -f -y && rm -rf /tmp/*
 
 RUN mamba install --yes 'datalad>=0.16' rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes \
+  && imagecodecs \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.7/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && conda clean --all -f -y && rm -rf /tmp/*
