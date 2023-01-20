@@ -64,12 +64,7 @@ RUN mkdir /opt/extras && chown -R $NB_UID:$NB_GID $HOME /opt/extras
 
 USER $NB_USER
 
-RUN cd /opt/extras && \
-    git clone --depth 1 https://github.com/jupyterhub/jupyter-remote-desktop-proxy.git && \
-    cd jupyter-remote-desktop-proxy && \
-    mamba env update -n base --file environment.yml && \
-    cd /opt && rm -rf /opt/extras/* && \
-    conda clean --all -f -y && rm -rf /tmp/*
+RUN pip install --no-cache-dir jupyter-remote-desktop-proxy
 
 RUN mamba install --yes 'datalad>=0.16' rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes \
   && imagecodecs \
@@ -81,6 +76,7 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
     datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
     'pydra>=0.17' 'pynwb>=2.0.0' 'nwbwidgets>=0.9.0' hdf5plugin s3fs h5netcdf "xarray[io]"  \
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume 'ipywidgets<8' ome-zarr \
-    webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip
+    webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
+    tensorstore
 
 # RUN pip install --no-cache-dir --upgrade 'itkwidgets[lab]>=1.0a8' 'ipywidgets<8'
