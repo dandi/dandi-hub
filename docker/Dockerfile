@@ -1,33 +1,13 @@
-FROM golang:1.19.3 as builder
-
-ARG VERSION="1.1.3"
-
-WORKDIR $GOPATH/src/github.com/apptainer
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libseccomp-dev \
-    pkg-config \
-    uidmap \
-    squashfs-tools \
-    squashfuse \
-    fuse2fs \
-    fuse-overlayfs \
-    fakeroot \
-    cryptsetup \
-    curl wget git
-RUN wget -q https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer-${VERSION}.tar.gz && \
-    tar -xzf apptainer-${VERSION}.tar.gz && \
-    cd apptainer-${VERSION} && \
-    ./mconfig --prefix=/opt/apptainer --without-suid && \
-    make -C ./builddir && \
-    make -C ./builddir install
-
-FROM jupyter/datascience-notebook:2022-08-15
+FROM jupyter/datascience-notebook:2023-01-16
 
 USER root
-COPY --from=builder /opt/apptainer /opt/apptainer
-ENV PATH="/opt/apptainer/bin:$PATH"
+ARG VERSION="1.1.5"
+
+RUN wget -q https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer_${VERSION}_amd64.deb \
+ && wget https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer-suid_${VERSION}_amd64.deb \
+ && apt-get update && apt-get install --yes ./apptainer* \
+ && rm apptainer*
+
 RUN apt-get update && apt-get install -y ca-certificates libseccomp2 \
    uidmap squashfs-tools squashfuse fuse2fs fuse-overlayfs fakeroot \
    s3fs netbase less parallel tmux screen vim emacs htop curl \
@@ -39,7 +19,9 @@ RUN curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x8
 
 # Install jupyter server proxy and desktop
 RUN apt-get -y update \
-   && apt-get install -y dbus-x11 \
+   && apt-get install -y  \
+       dbus-x11 \
+       libgl1-mesa-glx \
        firefox \
        xfce4 \
        xfce4-panel \
@@ -50,7 +32,7 @@ RUN apt-get -y update \
     && rm -rf /tmp/*
 
 # Remove light-locker to prevent screen lock
-ARG TURBOVNC_VERSION=3.0.1
+ARG TURBOVNC_VERSION=3.0.2
 RUN wget -q "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O turbovnc_${TURBOVNC_VERSION}_amd64.deb && \
    apt-get install -y -q ./turbovnc_${TURBOVNC_VERSION}_amd64.deb && \
    apt-get remove -y -q light-locker && \
@@ -66,12 +48,11 @@ USER $NB_USER
 RUN pip install --no-cache-dir jupyter-remote-desktop-proxy
 
 # Install Allen SDK
-RUN mamba create -n allen -c conda-forge python=3.8 pip ipykernel 'h5py>=3.4=mpi*' \
+RUN mamba create --yes -n allen -c conda-forge python=3.8 pip ipykernel 'h5py>=3.4=mpi*' \
   && /opt/conda/envs/allen/bin/pip install --no-cache-dir allensdk \
   && conda clean --all -f -y && rm -rf /tmp/*
 
-RUN mamba install --yes 'datalad>=0.16' rclone 'h5py>3.3=mpi*' ipykernel zarr blosc eccodes \
-  && imagecodecs \
+RUN mamba install --yes 'datalad>=0.16' rclone 'h5py>3.3=mpi*' ipykernel zarr blosc eccodes websockify \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.7/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && conda clean --all -f -y && rm -rf /tmp/*
@@ -79,11 +60,11 @@ RUN mamba install --yes 'datalad>=0.16' rclone 'h5py>3.3=mpi*' ipykernel zarr bl
 RUN /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen \
     --display-name="Allen SDK"
 
-RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad_container \
-    datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
+RUN pip install --no-cache-dir -U plotly jupyter_bokeh jupytext nbgitpuller datalad_container \
+    datalad-osf dandi nibabel nilearn pybids spikeinterface neo itkwidgets \
     'pydra>=0.17' 'pynwb>=2.0.0' 'nwbwidgets>=0.9.0' hdf5plugin s3fs h5netcdf "xarray[io]"  \
-    aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume 'ipywidgets<8' ome-zarr \
+    aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
-    tensorstore
+    tensorstore anndata
 
 RUN pip install --no-cache-dir brainrender
