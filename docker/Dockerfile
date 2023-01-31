@@ -52,7 +52,7 @@ RUN mamba create --yes -n allen -c conda-forge python=3.8 pip ipykernel 'h5py>=3
   && /opt/conda/envs/allen/bin/pip install --no-cache-dir allensdk \
   && conda clean --all -f -y && rm -rf /tmp/*
 
-RUN mamba install --yes 'datalad>=0.16' rclone 'h5py>3.3=mpi*' ipykernel zarr blosc eccodes websockify \
+RUN mamba install --yes 'datalad>=0.18' rclone 'h5py>3.3=mpi*' ipykernel zarr blosc eccodes websockify \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.7/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && conda clean --all -f -y && rm -rf /tmp/*
