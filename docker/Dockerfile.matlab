@@ -61,3 +61,4 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
     tensorstore anndata
 
 # RUN pip install --no-cache-dir --upgrade 'itkwidgets[lab]>=1.0a8' ipywidgets
+RUN pip install --no-cache-dir jupyter-matlab-proxy
