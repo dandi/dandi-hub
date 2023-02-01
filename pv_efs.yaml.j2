@@ -1,12 +1,15 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: efs-persist
+  name: efs-pv
 spec:
   capacity:
-    storage: 123Gi
+    storage: 5Gi
+  volumeMode: Filesystem
   accessModes:
     - ReadWriteMany
-  nfs:
-    server: {{ efs_id }}.efs.{{ aws_region }}.amazonaws.com
-    path: "/"
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: efs-sc
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: {{ efs_id }}

@@ -12,7 +12,7 @@
       - name: Install boto3
         pip:
           name: boto3
-          executable: /usr/bin/pip
+          executable: /usr/bin/pip-3
         become: yes
         tags: always
 
@@ -20,22 +20,20 @@
       - name: Upgrade awscli
         pip:
           name: awscli
-          executable: /usr/bin/pip
+          executable: /usr/bin/pip-3
         become: yes
         tags: always
 
       ## Idempotent delete helm release of JH
-      - name: Determine if Helm and Tiller are connected already
-        command: helm version --tiller-connection-timeout 30
+      - name: Determine if Helm is available
+        command: helm version
         failed_when: False
         changed_when: False
         register: helmver_result
-        async: 45
-        poll: 5
         tags: always
 
       - name: Determine if JH is currently installed.
-        command: helm status {{ namespace }}-jupyterhub
+        command: helm status --namespace {{ namespace }} {{ namespace }}-jupyterhub
         register: jh_installed_result
         failed_when: False
         changed_when: False
@@ -44,8 +42,49 @@
         # delete the Helm release. This deletes all resources that were created
         # by Helm for your JupyterHub deployment
       - name: Delete helm release
-        command: helm delete {{ namespace }}-jupyterhub --purge
+        command: helm delete {{ namespace }}-jupyterhub --namespace {{ namespace }}
         when: helmver_result.stdout is defined and not helmver_result.rc and not jh_installed_result.rc
+        tags: always
+
+      - name: check if nodes yaml file exists
+        stat:
+          path: /home/ec2-user/{{ namespace }}/cluster-autoscaler-multi-asg.yaml
+        register: autoscaler_yaml
+        tags: always
+
+      - block:
+        # Need to remove the spot group and autoscaler as well
+        - name: Detach role policy
+          shell: aws iam detach-role-policy --policy-arn arn:aws:iam::278212569472:policy/ig-policy --role-name nodes.{{ namespace }}.k8s.local
+          register: aws_result
+          until: aws_result.stderr.find('ig-policy was not found') != -1
+          retries: 2
+          delay: 5
+          failed_when:
+            - aws_result.rc != 0
+            - '"ig-policy was not found" not in aws_result.stderr'
+
+        - name: Delete the nodes spec files
+          file:
+            path: "{{ item }}"
+            state: absent
+          with_items:
+            - /home/ec2-user/{{ namespace }}/spot-ig.yaml
+            - /home/ec2-user/{{ namespace }}/spot-ig-gpu.yaml
+            - /home/ec2-user/{{ namespace }}/pod.yaml
+            - /home/ec2-user/{{ namespace }}/nodes1.yaml
+            - /home/ec2-user/{{ namespace }}/nodes2.yaml
+            - /home/ec2-user/{{ namespace }}/nodes3.yaml
+            - /home/ec2-user/{{ namespace }}/cluster-autoscaler-multi-asg.yaml
+        when: autoscaler_yaml.stat.exists == True
+        tags:
+          - never
+          - kubernetes
+          - all-fixtures
+
+      - name: Set kubectl context
+        command: kops export kubecfg --admin --name {{ namespace }}.k8s.local
+        ignore_errors: yes
         tags: always
 
       - name: Check for kube namespace
@@ -72,6 +111,13 @@
       - name: Gather EFS facts
         efs_info:
           name: "{{ namespace }}-efs"
+        register: efsresult
+        tags:
+          - never
+          - kubernetes
+          - all-fixtures
+
+      - debug: msg="EFS details {{ efsresult['efs'] }}"
         tags:
           - never
           - kubernetes
@@ -80,12 +126,12 @@
       - name: Remove EFS mount targets
         command: aws efs delete-mount-target --region {{ aws_region }} --mount-target-id {{ item['mount_target_id'] }}
         with_items:
-          "{{ efs[0]['mount_targets'] }}"
+          "{{ efsresult['efs'][0]['mount_targets'] }}"
         tags:
           - never
           - kubernetes
           - all-fixtures
-        when: efs[0] is defined
+        when: efsresult['efs'][0] is defined
 
       ## For example, only delete the EFS if you specifically run with tag 'all-fixtures' or 'fixture-efs'
       - name: Delete EFS fs
@@ -96,6 +142,15 @@
           - all-fixtures
           - fixture-efs
           - never
+
+      ## Wait for mount targets to be removed
+      - name: sleep for 15 seconds and continue with play
+        wait_for: timeout=15
+        delegate_to: localhost
+        tags:
+          - never
+          - kubernetes
+          - all-fixtures
 
       # delete security groups
       - name: Delete NFS Security Group
@@ -129,7 +184,6 @@
         aws_s3:
           bucket: "{{ namespace }}-s3"
           mode: delete
-          # ec2_url: ec2-54-172-77-177.compute-1.amazonaws.com
         register: s3_log
         tags:
           - all-fixtures
@@ -137,7 +191,7 @@
           - never
 
       - name: Gather EC2 Facts
-        ec2_instance_facts:
+        ec2_instance_info:
           filters:
             "tag:Name": "{{ namespace }}-ci"
         register: ec2_facts
@@ -145,13 +199,3 @@
           - all-fixtures
           - fixture-ci
           - never
-
-      - name: Delete CI node
-        ec2:
-          state: absent
-          instance_ids: "{{ ec2_facts['instances'][0]['instance_id'] }}"
-        tags:
-          - all-fixtures
-          - fixture-ci
-          - never
-        when: ec2_facts['instances'][0] is defined

@@ -1,17 +1,265 @@
 proxy:
   secretToken: "{{ os.stdout }}"
+  https:
+    enabled: true
+    type: offload
+  service:
+    annotations:
+      # Certificate ARN
+      service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "{{ aws_certificate_arn }}"
+      # The protocol to use on the backend, we use TCP since we're using websockets
+      service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+      # Which ports should use SSL
+      service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "3600"
+hub:
+  extraConfig:
+    myConfig: |
+      from kubernetes import client
+      def modify_pod_hook(spawner, pod):
+          pod.spec.containers[0].security_context = client.V1SecurityContext(
+              privileged=True
+          )
+          return pod
+      c.KubeSpawner.modify_pod_hook = modify_pod_hook
+
+      # Based on <https://github.com/jupyterhub/oauthenticator/blob/master/examples/auth_state/jupyterhub_config.py>:
+      import os
+      import warnings
+
+      from oauthenticator.github import GitHubOAuthenticator, _api_headers
+      from tornado.httpclient import HTTPRequest, HTTPClientError, AsyncHTTPClient
+      import json
+
+      # define our OAuthenticator with `.pre_spawn_start`
+      # for passing auth_state into the user environment
+
+      class GitHubEnvAuthenticator(GitHubOAuthenticator):
+
+          async def authenticate(self, handler, data=None):
+              userdict = await super().authenticate(handler, data=data)
+              if userdict is None:
+                  return userdict
+              req = HTTPRequest(
+                          f"https://api.dandiarchive.org/api/users/search/?username={userdict['name']}",
+                          method="GET",
+                          headers={"Accept": "application/json",
+                                   "User-Agent": "JupyterHub",
+                                   "Authorization": "token {{ danditoken }}"},
+                          validate_cert=self.validate_server_cert,
+                     )
+              try:
+                  client = AsyncHTTPClient()
+                  resp = await client.fetch(req)
+                  # resp_json = await self.fetch(req, "checking users")
+              except HTTPClientError:
+                  return None
+              else:
+                  if resp.body:
+                      resp_json = json.loads(resp.body.decode('utf8', 'replace'))
+                      for val in resp_json:
+                          if val["username"] == userdict["name"]:
+                              return userdict
+              return None
+
+          async def pre_spawn_start(self, user, spawner):
+              auth_state = await user.get_auth_state()
+              if not auth_state:
+                  # user has no auth state
+                  return
+              # define some environment variables from auth_state
+              spawner.environment['GITHUB_TOKEN'] = auth_state['access_token']
+              spawner.environment['GITHUB_USER'] = auth_state['github_user']['login']
+              spawner.environment['GITHUB_EMAIL'] = auth_state['github_user']['email']
+              if auth_state['github_user']['email']:
+                  return
+              req = HTTPRequest(
+                          self.github_api + "/user/emails",
+                          method="GET",
+                          headers=_api_headers(auth_state['access_token']),
+                          validate_cert=self.validate_server_cert,
+                     )
+              try:
+                  client = AsyncHTTPClient()
+                  resp = await client.fetch(req)
+                  # resp_json = await self.fetch(req, "fetching user emails")
+              except HTTPClientError:
+                  pass
+              else:
+                  if resp.body:
+                      resp_json = json.loads(resp.body.decode('utf8', 'replace'))
+                      for val in resp_json:
+                          if val["primary"]:
+                              spawner.environment['GITHUB_EMAIL'] = val['email']
+
+      c.GitHubOAuthenticator.scope = ['read:user', 'gist', 'user:email']
+      c.JupyterHub.authenticator_class = GitHubEnvAuthenticator
+
+      # enable authentication state
+      c.GitHubOAuthenticator.enable_auth_state = True
+
+      # c.JupyterHub.authenticator_class = "dummy"
+      # c.DummyAuthenticator.password = "{{ dummypass }}"
+
+  config:
+    Authenticator:
+      admin_users:
+      - "satra"
+      - "yarikoptic"
+      - "dandibot"
+    GitHubOAuthenticator:
+      client_id: "{{ github_client_id }}"
+      client_secret: "{{ github_client_secret }}"
+      oauth_callback_url: "{{ ingress }}/hub/oauth_callback"
+    JupyterHub:
+      admin_access: false
+      authenticator_class: github
+    OAuthenticator:
+      scope:
+      - read:user
+      - user:email
+
+scheduling:
+  userScheduler:
+    enabled: true
+  podPriority:
+    enabled: true
+  userPlaceholder:
+    enabled: false
+    replicas: 4
+
+cull:
+  enabled: true
+  timeout: 3600
+  every: 300
+
 singleuser:
   defaultUrl: "/lab"
   image:
     name: {{ singleuser_image_repo }}
     tag: {{ singleuser_image_tag }}
+  memory:
+    limit: 16G
+    guarantee: 1G
+  cpu:
+    limit: 12
+    guarantee: 0.5
+  startTimeout: 1200
+  profileList:
+    - display_name: "Tiny. Useful for many quick things"
+      description: "0.5 CPU / 1 GB"
+      kubespawner_override:
+        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+        image_pull_policy: Always
+        cpu_limit: 2
+        cpu_guarantee: 0.25
+        mem_limit: 2G
+        mem_guarantee: 0.5G
+    - display_name: "Base"
+      description: "6 CPU / 16 GB upto 12C/32G. May take up to 15 mins to start."
+      default: true
+      kubespawner_override:
+        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+        image_pull_policy: Always
+        cpu_limit: 12
+        cpu_guarantee: 6
+        mem_limit: 32G
+        mem_guarantee: 16G
+    - display_name: "Medium"
+      description: "12C/32G upto 24C/64G. May take up to 15 mins to start."
+      kubespawner_override:
+        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+        image_pull_policy: Always
+        cpu_limit: 24
+        cpu_guarantee: 12
+        mem_limit: 64G
+        mem_guarantee: 32G
+    - display_name: "Large"
+      description: "24C/64G upto 48C/96G. May take up to 15 mins to start."
+      kubespawner_override:
+        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+        image_pull_policy: Always
+        cpu_limit: 48
+        cpu_guarantee: 24
+        mem_limit: 96G
+        mem_guarantee: 64G
+    - display_name: "T4 GPU for inference"
+      description: "4 CPU / 15 GB / 1 T4 GPU. May take up to 15 mins to start."
+      kubespawner_override:
+        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-gpu'
+        image_pull_policy: Always
+        cpu_limit: 4
+        cpu_guarantee: 2
+        mem_limit: 15G
+        mem_guarantee: 10G
+        extra_resource_limits:
+          nvidia.com/gpu: "1"
+        extra_pod_config:
+          runtimeClassName: nvidia
+    - display_name: "Base (MATLAB)"
+      description: "6 CPU / 16 GB upto 12C/32G. May take up to 15 mins to start. This requires your own license."
+      kubespawner_override:
+        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-matlab'
+        image_pull_policy: Always
+        cpu_limit: 12
+        cpu_guarantee: 6
+        mem_limit: 32G
+        mem_guarantee: 16G
   storage:
-    type: "static"
-    static:
-      pvcName: "efs-persist"
-      subPath: 'home/{username}'
-  extraEnv:
-    CHOWN_HOME: 'yes'
-  uid: 0
-  fsGid: 0
+    type: none
+    extraVolumes:
+      - name: fuse
+        hostPath:
+          path: /dev/fuse
+      - name: shm-volume
+        emptyDir:
+          medium: Memory
+      - name: persistent-storage
+        persistentVolumeClaim:
+          claimName: efs-claim
+    extraVolumeMounts:
+      - name: fuse
+        mountPath: /dev/fuse
+      - name: shm-volume
+        mountPath: /dev/shm
+      - name: persistent-storage
+        mountPath: '/home/jovyan'
+        subPath: 'home/{username}'
+      - name: persistent-storage
+        mountPath: '/shared'
+        subPath: 'shared'
+  initContainers:
+    - name: nfs-fixer
+      image: alpine
+      securityContext:
+        runAsUser: 0
+      volumeMounts:
+      - name: persistent-storage
+        mountPath: /nfs
+        subPath: 'home/{username}'
+      - name: persistent-storage
+        mountPath: /shared
+        subPath: 'shared'
+      command:
+      - sh
+      - -c
+      - >
+        chmod 0775 /nfs;
+        chown 1000:100 /nfs;
+        chmod 0775 /shared;
+        chown 1000:100 /shared
   cmd: "start-singleuser.sh"
+  lifecycleHooks:
+    postStart:
+      exec:
+        command:
+          - "sh"
+          - "-c"
+          - >
+            gitpuller https://github.com/dandi/example-notebooks master dandi-notebooks;
+            chown -R jovyan:users dandi-notebooks;
+            datalad install https://github.com/dandi/dandisets;
+            /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen --display-name "Python (Allen SDK)";
+            /opt/conda/bin/pip install --upgrade dandi;
+            git config --global user.email "${GITHUB_EMAIL}";
+            git config --global user.name "${GITHUB_USER}"
