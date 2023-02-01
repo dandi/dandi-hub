@@ -62,7 +62,7 @@ RUN /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen \
 
 RUN pip install --no-cache-dir -U plotly jupyter_bokeh jupytext nbgitpuller datalad_container \
     datalad-osf dandi nibabel nilearn pybids spikeinterface neo itkwidgets \
-    'pydra>=0.17' 'pynwb>=2.0.0' 'nwbwidgets>=0.9.0' hdf5plugin s3fs h5netcdf "xarray[io]"  \
+    'pydra>=0.17' 'pynwb>=2.0.0' 'nwbwidgets>=0.10.1' hdf5plugin s3fs h5netcdf "xarray[io]"  \
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
     tensorstore anndata
