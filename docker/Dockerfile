@@ -1,4 +1,4 @@
-FROM jupyter/datascience-notebook:2023-01-16
+FROM jupyter/datascience-notebook:2023-02-09
 
 USER root
 ARG VERSION="1.1.5"
@@ -18,17 +18,19 @@ RUN curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x8
   && ./aws/install && rm -rf ./aws awscliv2.zip
 
 # Install jupyter server proxy and desktop
-RUN apt-get -y update \
+RUN curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg \
+   && echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"|sudo tee /etc/apt/sources.list.d/brave-browser-release.list \
+   && apt-get -y update \
    && apt-get install -y  \
        dbus-x11 \
        libgl1-mesa-glx \
-       firefox \
        xfce4 \
        xfce4-panel \
        xfce4-session \
        xfce4-settings \
        xorg \
        xubuntu-icon-theme \
+       brave-browser \
     && rm -rf /tmp/*
 
 # Remove light-locker to prevent screen lock
