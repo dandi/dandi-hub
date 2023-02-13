@@ -95,37 +95,28 @@ We have done this via a bot GitHub user account (e.g. dandibot).
     ]
 }
 ```
-7. Update `dandi-info/z2jh.yaml` to reflect the new policy ARN. Search for `ig-policy` in the file.
+Update `z2jh.yaml` to reflect the new policy ARN. Search for `ig-policy` in the file.
 
-To use this z2jh-aws-ansible repo for Dandihub deployment, make sure it is populated (otherwise, 
-do `git submodule update --init z2jh-aws-ansible` in the main repo before the `cd` step below):
+7. Startup and teardown.
+
+To start up:
 
 ```bash
-cd z2jh-aws-ansible
-cp -r ../dandi-info/. .
-ansible-playbook -i hosts z2jh.yml -v --vault-password-file ../ansible_password
+ansible-playbook -i hosts z2jh.yml -v --vault-password-file ansible_password
 ```
 
 To tear down:
 
 ```bash
-ansible-playbook -i hosts teardown.yml -v --vault-password-file ../ansible_password -t all-fixtures
+ansible-playbook -i hosts teardown.yml -v --vault-password-file ansible_password -t all-fixtures
 ```
 
 To remove kubernetes without removing shared EFS:
 ```bash
-ansible-playbook -i hosts teardown.yml -v --vault-password-file ../ansible_password -t kubernetes
+ansible-playbook -i hosts teardown.yml -v --vault-password-file ansible_password -t kubernetes
 ```
 
-## Pushing Changes to GitHub
-
-- Inside `z2jh-aws-ansible`, do `rm -rf *` and then `git stash`. This will restore the submodule to its 
-  pre-modification step.
-- Step outside, commit changes, and either push or send a PR to Dandihub.
-
-## `dandi-info` Files
-
-For reference, the following files are located in the `dandi-info` subfolder:
+## Description of files
 
 - `group_vars/all`: ansible file contains variables for various templates
 - `cluster-autoscaler-multi-asg.yaml.j2`: k8s cluster autoscaler spec

@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: stardog
+  labels:
+    name: stardog
+spec:
+  containers:
+  - name: stardog-app
+    image: stardog/stardog
+    ports:
+      - containerPort: 5820
+    resources:
+      limits:
+        cpu: "2"
+      requests:
+        cpu: "1.9"
+    volumeMounts:
+    - name: persistent-storage
+      mountPath: /var/opt/stardog
+      subPath: stardog
+  nodeSelector:
+    on-demand: "true"
+    kops.k8s.io/instancegroup: "nodes-us-east-2a"
+  volumes:
+  - name: persistent-storage
+    persistentVolumeClaim:
+      claimName: efs-claim
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: stardog
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "3600"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "{{ aws_certificate_arn }}"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
+spec:
+  type: LoadBalancer
+  ports:
+  - name: https
+    port: 5820
+    protocol: TCP
+    targetPort: 5820
+  selector:
+    name: stardog
