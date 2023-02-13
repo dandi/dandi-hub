@@ -24,10 +24,11 @@ that you will use in `group_vars/all` file. (US-east-2 Ohio)
 
 1. Create the GitHub OAuth App id/token: GitHub settings -> Developer settings -> Oauth Apps.
 We have done this via a bot GitHub user account (e.g. dandibot). You
-will need to set Homepage URL TODO(satra whats this supposed to be) and
-the Authorization callback URL. This can be set to a subdomain, just be
-sure to set this to the same value as `ingress` in `group_vars/all` and
-also set up the CNAME route via Route 53.
+will need to set Homepage URL (e.g., `https://hub.dandiarchive.org`) and
+the Authorization callback URL (e.g.
+`https://hub.dandiarchive.org/hub/oauth_callback`). This can be set to a
+subdomain, just be sure to set this to the same value as `ingress` in
+`group_vars/all` and also set up the CNAME route via Route 53.
 
 1. Set up an AWS CI instance with these authorized roles
 (see [this blog post](https://mast-labs.stsci.io/2019/02/zero-to-jupyterhub-with-ansible) for more details):
@@ -67,10 +68,9 @@ also set up the CNAME route via Route 53.
        - github_client_id (From GH OAuth app)
        - github_client_secret (From GH OAuth app)
        - aws_certificate_arn (From aws certificate manager)
-       - dummypass (this is a string password you can use for testing without GitHub authentication)
-          TODO(satra, how do we use this password later?)
-       - danditoken TODO(satra, I just made up a string, how is this used?
-           PS it is necessary to set because this var is in config.yaml.j2)
+       - dummypass (a string password you can use for testing without GitHub authentication
+             by uncommenting the relevant dummypass options in `config.yaml.j2`)
+       - danditoken (used to authenticate github users against registered dandi users)
 
     1. Also note that `namespace` has to be unique across any JH
        instances created with this setup.
@@ -101,27 +101,19 @@ also set up the CNAME route via Route 53.
         }
         ```
 
-1. Populate (or update) the `z2jh-aws-ansible` submodule (from repo root) `git submodule update --init z2jh-aws-ansible`
-
-1. Copy over the changes you've made into the submodule
-```bash
-cd z2jh-aws-ansible
-cp -r ../dandi-info/. .
-```
-
 1. Run the playbook! 
 
-    `ansible-playbook -i hosts z2jh.yml -v --vault-password-file ../ansible_password`
+    `ansible-playbook -i hosts z2jh.yml -v --vault-password-file ansible_password`
 
 1. To tear down:
 
     ```bash
-    ansible-playbook -i hosts teardown.yml -v --vault-password-file ../ansible_password -t all-fixtures
+    ansible-playbook -i hosts teardown.yml -v --vault-password-file ansible_password -t all-fixtures
     ```
 
 To remove kubernetes without removing shared EFS:
 ```bash
-ansible-playbook -i hosts teardown.yml -v --vault-password-file ../ansible_password -t kubernetes
+ansible-playbook -i hosts teardown.yml -v --vault-password-file ansible_password -t kubernetes
 ```
 
 ## Pushing Changes to GitHub
