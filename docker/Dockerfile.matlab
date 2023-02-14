@@ -3,6 +3,10 @@ FROM ghcr.io/mathworks-ref-arch/matlab-integration-for-jupyter/jupyter-byoi-matl
 USER root
 ARG VERSION="1.1.5"
 
+ARG EXTRA_DIR=/opt/extras
+
+
+
 RUN wget -q https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer_${VERSION}_amd64.deb \
  && wget https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer-suid_${VERSION}_amd64.deb \
  && apt-get update && apt-get install --yes ./apptainer* \
@@ -20,7 +24,7 @@ RUN curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x8
 
 # Install jupyter server proxy and desktop
 RUN curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg \
-   && echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"|sudo tee /etc/apt/sources.list.d/brave-browser-release.list \
+   && echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list \
    && apt-get -y update \
    && apt-get install -y  \
        dbus-x11 \
@@ -44,7 +48,7 @@ RUN wget -q "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}
     && rm -rf /tmp/*
 
 # apt-get may result in root-owned directories/files under $HOME
-RUN mkdir /opt/extras && chown -R $NB_UID:$NB_GID $HOME /opt/extras
+RUN mkdir ${EXTRA_DIR} && chown -R $NB_UID:$NB_GID $HOME ${EXTRA_DIR}
 
 USER $NB_USER
 
