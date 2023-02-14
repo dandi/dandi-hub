@@ -66,5 +66,33 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
     tensorstore anndata
 
-# RUN pip install --no-cache-dir --upgrade 'itkwidgets[lab]>=1.0a8' ipywidgets
+# Install the jupyter-matlab kernel and matlab-proxy
 RUN pip install --no-cache-dir jupyter-matlab-proxy
+
+## Adds add-ons and register them in the Matlab instance
+# Patch startup.m to automatically register the addons
+# The registration process simply iterate over all entries from the ADDONS_DIR folder
+# and add them to the "path"
+ARG MATLAB_STARTUP=/opt/conda/lib/python3.10/site-packages/matlab_proxy/matlab/startup.m
+RUN echo -e "\n\
+addons = dir('${ADDONS_DIR}'); \n\
+addons = setdiff({addons([addons.isdir]).name}, {'.', '..'}); \n\
+for addon_idx = 1:numel(addons) \n\
+    addpath(strcat('${ADDONS_DIR}/', addons{addon_idx})); \n\
+end \n\
+generateCore();  % Generate the most recent nwb-schema \n\
+clear" >> ${MATLAB_STARTUP}
+
+# Variables for addons management
+ARG ADDONS_DIR=${EXTRA_DIR}/dandi
+ARG ADDONS="https://github.com/NeurodataWithoutBorders/matnwb/archive/refs/tags/v2.6.0.0.zip \
+            https://github.com/emeyers/Brain-Observatory-Toolbox/archive/refs/tags/v0.9.2.zip"
+
+# Add add-ons for Dandi: create the addons folder and download/unzip the addons
+RUN mkdir ${ADDONS_DIR} && \
+    cd ${ADDONS_DIR} && \
+    for addon in $ADDONS; do \
+       wget -O addon.zip $addon \
+       && unzip addon.zip \
+       && rm addon.zip; \
+    done
