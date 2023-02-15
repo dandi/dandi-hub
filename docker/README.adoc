@@ -14,7 +14,7 @@ It is shipped with https://github.com/mathworks/matlab-proxy[MATLAB-proxy] which
 
 This Dockerfile includes the following add-ons:
 
-* NeurodataWithoutBorders v2.6.0.0
+* matnwb v2.6.0.0
 * Brain-Observatory-Toolbox v0.9.2
 
 === How to Build
@@ -103,7 +103,7 @@ You can impact those parameters:
 
 `ADDONS_DIR`::
 This variable defines where the add-ons must be downloaded/extracted and what will be the folder scanned by MATLAB at startup time.
-If you change this folder, the Jupyter user needs to have read/write access to it. This comes from a specificity of `NeurodataWithoutBorders` which requires the execution of some extra actions for its activation.
+If you change this folder, the Jupyter user needs to have read/write access to it. This comes from a specificity of `matnwb` which requires the execution of some extra actions for its activation.
 
 `ADDONS`::
 This variable defines the list of add-ons to download and install. You can add as much add-ons as you want as long as they are compatible with MATLAB-R22.
