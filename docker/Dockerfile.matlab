@@ -5,8 +5,6 @@ ARG VERSION="1.1.5"
 
 ARG EXTRA_DIR=/opt/extras
 
-
-
 RUN wget -q https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer_${VERSION}_amd64.deb \
  && wget https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer-suid_${VERSION}_amd64.deb \
  && apt-get update && apt-get install --yes ./apptainer* \
@@ -73,7 +71,8 @@ RUN pip install --no-cache-dir jupyter-matlab-proxy
 # Patch startup.m to automatically register the addons
 # The registration process simply iterate over all entries from the ADDONS_DIR folder
 # and add them to the "path"
-ARG MATLAB_STARTUP=/opt/conda/lib/python3.10/site-packages/matlab_proxy/matlab/startup.m
+ARG ADDONS_DIR=${EXTRA_DIR}/dandi
+
 RUN echo -e "\n\
 addons = dir('${ADDONS_DIR}'); \n\
 addons = setdiff({addons([addons.isdir]).name}, {'.', '..'}); \n\
@@ -81,10 +80,10 @@ for addon_idx = 1:numel(addons) \n\
     addpath(strcat('${ADDONS_DIR}/', addons{addon_idx})); \n\
 end \n\
 generateCore();  % Generate the most recent nwb-schema \n\
-clear" >> ${MATLAB_STARTUP}
+% ADD HERE EXTRA ACTIONS FOR YOUR ADD-ON IF REQUIRED! \n\
+clear" >> /opt/conda/lib/python3.10/site-packages/matlab_proxy/matlab/startup.m
 
 # Variables for addons management
-ARG ADDONS_DIR=${EXTRA_DIR}/dandi
 ARG ADDONS="https://github.com/NeurodataWithoutBorders/matnwb/archive/refs/tags/v2.6.0.0.zip \
             https://github.com/emeyers/Brain-Observatory-Toolbox/archive/refs/tags/v0.9.2.zip"
 
