@@ -69,4 +69,6 @@ RUN pip install --no-cache-dir -U plotly jupyter_bokeh jupytext nbgitpuller data
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
     tensorstore anndata
 
-RUN pip install --no-cache-dir brainrender
+RUN pip install --no-cache-dir multiscale_spatial_image jupyterlab-git
+
+RUN pip install --no-cache-dir brainrender napari
