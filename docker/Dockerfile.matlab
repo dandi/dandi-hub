@@ -13,7 +13,7 @@ RUN wget -q https://github.com/apptainer/apptainer/releases/download/v${VERSION}
 RUN apt-get update && apt-get install -y ca-certificates libseccomp2 \
    uidmap squashfs-tools squashfuse fuse2fs fuse-overlayfs fakeroot \
    s3fs netbase less parallel tmux screen vim emacs htop curl \
-   git \
+   git build-essential \
    && rm -rf /tmp/*
 
 RUN curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
@@ -83,15 +83,25 @@ generateCore();  % Generate the most recent nwb-schema \n\
 % ADD HERE EXTRA ACTIONS FOR YOUR ADD-ON IF REQUIRED! \n\
 clear" >> /opt/conda/lib/python3.10/site-packages/matlab_proxy/matlab/startup.m
 
-# Variables for addons management
-ARG ADDONS="https://github.com/NeurodataWithoutBorders/matnwb/archive/refs/tags/v2.6.0.0.zip \
-            https://github.com/emeyers/Brain-Observatory-Toolbox/archive/refs/tags/v0.9.2.zip"
+# Variables for addons management that are tied to a specific release
+ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/refs/tags/v2.6.0.0.zip"
 
 # Add add-ons for Dandi: create the addons folder and download/unzip the addons
 RUN mkdir ${ADDONS_DIR} && \
     cd ${ADDONS_DIR} && \
-    for addon in $ADDONS; do \
+    for addon in $ADDONS_RELEASES; do \
        wget -O addon.zip $addon \
+       && unzip addon.zip \
+       && rm addon.zip; \
+    done
+
+# Variables for addons management that always takes the last release
+ARG ADDONS_LATEST="https://github.com/emeyers/Brain-Observatory-Toolbox"
+
+# Add add-ons for Dandi: detect/download/unzip the last release version
+RUN cd ${ADDONS_DIR} && \
+    for addon in $ADDONS_LATEST; do \
+       wget -O addon.zip $(echo "$addon/releases/latest" | sed 's/\/github.com\//\/api.github.com\/repos\//' | xargs wget -qO- |  grep zipball_url | cut -d '"' -f 4) \
        && unzip addon.zip \
        && rm addon.zip; \
     done

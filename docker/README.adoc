@@ -105,5 +105,8 @@ You can impact those parameters:
 This variable defines where the add-ons must be downloaded/extracted and what will be the folder scanned by MATLAB at startup time.
 If you change this folder, the Jupyter user needs to have read/write access to it. This comes from a specificity of `matnwb` which requires the execution of some extra actions for its activation.
 
-`ADDONS`::
+`ADDONS_RELEASE`::
 This variable defines the list of add-ons to download and install. You can add as much add-ons as you want as long as they are compatible with MATLAB-R22.
+
+`ADDONS_LATEST`::
+This variable defines the list of add-ons to download and install directly from the lastest version identified in the github repository.
