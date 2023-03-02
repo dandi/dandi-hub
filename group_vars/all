@@ -9,7 +9,7 @@ node_count: 1
 max_node: 5
 max_spot: 50
 max_spot_gpu: 50
-jupyterhub_chart_version: 1.2.0
+jupyterhub_chart_version: 2.0.1-0.dev.git.6023.h2a02c402
 singleuser_image_repo: dandiarchive/dandihub
 singleuser_image_tag: latest
 helm_chart_repo_name: jupyterhub

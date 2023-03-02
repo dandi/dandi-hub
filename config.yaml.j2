@@ -15,7 +15,7 @@ proxy:
 hub:
   extraConfig:
     myConfig: |
-      from kubernetes import client
+      from kubernetes_asyncio import client
       def modify_pod_hook(spawner, pod):
           pod.spec.containers[0].security_context = client.V1SecurityContext(
               privileged=True
@@ -133,6 +133,9 @@ cull:
   timeout: 3600
   every: 300
 
+debug:
+  enabled: true
+
 singleuser:
   defaultUrl: "/lab"
   image:
@@ -144,12 +147,12 @@ singleuser:
   cpu:
     limit: 12
     guarantee: 0.5
-  startTimeout: 1200
+  startTimeout: 2400
   profileList:
     - display_name: "Tiny. Useful for many quick things"
       description: "0.5 CPU / 1 GB"
       kubespawner_override:
-        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+        image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
         image_pull_policy: Always
         cpu_limit: 2
         cpu_guarantee: 0.25
@@ -159,7 +162,7 @@ singleuser:
       description: "6 CPU / 16 GB upto 12C/32G. May take up to 15 mins to start."
       default: true
       kubespawner_override:
-        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+        image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
         image_pull_policy: Always
         cpu_limit: 12
         cpu_guarantee: 6
@@ -168,7 +171,7 @@ singleuser:
     - display_name: "Medium"
       description: "12C/32G upto 24C/64G. May take up to 15 mins to start."
       kubespawner_override:
-        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+        image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
         image_pull_policy: Always
         cpu_limit: 24
         cpu_guarantee: 12
@@ -177,7 +180,7 @@ singleuser:
     - display_name: "Large"
       description: "24C/64G upto 48C/96G. May take up to 15 mins to start."
       kubespawner_override:
-        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+        image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
         image_pull_policy: Always
         cpu_limit: 48
         cpu_guarantee: 24
@@ -186,7 +189,7 @@ singleuser:
     - display_name: "T4 GPU for inference"
       description: "4 CPU / 15 GB / 1 T4 GPU. May take up to 15 mins to start."
       kubespawner_override:
-        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-gpu'
+        image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-gpu'
         image_pull_policy: Always
         cpu_limit: 4
         cpu_guarantee: 2
@@ -199,7 +202,7 @@ singleuser:
     - display_name: "Base (MATLAB)"
       description: "6 CPU / 16 GB upto 12C/32G. May take up to 15 mins to start. This requires your own license."
       kubespawner_override:
-        singleuser_image_spec: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-matlab'
+        image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-matlab'
         image_pull_policy: Always
         cpu_limit: 12
         cpu_guarantee: 6
