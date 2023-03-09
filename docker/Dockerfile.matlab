@@ -104,9 +104,9 @@ RUN cd ${ADDONS_DIR} && \
        wget -O addon.zip $(echo "$addon/releases/latest" | sed 's/\/github.com\//\/api.github.com\/repos\//' | xargs wget -qO- |  grep zipball_url | cut -d '"' -f 4) \
        && unzip addon.zip; \
        echo -e "\n\
-add_path(\"${ADDONS_DIR}/$(unzip -Z -1 addon.zip | head -1)quickstarts\"); \n\
-add_path(\"${ADDONS_DIR}/$(unzip -Z -1 addon.zip | head -1)demos\"); \n\
-add_path(\"${ADDONS_DIR}/$(unzip -Z -1 addon.zip | head -1)tutorials\");\n\
+addpath(\"${ADDONS_DIR}/$(unzip -Z -1 addon.zip | head -1)quickstarts\"); \n\
+addpath(\"${ADDONS_DIR}/$(unzip -Z -1 addon.zip | head -1)demos\"); \n\
+addpath(\"${ADDONS_DIR}/$(unzip -Z -1 addon.zip | head -1)tutorials\");\n\
 clear" >> /opt/conda/lib/python3.10/site-packages/matlab_proxy/matlab/startup.m \
        && rm addon.zip; \
     done
