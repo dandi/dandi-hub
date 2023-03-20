@@ -469,7 +469,7 @@
         changed_when: False
 
       - name: Install JupyterHub release
-        shell: helm upgrade --install {{ namespace }}-jupyterhub {{ helm_chart_repo_name }}/jupyterhub \
+        shell: helm --install {{ namespace }}-jupyterhub {{ helm_chart_repo_name }}/jupyterhub \
           --debug \
           --version={{ jupyterhub_chart_version }} \
           --namespace={{ namespace }} \
