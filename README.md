@@ -41,7 +41,7 @@ subdomain, just be sure to set this to the same value as `ingress` in
     - AmazonRoute53FullAccess
     - AmazonEventBridgeFullAccess
 
-1. Add the public dns name to the `dandi-info/hosts` file (This is an Ansible Inventory file.)
+1. Add the public dns name to the `hosts` file (This is an Ansible Inventory file.)
 
 1. SSH into the ec2 instance (using the pem key downloaded in previous
    step) and **install git in the CI instance** `sudo yum install git -y`
@@ -75,7 +75,7 @@ subdomain, just be sure to set this to the same value as `ingress` in
     1. Also note that `namespace` has to be unique across any JH
        instances created with this setup.
 
-1. Ensure `dandi-info/z2jh.yaml` uses the `ig-policy` in the file. (This
+1. Ensure `z2jh.yaml` uses the `ig-policy` in the file. (This
    is not necessary to change if there is already an instance of the
    policy in AWS. If you need to create `ig-policy` use the following:
 
@@ -122,9 +122,7 @@ ansible-playbook -i hosts teardown.yml -v --vault-password-file ansible_password
   pre-modification step.
 - Step outside, commit changes, and either push or send a PR to Dandihub.
 
-## `dandi-info` Files
-
-For reference, the following files are located in the `dandi-info` subfolder:
+## Files
 
 - `group_vars/all`: ansible file contains variables for various templates
 - `cluster-autoscaler-multi-asg.yaml.j2`: k8s cluster autoscaler spec
