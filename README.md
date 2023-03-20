@@ -12,7 +12,7 @@ in DANDI.
 ## Usage
 
 To use the hub, you will need to register for an account using the DANDI
-Web application.
+Web application (https://dandiarchive.org) using your GitHub account.
 
 ---
 **NOTE:**
