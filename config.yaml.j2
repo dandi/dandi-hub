@@ -2,7 +2,11 @@ proxy:
   secretToken: "{{ os.stdout }}"
   https:
     enabled: true
+    hosts:
+    - {{ ingress_host }}
     type: offload
+    #letsencrypt:
+    #  contactEmail: help@dandiarchive.org
   service:
     annotations:
       # Certificate ARN
@@ -111,13 +115,12 @@ hub:
       client_id: "{{ github_client_id }}"
       client_secret: "{{ github_client_secret }}"
       oauth_callback_url: "{{ ingress }}/hub/oauth_callback"
-    JupyterHub:
-      admin_access: false
-      authenticator_class: github
-    OAuthenticator:
       scope:
       - read:user
+      - gist
       - user:email
+    JupyterHub:
+      authenticator_class: github
 
 scheduling:
   userScheduler:
@@ -228,6 +231,10 @@ singleuser:
       - name: persistent-storage
         mountPath: '/shared'
         subPath: 'shared'
+      - name: persistent-storage
+        mountPath: '/readonly'
+        readOnly: true
+        subPath: 'readonly'
   initContainers:
     - name: nfs-fixer
       image: alpine
@@ -240,6 +247,9 @@ singleuser:
       - name: persistent-storage
         mountPath: /shared
         subPath: 'shared'
+      - name: persistent-storage
+        mountPath: /readonly
+        subPath: 'readonly'
       command:
       - sh
       - -c
@@ -247,7 +257,8 @@ singleuser:
         chmod 0775 /nfs;
         chown 1000:100 /nfs;
         chmod 0775 /shared;
-        chown 1000:100 /shared
+        chown 1000:100 /shared;
+        chmod 0555 /readonly
   cmd: "start-singleuser.sh"
   lifecycleHooks:
     postStart:

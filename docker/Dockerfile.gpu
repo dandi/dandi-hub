@@ -1,7 +1,7 @@
-FROM jupyter/datascience-notebook:2023-02-09
+FROM jupyter/datascience-notebook:2023-03-13
 
 USER root
-ARG VERSION="1.1.5"
+ARG VERSION="1.1.6"
 
 RUN wget -q https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer_${VERSION}_amd64.deb \
  && wget https://github.com/apptainer/apptainer/releases/download/v${VERSION}/apptainer-suid_${VERSION}_amd64.deb \

@@ -75,31 +75,41 @@ subdomain, just be sure to set this to the same value as `ingress` in
     1. Also note that `namespace` has to be unique across any JH
        instances created with this setup.
 
-1. Ensure `z2jh.yaml` uses the `ig-policy` in the file. (This
-   is not necessary to change if there is already an instance of the
-   policy in AWS. If you need to create `ig-policy` use the following:
+       1. Ensure `z2jh.yaml` uses the `ig-policy` in the file. (This
+          is not necessary to change if there is already an instance of the
+          policy in AWS. If you need to create `ig-policy` use the following:
 
-        ```
-        {
-            "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Effect": "Allow",
-                    "Action": [
-                        "autoscaling:DescribeAutoScalingGroups",
-                        "autoscaling:DescribeAutoScalingInstances",
-                        "autoscaling:DescribeLaunchConfigurations",
-                        "autoscaling:DescribeTags",
-                        "autoscaling:SetDesiredCapacity",
-                        "autoscaling:TerminateInstanceInAutoScalingGroup",
-                        "ec2:DescribeLaunchTemplateVersions",
-                        "ec2:DescribeInstanceTypes"
-                    ],
-                    "Resource": "*"
-                }
-            ]
-        }
-        ```
+               ```
+               {
+                   "Version": "2012-10-17",
+                   "Statement": [
+                       {
+                           "Effect": "Allow",
+                           "Action": [
+                               "autoscaling:DescribeAutoScalingGroups",
+                               "autoscaling:DescribeAutoScalingInstances",
+                               "autoscaling:DescribeLaunchConfigurations",
+                               "autoscaling:DescribeScalingActivities",
+                               "autoscaling:DescribeTags",
+                               "ec2:DescribeInstanceTypes",
+                               "ec2:DescribeLaunchTemplateVersions"
+                           ],
+                           "Resource": ["*"]
+                       },
+                       {
+                           "Effect": "Allow",
+                           "Action": [
+                               "autoscaling:SetDesiredCapacity",
+                               "autoscaling:TerminateInstanceInAutoScalingGroup",
+                               "ec2:DescribeImages",
+                               "ec2:GetInstanceTypesFromInstanceRequirements",
+                               "eks:DescribeNodegroup"
+                           ],
+                           "Resource": ["*"]
+                       }
+                   ]
+               }
+               ```
 
 1. Run the playbook! 
 

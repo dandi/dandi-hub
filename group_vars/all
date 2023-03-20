@@ -9,7 +9,7 @@ node_count: 1
 max_node: 5
 max_spot: 50
 max_spot_gpu: 50
-jupyterhub_chart_version: 2.0.1-0.dev.git.6023.h2a02c402
+jupyterhub_chart_version: 2.0.1-0.dev.git.6026.h0e7347d7
 singleuser_image_repo: dandiarchive/dandihub
 singleuser_image_tag: latest
 helm_chart_repo_name: jupyterhub
@@ -45,6 +45,7 @@ test_github_client_secret: !vault |
           37333965393463376265303636353134313162633865646235646536623239333836366663396235
           6431313031366234623333666436656433353638623736303436
 ingress: https://hub.dandiarchive.org
+ingress_host: hub.dandiarchive.org
 aws_certificate_arn: !vault |
           $ANSIBLE_VAULT;1.1;AES256
           37396338623632313534326161633435326265373136326632626462633638616137336336336562

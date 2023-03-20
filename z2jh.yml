@@ -52,7 +52,7 @@
 
       - block:
         - name: Download kops
-          shell: wget -O kops https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
+          shell: wget -O kops https://github.com/kubernetes/kops/releases/download/v1.25.4/kops-linux-amd64
           args:
             chdir: /home/ec2-user/{{ namespace }}
             creates: kops
@@ -77,7 +77,7 @@
 
       - block:
         - name: Download kubectl
-          shell: wget -O kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+          shell: wget -O kubectl https://storage.googleapis.com/kubernetes-release/release/v1.25.8/bin/linux/amd64/kubectl
           args:
             chdir: /home/ec2-user/{{ namespace }}
             creates: /home/ec2-user/{{ namespace }}/kubectl
@@ -332,7 +332,7 @@
           command: kops rolling-update cluster --yes
           register: kops_ru_result
           until: kops_ru_result.stdout.find('Rolling update completed for cluster') != -1
-          retries: 5
+          retries: 10
           delay: 60 # this value
           args:
             chdir: /home/ec2-user/{{ namespace }}
