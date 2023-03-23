@@ -1,8 +1,28 @@
 # DANDI JupyterHub
 
-[Dandihub](https://hub.dandiarchive.org) provides a JupyterHub instance in the cloud to interact with the data stored in DANDI.
+This repository spins up a Kubernetes cluster on AWS using
+[`ansible`][ansible], [`boto`][boto] and [`kops`][kops], and then uses
+the [`jupyterhub` helm chart][jupyter-helm] to deploy a JupyterHub
+instance in the cluster.
 
-To use the hub, you will need to register for an account using the DANDI Web application. Note that Dandihub is not intended for significant computation, but provides a place to introspect Dandisets and to perform some analysis and visualization of data.
+This project is deployed at [Dandihub][dandihub] which a JupyterHub
+instance in the cloud that allows users to interact with the data stored
+in DANDI.
+
+## Usage
+
+To use the hub, you will need to register for an account using the DANDI
+Web application (https://dandiarchive.org) using your GitHub account.
+
+---
+**NOTE:**
+Note that Dandihub is not intended for significant
+computation, but provides a place to introspect Dandisets and to
+perform some analysis and visualization of data.
+
+---
+
+## Deployment
 
 This information in this README is based on:
 - [this blog post](https://mast-labs.stsci.io/2019/02/zero-to-jupyterhub-with-ansible)
@@ -10,8 +30,6 @@ This information in this README is based on:
 - [this blog post on autoscaling and spot pricing]( https://web.archive.org/web/20220127043940/https://www.replex.io/blog/the-ultimate-guide-to-deploying-kubernetes-cluster-on-aws-ec2-spot-instances-using-kops-and-eks)
 
 **Note**: The original MAST setup is now significantly outdated.
-
-## Deployment
 
 Follow the steps below to deploy DANDI JupyterHub.
 
@@ -111,7 +129,7 @@ subdomain, just be sure to set this to the same value as `ingress` in
                }
                ```
 
-1. Run the playbook! 
+1. Run the playbook!
 
     `ansible-playbook -i hosts z2jh.yml -v --vault-password-file ansible_password`
 
@@ -157,3 +175,9 @@ see [the handbook](https://www.dandiarchive.org/handbook/).
   - ask a question: https://github.com/dandi/helpdesk/discussions
   - file a feature request or bug report: https://github.com/dandi/helpdesk/issues/new/choose
   - contact the DANDI team: help@dandiarchive.org
+
+[ansible]: https://docs.ansible.com/
+[boto]: https://boto3.amazonaws.com/v1/documentation/api/latest/index.html
+[dandihub]: https://hub.dandiarchive.org
+[jupyter-helm]: https://hub.jupyter.org/helm-chart/
+[kops]: https://kops.sigs.k8s.io/
