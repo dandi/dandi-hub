@@ -73,3 +73,7 @@ RUN pip install --no-cache-dir multiscale_spatial_image jupyterlab-git \
         datalad-fuse
 
 RUN pip install --no-cache-dir brainrender napari
+
+# Neovim editor
+RUN apt-get install neovim
+RUN apt-get install python3-neovim
