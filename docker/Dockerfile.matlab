@@ -51,6 +51,7 @@ RUN mkdir ${EXTRA_DIR} && chown -R $NB_UID:$NB_GID $HOME ${EXTRA_DIR}
 USER $NB_USER
 
 RUN pip install --no-cache-dir jupyter-remote-desktop-proxy
+RUN apt-get install neovim
 
 RUN mamba install --yes 'datalad>=0.18' rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes websockify \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.7/git-annex-remote-rclone \
