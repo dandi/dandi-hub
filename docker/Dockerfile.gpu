@@ -48,6 +48,7 @@ RUN mkdir /opt/extras && chown -R $NB_UID:$NB_GID $HOME /opt/extras
 USER $NB_USER
 
 RUN pip install --no-cache-dir jupyter-remote-desktop-proxy
+RUN apt-get install neovim
 
 # Install Allen SDK
 RUN mamba create --yes -n allen -c conda-forge python=3.8 pip ipykernel 'h5py>=3.4=mpi*' \
