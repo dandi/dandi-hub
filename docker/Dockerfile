@@ -48,6 +48,7 @@ RUN mkdir /opt/extras && chown -R $NB_UID:$NB_GID $HOME /opt/extras
 USER $NB_USER
 
 RUN pip install --no-cache-dir jupyter-remote-desktop-proxy
+RUN apt-get install neovim
 
 # Install Allen SDK
 RUN mamba create --yes -n allen -c conda-forge python=3.8 pip ipykernel 'h5py>=3.4=mpi*' \
@@ -73,7 +74,3 @@ RUN pip install --no-cache-dir multiscale_spatial_image jupyterlab-git \
         datalad-fuse
 
 RUN pip install --no-cache-dir brainrender napari
-
-# Neovim editor
-RUN apt-get install neovim
-RUN apt-get install python3-neovim
