@@ -36,6 +36,9 @@ RUN curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://br
        brave-browser \
     && rm -rf /tmp/*
 
+#neovim
+RUN apt-get install neovim
+
 # Remove light-locker to prevent screen lock
 ARG TURBOVNC_VERSION=3.0.2
 RUN wget -q "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O turbovnc_${TURBOVNC_VERSION}_amd64.deb && \
@@ -51,7 +54,6 @@ RUN mkdir ${EXTRA_DIR} && chown -R $NB_UID:$NB_GID $HOME ${EXTRA_DIR}
 USER $NB_USER
 
 RUN pip install --no-cache-dir jupyter-remote-desktop-proxy
-RUN apt-get install neovim
 
 RUN mamba install --yes 'datalad>=0.18' rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes websockify \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.7/git-annex-remote-rclone \
