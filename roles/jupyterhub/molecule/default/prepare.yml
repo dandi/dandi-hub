@@ -1,0 +1,10 @@
+---
+- name: Prepare
+  hosts: all
+  tasks:
+    - name: Install prerequisites
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - openssl
