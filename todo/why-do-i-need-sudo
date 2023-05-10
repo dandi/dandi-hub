@@ -1,0 +1,2 @@
+# For now
+alias mol="sudo $(which molecule)"
