@@ -1,6 +1,8 @@
 ---
 - name: Converge
   hosts: all
+  collections:
+    - kubernetes.core
   tasks:
     # replace these tasks with whatever you find suitable to test
     - name: Copy something to test use of synchronize module

@@ -2,9 +2,36 @@
 - name: Prepare
   hosts: all
   tasks:
-    - name: Install prerequisites
+    - name: Install system prerequisites
       package:
         name: "{{ item }}"
         state: present
       with_items:
         - openssl
+        - python3-pyyaml
+        - podman
+
+    - name: Check for helm package
+      command: which helm
+      failed_when: false
+      changed_when: false
+      register: helm
+
+    - name: Install helm
+      shell: curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get-helm-3 | bash
+      when: helm.rc
+
+    - name: Download Kind
+      shell: curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.14.0/kind-linux-amd64
+
+    - name: Install Kind
+      ansible.builtin.copy:
+        remote_src=True
+        src=./kind
+        dest=/usr/local/bin/kind
+        mode=+x
+
+    - name: Create Kind cluster
+      shell: "kind create cluster"
+    
+

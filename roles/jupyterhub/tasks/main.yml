@@ -8,26 +8,55 @@
   command: openssl rand -hex 32
   register: os
 
-- name: ensures namespace dir exists
+- name: Set namespace dir for Jupyterhub
+  set_fact:
+    jupyterhub_working_dir: "{{ user_home }}/{{ namespace }}"
+
+- name: Ensure namespace dir exists
   file:
-    path: "{{ user_home }}/{{ namespace }}"
+    path: "{{ jupyterhub_working_dir }}"
+    recurse: true
     state: directory
 
 - name: Create config file for JupyterHub
   template:
     src: config.yaml.j2
-    dest: "{{ user_home }}/{{ namespace }}/config.yaml"
+    dest: "{{ jupyterhub_working_dir }}/config.yaml"
 
-# - name: Add JupyterHub Helm Chart repo
-#   command: helm repo add {{ helm_chart_repo_name }} {{ helm_chart_repo_url }}
-#   args:
-#     chdir: /home/ec2-user/{{ namespace }}
+# Helm installed by previous to add aks repo. separate?
+# - name: Download and extract Helm tarball
+#   ansible.builtin.unarchive:
+#     src: https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz
+#     dest: /tmp/
+#     remote_src: yes
 #
+# - name: Install Helm
+#   ansible.builtin.copy:
+#     remote_src=True
+#     src=/tmp/linux-amd64/helm
+#     dest=/usr/local/bin/helm
+#     mode=+x
+
+# From repository
+- name: Add JupyterHub Helm Chart repo
+  kubernetes.core.helm_repository:
+    name: "{{ helm_chart_repo_name }}"
+    repo_url: "{{ helm_chart_repo_url }}"
+
+- name: Separately update the repository cache
+  kubernetes.core.helm:
+    name: "{{ namespace }}-jupyterhub"
+    namespace: "{{ namespace }}"
+    chart_ref: "{{ helm_chart_repo_name }}/jupyterhub"
+    values_files: "
+      - {{ jupyterhub_working_dir }}/config.yaml"
+    update_repo_cache: true
+
 # - name: Update Helm chart repos
 #   command: helm repo update
 #   args:
 #     chdir: /home/ec2-user/{{ namespace }}
-#
+
 # - name: Check for JupyterHub helm release
 #   command: helm list
 #   register: hl_log

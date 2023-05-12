@@ -10,4 +10,6 @@ github_client_secret: foo
 singleuser_image_tag: foo
 singleuser_image_repo: foo
 namespace: foo
-user_home: ec2-user
+user_home: /home/ec2-user
+helm_chart_repo_name: jupyterhub
+helm_chart_repo_url: https://jupyterhub.github.io/helm-chart/
