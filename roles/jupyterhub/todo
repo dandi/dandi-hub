@@ -1,0 +1,2 @@
+# kind doesn't like rootless
+ systemd-run --scope --user kind create cluster
