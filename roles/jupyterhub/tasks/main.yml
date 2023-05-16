@@ -45,44 +45,38 @@
 
 - name: Separately update the repository cache
   kubernetes.core.helm:
-    name: "{{ namespace }}-jupyterhub"
-    namespace: "{{ namespace }}"
-    chart_ref: "{{ helm_chart_repo_name }}/jupyterhub"
-    values_files: "
-      - {{ jupyterhub_working_dir }}/config.yaml"
+    name: dummy
+    namespace: kube-system
+    state: absent
     update_repo_cache: true
 
-# - name: Update Helm chart repos
-#   command: helm repo update
-#   args:
-#     chdir: /home/ec2-user/{{ namespace }}
+- name: Install Jupyterhub helm chart
+  kubernetes.core.helm:
+    name: "{{ namespace }}-jupyterhub"
+    chart_ref: "{{ helm_chart_repo_name }}/jupyterhub"
+    release_namespace: "{{ namespace }}"
+    values_files:
+      - "{{ jupyterhub_working_dir }}/config.yaml"
+    update_repo_cache: true
+    create_namespace: true
+  become: yes
 
-# - name: Check for JupyterHub helm release
-#   command: helm list
-#   register: hl_log
-#   changed_when: False
-#
-# - name: Install JupyterHub release
-#   shell: helm install {{ namespace }}-jupyterhub {{ helm_chart_repo_name }}/jupyterhub \
-#     --debug \
-#     --version={{ jupyterhub_chart_version }} \
-#     --namespace={{ namespace }} \
-#     --timeout=10m
-#     -f config.yaml
-#   args:
-#     chdir: /home/ec2-user/{{ namespace }}
-#   when: hl_log.stdout.find(namespace + '-jupyterhub') == -1
-#
-# ## Wait for proxy to spin up ##
-# - name: sleep for 30 seconds and continue with play
-#   wait_for: timeout=30
-#   delegate_to: localhost
-#
-# - name: Get URL for public proxy
-#   command: kubectl --namespace={{ namespace }} describe svc proxy-public
-#   register: pp_log
-#   until: pp_log.stdout.find('Ensured load balancer') != -1
-#   retries: 10
-#   delay: 60
-#
-# - debug: msg="Navigate browser to {{ pp_log.stdout_lines[20] }} to begin using JupyterHub!"
+- debug:
+    msg: "{{ kubeconfig }}"
+
+# (I think) This currently doesn't work in a Kind cluster, which only exposes a single port and cant be used this way.
+# (Whats happening) The LoadBalancer.EXTERNAL_IP is stuck at `pending` and no events occur.
+# This command will make the svc accessible on localhost:8001
+# `kubectl port-forward svc/proxy-public 8001:https --kubeconfig /home/austin/.kube/config-molecule-test -n dandihub`
+- name: Get URL for public proxy
+  command: kubectl --namespace={{ namespace }} --kubeconfig {{ kubeconfig }} describe svc proxy-public
+  register: pp_log
+  until: pp_log.stdout.find('Ensured load balancer') != -1
+  retries: 10
+  delay: 60
+  become: yes
+
+- debug:
+    msg: "{{pp_log}}"
+
+- debug: msg="Navigate browser to {{ pp_log.stdout_lines[20] }} to begin using JupyterHub!"
