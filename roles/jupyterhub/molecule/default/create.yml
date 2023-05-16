@@ -1,0 +1,27 @@
+---
+- name: Create
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Build a kind cluster (wait for control plane).
+      ansible.builtin.command: >-
+        kind create cluster
+        --wait 300s
+        --name molecule-test
+        --kubeconfig {{ kubeconfig }}
+      changed_when: true
+      become: yes
+
+    - name: Set kubectl context
+      ansible.builtin.command: >-
+        kind export kubeconfig
+        --kubeconfig {{ kubeconfig }}
+        --name molecule-test
+      become: yes
+
+
+
+    - debug:
+        msg: "{{ kubeconfig }}"
