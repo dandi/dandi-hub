@@ -76,7 +76,10 @@ ARG TOOLBOXES="Bioinformatics_Toolbox \
                Computer_Vision_Toolbox \
                Curve_Fitting_Toolbox \
                Deep_Learning_Toolbox \
-               Econometrics_Toolbox"
+               Econometrics_Toolbox \
+               Image_Processing_Toolbox \
+               Optimization_Toolbox \
+               Statistics_and_Machine_Learning_Toolbox"
 RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
     chmod +x mpm
 RUN ./mpm install \
