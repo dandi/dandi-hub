@@ -67,6 +67,9 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
 # Install the jupyter-matlab kernel and matlab-proxy
 RUN pip install --no-cache-dir jupyter-matlab-proxy
 
+# Ensure OpenSSL is up-to-date
+RUN pip install -U pyopenssl
+
 ## Adds add-ons and register them in the Matlab instance
 # Patch startup.m to automatically register the addons
 # The registration process simply iterate over all entries from the ADDONS_DIR folder
