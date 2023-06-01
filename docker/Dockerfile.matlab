@@ -1,4 +1,5 @@
-FROM --platform=linux/amd64 ghcr.io/mathworks-ref-arch/matlab-integration-for-jupyter/jupyter-byoi-matlab-notebook:r2022b
+ARG MATLAB_RELEASE=r2023a
+FROM --platform=linux/amd64 ghcr.io/mathworks-ref-arch/matlab-integration-for-jupyter/jupyter-byoi-matlab-notebook:${MATLAB_RELEASE}
 
 USER root
 ARG VERSION="1.1.5"
@@ -66,6 +67,29 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
 
 # Install the jupyter-matlab kernel and matlab-proxy
 RUN pip install --no-cache-dir jupyter-matlab-proxy
+
+# Install the required Toolboxes with user root
+# Optimization toolbox is a required dependency
+USER root
+ARG MATLAB_RELEASE
+ARG TOOLBOXES="Bioinformatics_Toolbox \
+               Computer_Vision_Toolbox \
+               Curve_Fitting_Toolbox \
+               Deep_Learning_Toolbox \
+               Econometrics_Toolbox \
+               Image_Processing_Toolbox \
+               Optimization_Toolbox \
+               Statistics_and_Machine_Learning_Toolbox"
+RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
+    chmod +x mpm
+RUN ./mpm install \
+    --release=${MATLAB_RELEASE} \
+    --destination=/opt/matlab \
+    --products ${TOOLBOXES} && \
+    rm -f mpm /tmp/mathworks_root.log
+
+# Switch back to NB_USER for addons installations
+USER $NB_USER
 
 ## Adds add-ons and register them in the Matlab instance
 # Patch startup.m to automatically register the addons
