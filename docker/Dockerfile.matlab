@@ -112,7 +112,9 @@ generateCore();  % Generate the most recent nwb-schema \n\
 clear" >> ${STARTUP_SCRIPT}
 
 # Variables for addons management that are tied to a specific release
-ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/refs/tags/v2.6.0.0.zip"
+ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/refs/tags/v2.6.0.2.zip \
+                     https://github.com/schnitzer-lab/EXTRACT-public/archive/refs/heads/master.zip \
+                     https://github.com/bahanonu/ciatah/archive/refs/heads/master.zip"
 
 # Add add-ons for Dandi: create the addons folder and download/unzip the addons
 RUN mkdir ${ADDONS_DIR} && \
