@@ -108,6 +108,7 @@ for addon_idx = 1:numel(addons) \n\
     addpath(strcat('${ADDONS_DIR}/', addons{addon_idx})); \n\
 end \n\
 generateCore();  % Generate the most recent nwb-schema \n\
+ciapkg.io.loadDependencies('gui', 0);  % Load dependencies for CIAtah \n\
 % ADD HERE EXTRA ACTIONS FOR YOUR ADD-ON IF REQUIRED! \n\
 clear" >> ${STARTUP_SCRIPT}
 
