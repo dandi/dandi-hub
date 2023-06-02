@@ -88,14 +88,18 @@ RUN ./mpm install \
     --products ${TOOLBOXES} && \
     rm -f mpm /tmp/mathworks_root.log
 
-# Switch back to NB_USER for addons installations
+# Switch back to NB_USER for addons and live-scripts installations
 USER $NB_USER
+
+# Install the live-scripts examples
+RUN git clone https://github.com/INCF/example-live-scripts
 
 ## Adds add-ons and register them in the Matlab instance
 # Patch startup.m to automatically register the addons
 # The registration process simply iterate over all entries from the ADDONS_DIR folder
 # and add them to the "path"
 ARG ADDONS_DIR=${EXTRA_DIR}/dandi
+ARG STARTUP_SCRIPT=/opt/conda/lib/python3.10/site-packages/matlab_proxy/matlab/startup.m
 
 RUN echo -e "\n\
 addons = dir('${ADDONS_DIR}'); \n\
@@ -105,7 +109,7 @@ for addon_idx = 1:numel(addons) \n\
 end \n\
 generateCore();  % Generate the most recent nwb-schema \n\
 % ADD HERE EXTRA ACTIONS FOR YOUR ADD-ON IF REQUIRED! \n\
-clear" >> /opt/conda/lib/python3.10/site-packages/matlab_proxy/matlab/startup.m
+clear" >> ${STARTUP_SCRIPT}
 
 # Variables for addons management that are tied to a specific release
 ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/refs/tags/v2.6.0.0.zip"
@@ -131,7 +135,7 @@ RUN cd ${ADDONS_DIR} && \
 addpath(\"${ADDONS_DIR}/$(unzip -Z -1 addon.zip | head -1)quickstarts\"); \n\
 addpath(\"${ADDONS_DIR}/$(unzip -Z -1 addon.zip | head -1)demos\"); \n\
 addpath(\"${ADDONS_DIR}/$(unzip -Z -1 addon.zip | head -1)tutorials\");\n\
-clear" >> /opt/conda/lib/python3.10/site-packages/matlab_proxy/matlab/startup.m \
+clear" >> ${STARTUP_SCRIPT} \
        && rm addon.zip; \
     done
 # The copy of the quickstarts/demos/tutorials folder in the startup.m file are temporary
