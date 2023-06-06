@@ -79,7 +79,12 @@ ARG TOOLBOXES="Bioinformatics_Toolbox \
                Econometrics_Toolbox \
                Image_Processing_Toolbox \
                Optimization_Toolbox \
-               Statistics_and_Machine_Learning_Toolbox"
+               Statistics_and_Machine_Learning_Toolbox \
+               Signal_Processing_Toolbox \
+               Parallel_Computing_Toolbox \
+               Financial_Toolbox \
+               Wavelet_Toolbox "
+
 RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
     chmod +x mpm
 RUN ./mpm install \
