@@ -64,6 +64,9 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
     tensorstore anndata
+    
+# Ensure OpenSSL is up-to-date
+RUN pip install -U pyopenssl
 
 # Install the jupyter-matlab kernel and matlab-proxy
 RUN pip install --no-cache-dir jupyter-matlab-proxy
@@ -79,7 +82,12 @@ ARG TOOLBOXES="Bioinformatics_Toolbox \
                Econometrics_Toolbox \
                Image_Processing_Toolbox \
                Optimization_Toolbox \
-               Statistics_and_Machine_Learning_Toolbox"
+               Statistics_and_Machine_Learning_Toolbox \
+               Signal_Processing_Toolbox \
+               Parallel_Computing_Toolbox \
+               Financial_Toolbox \
+               Wavelet_Toolbox "
+
 RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
     chmod +x mpm
 RUN ./mpm install \
