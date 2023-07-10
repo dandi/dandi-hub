@@ -64,7 +64,7 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
     tensorstore anndata
-    
+
 # Ensure OpenSSL is up-to-date
 RUN pip install -U pyopenssl
 
@@ -113,10 +113,10 @@ RUN echo -e "\n\
 addons = dir('${ADDONS_DIR}'); \n\
 addons = setdiff({addons([addons.isdir]).name}, {'.', '..'}); \n\
 for addon_idx = 1:numel(addons) \n\
-    addpath(strcat('${ADDONS_DIR}/', addons{addon_idx})); \n\
+    addpath(genpath(strcat('${ADDONS_DIR}/', addons{addon_idx}))); \n\
 end \n\
 generateCore();  % Generate the most recent nwb-schema \n\
-ciapkg.io.loadDependencies('gui', 0);  % Load dependencies for CIAtah \n\
+% ciapkg.io.loadDependencies('guiEnabled', 0);  % Load dependencies for CIAtah \n\
 % ADD HERE EXTRA ACTIONS FOR YOUR ADD-ON IF REQUIRED! \n\
 clear" >> ${STARTUP_SCRIPT}
 
@@ -141,12 +141,7 @@ ARG ADDONS_LATEST="https://github.com/emeyers/Brain-Observatory-Toolbox"
 RUN cd ${ADDONS_DIR} && \
     for addon in $ADDONS_LATEST; do \
        wget -O addon.zip $(echo "$addon/releases/latest" | sed 's/\/github.com\//\/api.github.com\/repos\//' | xargs wget -qO- |  grep zipball_url | cut -d '"' -f 4) \
-       && unzip addon.zip; \
-       echo -e "\n\
-addpath(\"${ADDONS_DIR}/$(unzip -Z -1 addon.zip | head -1)quickstarts\"); \n\
-addpath(\"${ADDONS_DIR}/$(unzip -Z -1 addon.zip | head -1)demos\"); \n\
-addpath(\"${ADDONS_DIR}/$(unzip -Z -1 addon.zip | head -1)tutorials\");\n\
-clear" >> ${STARTUP_SCRIPT} \
+       && unzip addon.zip \
        && rm addon.zip; \
     done
 # The copy of the quickstarts/demos/tutorials folder in the startup.m file are temporary
