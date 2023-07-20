@@ -110,6 +110,12 @@ ARG ADDONS_DIR=${EXTRA_DIR}/dandi
 ARG STARTUP_SCRIPT=/opt/conda/lib/python3.10/site-packages/matlab_proxy/matlab/startup.m
 
 RUN echo -e "\n\
+% Sets the number of workers for 'Processes' to 5\n\
+cluster = parcluster('Processes'); \n\
+cluster.NumWorkers = 5; \n\
+saveProfile(cluster); \n\
+ \n\
+% Adds the addons to the path \n\
 addons = dir('${ADDONS_DIR}'); \n\
 addons = setdiff({addons([addons.isdir]).name}, {'.', '..'}); \n\
 for addon_idx = 1:numel(addons) \n\
