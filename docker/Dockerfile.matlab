@@ -64,7 +64,7 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
     tensorstore anndata
-    
+
 # Ensure OpenSSL is up-to-date
 RUN pip install -U pyopenssl
 
@@ -96,27 +96,40 @@ RUN ./mpm install \
     --products ${TOOLBOXES} && \
     rm -f mpm /tmp/mathworks_root.log
 
-# Switch back to NB_USER for addons installations
+# Switch back to NB_USER for addons and live-scripts installations
 USER $NB_USER
+
+# Install the live-scripts examples
+RUN git clone https://github.com/INCF/example-live-scripts
 
 ## Adds add-ons and register them in the Matlab instance
 # Patch startup.m to automatically register the addons
 # The registration process simply iterate over all entries from the ADDONS_DIR folder
 # and add them to the "path"
 ARG ADDONS_DIR=${EXTRA_DIR}/dandi
+ARG STARTUP_SCRIPT=/opt/conda/lib/python3.10/site-packages/matlab_proxy/matlab/startup.m
 
 RUN echo -e "\n\
+% Sets the number of workers for 'Processes' to 5\n\
+cluster = parcluster('Processes'); \n\
+cluster.NumWorkers = 5; \n\
+saveProfile(cluster); \n\
+ \n\
+% Adds the addons to the path \n\
 addons = dir('${ADDONS_DIR}'); \n\
 addons = setdiff({addons([addons.isdir]).name}, {'.', '..'}); \n\
 for addon_idx = 1:numel(addons) \n\
-    addpath(strcat('${ADDONS_DIR}/', addons{addon_idx})); \n\
+    addpath(genpath(strcat('${ADDONS_DIR}/', addons{addon_idx}))); \n\
 end \n\
 generateCore();  % Generate the most recent nwb-schema \n\
+% ciapkg.io.loadDependencies('guiEnabled', 0);  % Load dependencies for CIAtah \n\
 % ADD HERE EXTRA ACTIONS FOR YOUR ADD-ON IF REQUIRED! \n\
-clear" >> /opt/conda/lib/python3.10/site-packages/matlab_proxy/matlab/startup.m
+clear" >> ${STARTUP_SCRIPT}
 
 # Variables for addons management that are tied to a specific release
-ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/refs/tags/v2.6.0.0.zip"
+ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/refs/tags/v2.6.0.2.zip \
+                     https://github.com/schnitzer-lab/EXTRACT-public/archive/refs/heads/master.zip \
+                     https://github.com/bahanonu/ciatah/archive/refs/heads/master.zip"
 
 # Add add-ons for Dandi: create the addons folder and download/unzip the addons
 RUN mkdir ${ADDONS_DIR} && \
@@ -134,12 +147,7 @@ ARG ADDONS_LATEST="https://github.com/emeyers/Brain-Observatory-Toolbox"
 RUN cd ${ADDONS_DIR} && \
     for addon in $ADDONS_LATEST; do \
        wget -O addon.zip $(echo "$addon/releases/latest" | sed 's/\/github.com\//\/api.github.com\/repos\//' | xargs wget -qO- |  grep zipball_url | cut -d '"' -f 4) \
-       && unzip addon.zip; \
-       echo -e "\n\
-addpath(\"${ADDONS_DIR}/$(unzip -Z -1 addon.zip | head -1)quickstarts\"); \n\
-addpath(\"${ADDONS_DIR}/$(unzip -Z -1 addon.zip | head -1)demos\"); \n\
-addpath(\"${ADDONS_DIR}/$(unzip -Z -1 addon.zip | head -1)tutorials\");\n\
-clear" >> /opt/conda/lib/python3.10/site-packages/matlab_proxy/matlab/startup.m \
+       && unzip addon.zip \
        && rm addon.zip; \
     done
 # The copy of the quickstarts/demos/tutorials folder in the startup.m file are temporary
