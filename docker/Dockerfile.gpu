@@ -67,9 +67,10 @@ RUN pip install --no-cache-dir -U plotly jupyter_bokeh jupytext nbgitpuller data
     'pydra>=0.17' 'pynwb>=2.3.1' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]"  \
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
-    tensorstore anndata
+    tensorstore anndata && rm -rf /tmp/*
 
-RUN mamba install --yes -c rapidsai -c conda-forge -c nvidia rapids=23.10 cudatoolkit cudnn \
+RUN conda install --yes --solver=libmamba -c rapidsai -c conda-forge -c nvidia  \
+    rapids=23.10 python=3.10 cuda-version=11.8 \
   && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN pip install --no-cache-dir multiscale_spatial_image jupyterlab-git \
