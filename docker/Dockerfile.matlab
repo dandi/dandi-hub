@@ -99,9 +99,6 @@ RUN ./mpm install \
 # Switch back to NB_USER for addons and live-scripts installations
 USER $NB_USER
 
-# Install the live-scripts examples
-RUN git clone https://github.com/INCF/example-live-scripts
-
 ## Adds add-ons and register them in the Matlab instance
 # Patch startup.m to automatically register the addons
 # The registration process simply iterate over all entries from the ADDONS_DIR folder
@@ -109,12 +106,21 @@ RUN git clone https://github.com/INCF/example-live-scripts
 ARG ADDONS_DIR=${EXTRA_DIR}/dandi
 ARG STARTUP_SCRIPT=/opt/conda/lib/python3.10/site-packages/matlab_proxy/matlab/startup.m
 
+# Install the live-scripts examples
+# RUN git clone https://github.com/INCF/example-live-scripts ${ADDONS_DIR}/example-live-scripts
+
 RUN echo -e "\n\
 % Sets the number of workers for 'Processes' to 5\n\
 cluster = parcluster('Processes'); \n\
 cluster.NumWorkers = 5; \n\
 saveProfile(cluster); \n\
  \n\
+% Copy the live-example folder \n\
+homedirExamples = strcat(getenv('HOME'), '/example-live-scripts') \n\
+if not(isfolder(homedirExamples)) \n\
+    % copyfile('${ADDONS_DIR}/example-live-scripts', homedirExamples) \n\
+    repo = gitclone('https://github.com/INCF/example-live-scripts', homedirExamples, Depth=1); \n\
+end \n\
 % Adds the addons to the path \n\
 addons = dir('${ADDONS_DIR}'); \n\
 addons = setdiff({addons([addons.isdir]).name}, {'.', '..'}); \n\
