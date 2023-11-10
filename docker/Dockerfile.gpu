@@ -69,8 +69,8 @@ RUN pip install --no-cache-dir -U plotly jupyter_bokeh jupytext nbgitpuller data
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
     tensorstore anndata && rm -rf /tmp/*
 
-RUN mamba install --yes -c rapidsai -c conda-forge -c nvidia  \
-    rapids=23.10 python=3.10 cuda-version=11.8 \
+RUN mamba install --yes --no-channel-priority -c rapidsai -c conda-forge -c nvidia  \
+    rapids=23.10 cudf=23.10 cuda-version=11.8 \
   && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN pip install --no-cache-dir multiscale_spatial_image jupyterlab-git \
