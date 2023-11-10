@@ -119,7 +119,8 @@ saveProfile(cluster); \n\
 homedirExamples = strcat(getenv('HOME'), '/example-live-scripts') \n\
 if not(isfolder(homedirExamples)) \n\
     % copyfile('${ADDONS_DIR}/example-live-scripts', homedirExamples) \n\
-    repo = gitclone('https://github.com/INCF/example-live-scripts', homedirExamples, Depth=1); \n\
+    % repo = gitclone('https://github.com/INCF/example-live-scripts', homedirExamples, Depth=1); \n\
+    system(strcat(string('git clone --depth=1 https://github.com/INCF/example-live-scripts '), homedirExamples)) \n\
 end \n\
 % Adds the addons to the path \n\
 addons = dir('${ADDONS_DIR}'); \n\
@@ -138,7 +139,7 @@ ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/r
                      https://github.com/bahanonu/ciatah/archive/refs/heads/master.zip"
 
 # Add add-ons for Dandi: create the addons folder and download/unzip the addons
-RUN mkdir ${ADDONS_DIR} && \
+RUN mkdir -p ${ADDONS_DIR} && \
     cd ${ADDONS_DIR} && \
     for addon in $ADDONS_RELEASES; do \
        wget -O addon.zip $addon \
