@@ -55,8 +55,8 @@ USER $NB_USER
 
 RUN pip install --no-cache-dir jupyter-remote-desktop-proxy
 
-# Install tensorflow
-RUN mamba install --yes 'tensorflow<=2.10.0' -c conda-forge \
+# Install tensorflow, cuda and extension for GPU usage display
+RUN CONDA_OVERRIDE_CUDA="11.2" mamba install --yes 'tensorflow-gpu<=2.10.0' 'cudatoolkit>=11.2' -c conda-forge \
   && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN pip install --no-cache-dir jupyterlab_nvdashboard
