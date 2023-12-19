@@ -21,6 +21,12 @@ instances.
    we currently have to maintain the whole Ansible playbook alone.
  - The majority of the complexity of this approach is the deployment and configuration of Kubernetes itself.
 
+## Desired features
+1. Spot pricing
+1. Connection to DANDI for OAuth
+1. Custom repositories - [GESIS](https://2i2c.org/blog/2022/gesis-2i2c-collaboration-update/)
+1. Regular clean up of shared space
+1. Persistent home directories with quotas
 ## Proposed Setup
 
 Amazon Solutions Architects have created and maintained a repository for
