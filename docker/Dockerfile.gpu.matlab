@@ -56,7 +56,7 @@ USER $NB_USER
 RUN pip install --no-cache-dir jupyter-remote-desktop-proxy jupyterlab_nvdashboard
 
 # Install CUDA toolkit and extension for GPU usage display
-RUN CONDA_VERBOSITY=1 CONDA_OVERRIDE_CUDA="11.8" mamba install --yes -c "nvidia/label/cuda-11.8.0" cuda-toolkit cudnn \
+RUN CONDA_OVERRIDE_CUDA="11.8" mamba install --yes -c "nvidia/label/cuda-11.8.0" cuda-toolkit cudnn \
   && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN mamba install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes websockify \
@@ -79,28 +79,28 @@ RUN pip install --no-cache-dir jupyter-matlab-proxy
 
 # Install the required Toolboxes with user root
 # Optimization toolbox is a required dependency
-# USER root
-# ARG MATLAB_RELEASE
-# ARG TOOLBOXES="Bioinformatics_Toolbox \
-#                Computer_Vision_Toolbox \
-#                Curve_Fitting_Toolbox \
-#                Deep_Learning_Toolbox \
-#                Econometrics_Toolbox \
-#                Image_Processing_Toolbox \
-#                Optimization_Toolbox \
-#                Statistics_and_Machine_Learning_Toolbox \
-#                Signal_Processing_Toolbox \
-#                Parallel_Computing_Toolbox \
-#                Financial_Toolbox \
-#                Wavelet_Toolbox \
-#                Deep_Learning_Toolbox_Converter_for_TensorFlow_models"
-# RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
-#     chmod +x mpm
-# RUN ./mpm install \
-#     --release=${MATLAB_RELEASE} \
-#     --destination=/opt/matlab \
-#     --products ${TOOLBOXES} && \
-#     rm -f mpm /tmp/mathworks_root.log
+USER root
+ARG MATLAB_RELEASE
+ARG TOOLBOXES="Bioinformatics_Toolbox \
+               Computer_Vision_Toolbox \
+               Curve_Fitting_Toolbox \
+               Deep_Learning_Toolbox \
+               Econometrics_Toolbox \
+               Image_Processing_Toolbox \
+               Optimization_Toolbox \
+               Statistics_and_Machine_Learning_Toolbox \
+               Signal_Processing_Toolbox \
+               Parallel_Computing_Toolbox \
+               Financial_Toolbox \
+               Wavelet_Toolbox \
+               Deep_Learning_Toolbox_Converter_for_TensorFlow_models"
+RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
+    chmod +x mpm
+RUN ./mpm install \
+    --release=${MATLAB_RELEASE} \
+    --destination=/opt/matlab \
+    --products ${TOOLBOXES} && \
+    rm -f mpm /tmp/mathworks_root.log
 
 # Switch back to NB_USER for addons and live-scripts installations
 USER $NB_USER

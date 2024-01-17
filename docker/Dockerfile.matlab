@@ -61,7 +61,7 @@ RUN mamba install --yes 'tensorflow<=2.10.0' -c conda-forge \
 
 RUN pip install --no-cache-dir jupyterlab_nvdashboard
 
-RUN mamba install --yes 'datalad>=0.18' rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes websockify \
+RUN mamba install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes websockify \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.7/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && conda clean --all -f -y && rm -rf /tmp/*
