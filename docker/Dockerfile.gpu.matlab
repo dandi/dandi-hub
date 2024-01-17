@@ -53,15 +53,12 @@ RUN mkdir ${EXTRA_DIR} && chown -R $NB_UID:$NB_GID $HOME ${EXTRA_DIR}
 
 USER $NB_USER
 
-RUN pip install --no-cache-dir jupyter-remote-desktop-proxy
+RUN pip install --no-cache-dir jupyter-remote-desktop-proxy jupyterlab_nvdashboard
 
-# Install tensorflow, cuda and extension for GPU usage display
-RUN CONDA_OVERRIDE_CUDA="11.2" mamba install --yes 'tensorflow-gpu<=2.10.0' 'cudatoolkit>=11.2' -c conda-forge \
+RUN CONDA_VERBOSITY=1 CONDA_OVERRIDE_CUDA="11.8" mamba install --yes -c "nvidia/label/cuda-11.8.0" cuda-toolkit cudnn \
   && conda clean --all -f -y && rm -rf /tmp/*
 
-RUN pip install --no-cache-dir jupyterlab_nvdashboard
-
-RUN mamba install --yes 'datalad>=0.18' rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes websockify \
+RUN mamba install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes websockify \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.7/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && conda clean --all -f -y && rm -rf /tmp/*
@@ -71,8 +68,15 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
     'pydra>=0.17' 'pynwb>=2.3.1' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]"  \
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
-    tensorstore anndata
+    tensorstore anndata "tensorflow[and-cuda]"
 
+
+# Install tensorflow, cuda and extension for GPU usage display
+# RUN CONDA_OVERRIDE_CUDA="11.8" mamba install --yes 'tensorflow-gpu' 'cudatoolkit>=11.8' -c conda-forge \
+#   && conda clean --all -f -y && rm -rf /tmp/*
+
+
+# RUN CONDA_OVERRIDE_CUDA="11.8" pip install "tensorflow[and-cuda]"
 
 # Ensure OpenSSL is up-to-date
 RUN pip install -U pyopenssl
@@ -82,28 +86,28 @@ RUN pip install --no-cache-dir jupyter-matlab-proxy
 
 # Install the required Toolboxes with user root
 # Optimization toolbox is a required dependency
-USER root
-ARG MATLAB_RELEASE
-ARG TOOLBOXES="Bioinformatics_Toolbox \
-               Computer_Vision_Toolbox \
-               Curve_Fitting_Toolbox \
-               Deep_Learning_Toolbox \
-               Econometrics_Toolbox \
-               Image_Processing_Toolbox \
-               Optimization_Toolbox \
-               Statistics_and_Machine_Learning_Toolbox \
-               Signal_Processing_Toolbox \
-               Parallel_Computing_Toolbox \
-               Financial_Toolbox \
-               Wavelet_Toolbox \
-               Deep_Learning_Toolbox_Converter_for_TensorFlow_models"
-RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
-    chmod +x mpm
-RUN ./mpm install \
-    --release=${MATLAB_RELEASE} \
-    --destination=/opt/matlab \
-    --products ${TOOLBOXES} && \
-    rm -f mpm /tmp/mathworks_root.log
+# USER root
+# ARG MATLAB_RELEASE
+# ARG TOOLBOXES="Bioinformatics_Toolbox \
+#                Computer_Vision_Toolbox \
+#                Curve_Fitting_Toolbox \
+#                Deep_Learning_Toolbox \
+#                Econometrics_Toolbox \
+#                Image_Processing_Toolbox \
+#                Optimization_Toolbox \
+#                Statistics_and_Machine_Learning_Toolbox \
+#                Signal_Processing_Toolbox \
+#                Parallel_Computing_Toolbox \
+#                Financial_Toolbox \
+#                Wavelet_Toolbox \
+#                Deep_Learning_Toolbox_Converter_for_TensorFlow_models"
+# RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
+#     chmod +x mpm
+# RUN ./mpm install \
+#     --release=${MATLAB_RELEASE} \
+#     --destination=/opt/matlab \
+#     --products ${TOOLBOXES} && \
+#     rm -f mpm /tmp/mathworks_root.log
 
 # Switch back to NB_USER for addons and live-scripts installations
 USER $NB_USER
