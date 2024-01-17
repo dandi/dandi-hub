@@ -55,10 +55,13 @@ USER $NB_USER
 
 RUN pip install --no-cache-dir jupyter-remote-desktop-proxy jupyterlab_nvdashboard
 
-RUN CONDA_VERBOSITY=1 CONDA_OVERRIDE_CUDA="11.8" mamba install --yes -c "nvidia/label/cuda-11.8.0" cuda-toolkit cudnn \
-  && conda clean --all -f -y && rm -rf /tmp/*
-RUN ONDA_OVERRIDE_CUDA="11.8" mamba install --yes 'tensorflow-gpu' -c conda-forge \
-&& conda clean --all -f -y && rm -rf /tmp/*
+# RUN CONDA_VERBOSITY=1 CONDA_OVERRIDE_CUDA="11.8" mamba install --yes -c "nvidia/label/cuda-11.8.0" cuda-toolkit cudnn \
+#   && conda clean --all -f -y && rm -rf /tmp/*
+# RUN ONDA_OVERRIDE_CUDA="11.8" mamba install --yes 'tensorflow-gpu' -c conda-forge \
+# && conda clean --all -f -y && rm -rf /tmp/*
+
+RUN CONDA_VERBOSITY=1 CONDA_OVERRIDE_CUDA="11.8" mamba install --yes tensorflow cudatoolkit -c conda-forge \
+    && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN mamba install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes websockify \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.7/git-annex-remote-rclone \
