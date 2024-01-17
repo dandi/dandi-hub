@@ -57,6 +57,8 @@ RUN pip install --no-cache-dir jupyter-remote-desktop-proxy jupyterlab_nvdashboa
 
 RUN CONDA_VERBOSITY=1 CONDA_OVERRIDE_CUDA="11.8" mamba install --yes -c "nvidia/label/cuda-11.8.0" cuda-toolkit cudnn \
   && conda clean --all -f -y && rm -rf /tmp/*
+RUN ONDA_OVERRIDE_CUDA="11.8" mamba install --yes 'tensorflow-gpu' -c conda-forge \
+&& conda clean --all -f -y && rm -rf /tmp/*
 
 RUN mamba install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes websockify \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.7/git-annex-remote-rclone \
@@ -68,7 +70,8 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
     'pydra>=0.17' 'pynwb>=2.3.1' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]"  \
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
-    tensorstore anndata "tensorflow[and-cuda]"
+    tensorstore anndata
+# "tensorflow[and-cuda]"
 
 
 # Install tensorflow, cuda and extension for GPU usage display
