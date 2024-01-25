@@ -22,11 +22,24 @@ instances.
  - The majority of the complexity of this approach is the deployment and configuration of Kubernetes itself.
 
 ## Desired features
-1. Spot pricing
-1. Connection to DANDI for OAuth
-1. Custom repositories - [GESIS](https://2i2c.org/blog/2022/gesis-2i2c-collaboration-update/)
-1. Regular clean up of shared space
-1. Persistent home directories with quotas
+
+* Top priority
+
+1. Environment/Compute
+  1. Single hub with multiple groups that get allocated different resources*
+  1. Bring/build your own image*
+  1. Run other services on the Kubernetes layer that JupyterHub users can use
+1. Costs
+  1. Spot pricing (and more generally, minimize costs using any cloud feature)*
+  1. Separate billing for each group
+  1. Monitor access, storage, compute for each user and group
+1. Storage
+  1. Storage quotas controllable by user/group*
+  1. Persistent home directories
+  1. Persistent shared directories
+  1. Regular clean up of shared directories
+1. Authentication
+  1. Connection to DANDI for OAuth
 ## Proposed Setup
 
 Amazon Solutions Architects have created and maintained a repository for
