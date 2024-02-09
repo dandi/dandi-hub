@@ -450,8 +450,6 @@
           --namespace kube-system \
           oci://public.ecr.aws/aws-ec2/helm/aws-node-termination-handler --version 0.22.0
 
-          oci://public.ecr.aws/aws-ec2/aws-node-termination-handler --version v1.20.0
-
       # configure and create jupyterhub
       - name: Create security token
         command: openssl rand -hex 32
