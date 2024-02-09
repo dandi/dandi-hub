@@ -52,7 +52,7 @@
 
       - block:
         - name: Download kops
-          shell: wget -O kops https://github.com/kubernetes/kops/releases/download/v1.25.4/kops-linux-amd64
+          shell: wget --quiet -O kops https://github.com/kubernetes/kops/releases/download/v1.28.4/kops-linux-amd64
           args:
             chdir: /home/ec2-user/{{ namespace }}
             creates: kops
@@ -77,7 +77,7 @@
 
       - block:
         - name: Download kubectl
-          shell: wget -O kubectl https://storage.googleapis.com/kubernetes-release/release/v1.25.8/bin/linux/amd64/kubectl
+          shell: wget --quiet -O kubectl https://storage.googleapis.com/kubernetes-release/release/v1.28.6/bin/linux/amd64/kubectl
           args:
             chdir: /home/ec2-user/{{ namespace }}
             creates: /home/ec2-user/{{ namespace }}/kubectl
@@ -353,6 +353,12 @@
             src: pv_efs.yaml.j2
             dest: /home/ec2-user/{{ namespace }}/pv_efs.yaml
 
+        - name: Add aws helm registry
+          shell: aws ecr-public get-login-password \
+            --region us-east-2 | helm registry login \
+            --username AWS \
+            --password-stdin public.ecr.aws
+
         - name: Add efs driver charts
           command: helm repo add aws-efs-csi-driver https://kubernetes-sigs.github.io/aws-efs-csi-driver/
           args:
@@ -428,10 +434,11 @@
             chdir: /home/ec2-user/{{ namespace }}
         when: autoscaler_yaml.stat.exists == False
 
-      - name: Add eks charts
-        command: helm repo add eks https://aws.github.io/eks-charts
-        args:
-          chdir: /home/ec2-user/{{ namespace }}
+      - name: Add aws helm registry
+        shell: aws ecr-public get-login-password \
+          --region us-east-2 | helm registry login \
+          --username AWS \
+          --password-stdin public.ecr.aws
 
       - name: Update Helm chart repos
         command: helm repo update
@@ -441,7 +448,9 @@
       - name: Add termination handler
         shell: helm upgrade --install aws-node-termination-handler \
           --namespace kube-system \
-          eks/aws-node-termination-handler
+          oci://public.ecr.aws/aws-ec2/helm/aws-node-termination-handler --version 0.22.0
+
+          oci://public.ecr.aws/aws-ec2/aws-node-termination-handler --version v1.20.0
 
       # configure and create jupyterhub
       - name: Create security token
