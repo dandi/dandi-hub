@@ -31,7 +31,7 @@ hub:
       import os
       import warnings
 
-      from oauthenticator.github import GitHubOAuthenticator, _api_headers
+      from oauthenticator.github import GitHubOAuthenticator
       from tornado.httpclient import HTTPRequest, HTTPClientError, AsyncHTTPClient
       import json
 
@@ -75,26 +75,6 @@ hub:
               spawner.environment['GITHUB_TOKEN'] = auth_state['access_token']
               spawner.environment['GITHUB_USER'] = auth_state['github_user']['login']
               spawner.environment['GITHUB_EMAIL'] = auth_state['github_user']['email']
-              if auth_state['github_user']['email']:
-                  return
-              req = HTTPRequest(
-                          self.github_api + "/user/emails",
-                          method="GET",
-                          headers=_api_headers(auth_state['access_token']),
-                          validate_cert=self.validate_server_cert,
-                     )
-              try:
-                  client = AsyncHTTPClient()
-                  resp = await client.fetch(req)
-                  # resp_json = await self.fetch(req, "fetching user emails")
-              except HTTPClientError:
-                  pass
-              else:
-                  if resp.body:
-                      resp_json = json.loads(resp.body.decode('utf8', 'replace'))
-                      for val in resp_json:
-                          if val["primary"]:
-                              spawner.environment['GITHUB_EMAIL'] = val['email']
 
       c.GitHubOAuthenticator.scope = ['read:user', 'gist', 'user:email']
       c.JupyterHub.authenticator_class = GitHubEnvAuthenticator
