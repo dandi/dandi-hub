@@ -132,8 +132,8 @@
           --authorization RBAC \
           --cloud aws \
           --container-runtime containerd \
-          --master-size t3a.medium \
-          --master-volume-size 20 \
+          --master-size t3a.large \
+          --master-volume-size 50 \
           --node-size {{ node_size }} \
           --zones {{ az_facts.availability_zones | map(attribute='zone_name') | list | join(',') }} \
           --node-volume-size {{ node_volume_size }} \
