@@ -5,7 +5,6 @@ metadata:
   generation: 2
   labels:
     kops.k8s.io/cluster: {{ namespace }}.k8s.local
-    hub.jupyter.org/dedicated: core
   name: nodes-us-east-2b
 spec:
   cloudLabels:
@@ -17,6 +16,7 @@ spec:
   maxSize: {{ max_node }}
   minSize: 1
   nodeLabels:
+    hub.jupyter.org/dedicated: core
     kops.k8s.io/instancegroup: nodes-us-east-2b
     on-demand: "true"
   role: Node
