@@ -31,7 +31,7 @@ hub:
       import os
       import warnings
 
-      from oauthenticator.github import GitHubOAuthenticator, _api_headers
+      from oauthenticator.github import GitHubOAuthenticator
       from tornado.httpclient import HTTPRequest, HTTPClientError, AsyncHTTPClient
       import json
 
@@ -40,12 +40,21 @@ hub:
 
       class GitHubEnvAuthenticator(GitHubOAuthenticator):
 
-          async def authenticate(self, handler, data=None):
-              userdict = await super().authenticate(handler, data=data)
-              if userdict is None:
-                  return userdict
+          async def check_allowed(self, username, auth_model):
+              """
+              Overrides the OAuthenticator.check_allowed to check dandi registered users
+              """
+              if auth_model["auth_state"].get("scope", []):
+                 scopes = []
+                 for val in auth_model["auth_state"]["scope"]:
+                     scopes.extend(val.split(","))
+                 auth_model["auth_state"]["scope"] = scopes
+              auth_model = await self.update_auth_model(auth_model)
+              # print("check_allowed:", username, auth_model)
+              if await super().check_allowed(username, auth_model):
+                  return True
               req = HTTPRequest(
-                          f"https://api.dandiarchive.org/api/users/search/?username={userdict['name']}",
+                          f"https://api.dandiarchive.org/api/users/search/?username={username}",
                           method="GET",
                           headers={"Accept": "application/json",
                                    "User-Agent": "JupyterHub",
@@ -55,16 +64,17 @@ hub:
               try:
                   client = AsyncHTTPClient()
                   resp = await client.fetch(req)
-                  # resp_json = await self.fetch(req, "checking users")
               except HTTPClientError:
-                  return None
+                  return False
               else:
                   if resp.body:
                       resp_json = json.loads(resp.body.decode('utf8', 'replace'))
                       for val in resp_json:
-                          if val["username"] == userdict["name"]:
-                              return userdict
-              return None
+                          if val["username"].lower() == username.lower():
+                              return True
+
+              # users should be explicitly allowed via config, otherwise they aren't
+              return False
 
           async def pre_spawn_start(self, user, spawner):
               auth_state = await user.get_auth_state()
@@ -75,28 +85,7 @@ hub:
               spawner.environment['GITHUB_TOKEN'] = auth_state['access_token']
               spawner.environment['GITHUB_USER'] = auth_state['github_user']['login']
               spawner.environment['GITHUB_EMAIL'] = auth_state['github_user']['email']
-              if auth_state['github_user']['email']:
-                  return
-              req = HTTPRequest(
-                          self.github_api + "/user/emails",
-                          method="GET",
-                          headers=_api_headers(auth_state['access_token']),
-                          validate_cert=self.validate_server_cert,
-                     )
-              try:
-                  client = AsyncHTTPClient()
-                  resp = await client.fetch(req)
-                  # resp_json = await self.fetch(req, "fetching user emails")
-              except HTTPClientError:
-                  pass
-              else:
-                  if resp.body:
-                      resp_json = json.loads(resp.body.decode('utf8', 'replace'))
-                      for val in resp_json:
-                          if val["primary"]:
-                              spawner.environment['GITHUB_EMAIL'] = val['email']
 
-      c.GitHubOAuthenticator.scope = ['read:user', 'gist', 'user:email']
       c.JupyterHub.authenticator_class = GitHubEnvAuthenticator
 
       # enable authentication state
@@ -108,19 +97,17 @@ hub:
   config:
     Authenticator:
       admin_users:
-      - "satra"
-      - "yarikoptic"
-      - "dandibot"
+        - "satra"
+        - "yarikoptic"
+        - "dandibot"
     GitHubOAuthenticator:
       client_id: "{{ github_client_id }}"
       client_secret: "{{ github_client_secret }}"
       oauth_callback_url: "{{ ingress }}/hub/oauth_callback"
       scope:
-      - read:user
-      - gist
-      - user:email
-    JupyterHub:
-      authenticator_class: github
+        - read:user
+        - gist
+        - user:email
 
 scheduling:
   userScheduler:
@@ -187,14 +174,14 @@ singleuser:
         mem_limit: 96G
         mem_guarantee: 64G
     - display_name: "T4 GPU for inference"
-      description: "4 CPU / 15 GB / 1 T4 GPU. May take up to 15 mins to start."
+      description: "8 CPU / 30 GB / 1 T4 GPU. May take up to 15 mins to start."
       kubespawner_override:
         image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-gpu'
         image_pull_policy: Always
-        cpu_limit: 4
-        cpu_guarantee: 2
-        mem_limit: 15G
-        mem_guarantee: 10G
+        cpu_limit: 8
+        cpu_guarantee: 6
+        mem_limit: 31G
+        mem_guarantee: 30G
         extra_resource_limits:
           nvidia.com/gpu: "1"
         extra_pod_config:
