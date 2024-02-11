@@ -70,7 +70,7 @@ hub:
                   if resp.body:
                       resp_json = json.loads(resp.body.decode('utf8', 'replace'))
                       for val in resp_json:
-                          if val["username"] == username:
+                          if val["username"].lower() == username.lower():
                               return True
 
               # users should be explicitly allowed via config, otherwise they aren't
