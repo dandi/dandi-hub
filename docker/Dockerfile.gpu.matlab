@@ -59,11 +59,11 @@ RUN pip install --no-cache-dir jupyter-remote-desktop-proxy jupyterlab_nvdashboa
 RUN CONDA_OVERRIDE_CUDA="12.3" mamba install --yes -c "nvidia/label/cuda-12.3.0" cuda-toolkit cudnn \
   && conda clean --all -f -y && rm -rf /tmp/*
 
-RUN echo -e "\n\
-import os \n\
-os.environ['LD_LIBRARY_PATH'] = '/usr/local/nvidia/lib64' \n\
-c.Spawner.env.update('LD_LIBRARY_PATH') \n\
-" >> ~/.jupyter/jupyter_notebook_config.py
+# RUN echo -e "\n\
+# import os \n\
+# os.environ['LD_LIBRARY_PATH'] = '/usr/local/nvidia/lib64' \n\
+# c.Spawner.env.update('LD_LIBRARY_PATH') \n\
+# " >> ~/.jupyter/jupyter_notebook_config.py
 
 RUN mamba install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes websockify \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.7/git-annex-remote-rclone \
