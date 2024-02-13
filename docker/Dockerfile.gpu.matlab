@@ -56,8 +56,14 @@ USER $NB_USER
 RUN pip install --no-cache-dir jupyter-remote-desktop-proxy jupyterlab_nvdashboard
 
 # Install CUDA toolkit and extension for GPU usage display
-RUN CONDA_OVERRIDE_CUDA="11.8" mamba install --yes -c "nvidia/label/cuda-11.8.0" cuda-toolkit cudnn \
+RUN CONDA_OVERRIDE_CUDA="12.3" mamba install --yes -c "nvidia/label/cuda-12.3.0" cuda-toolkit cudnn \
   && conda clean --all -f -y && rm -rf /tmp/*
+
+RUN echo -e "\n\
+import os \n\
+os.environ['LD_LIBRARY_PATH'] = '/usr/local/nvidia/lib64' \n\
+c.Spawner.env.update('LD_LIBRARY_PATH') \n\
+" >> ~/.jupyter/jupyter_notebook_config.py
 
 RUN mamba install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes websockify \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.7/git-annex-remote-rclone \
@@ -69,7 +75,7 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
     'pydra>=0.17' 'pynwb>=2.3.1' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]"  \
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
-    tensorstore anndata "tensorflow[and-cuda]"
+    tensorstore anndata "tensorflow[and-cuda]==2.14"
 
 # Ensure OpenSSL is up-to-date
 RUN pip install -U pyopenssl
