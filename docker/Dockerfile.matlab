@@ -53,13 +53,9 @@ RUN mkdir ${EXTRA_DIR} && chown -R $NB_UID:$NB_GID $HOME ${EXTRA_DIR}
 
 USER $NB_USER
 
-RUN pip install --no-cache-dir jupyter-remote-desktop-proxy
+RUN pip install --no-cache-dir jupyter-remote-desktop-proxy jupyterlab_nvdashboard
 
-# Install tensorflow
-RUN mamba install --yes 'tensorflow<=2.10.0' -c conda-forge \
-  && conda clean --all -f -y && rm -rf /tmp/*
 
-RUN pip install --no-cache-dir jupyterlab_nvdashboard
 
 RUN mamba install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes websockify \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.7/git-annex-remote-rclone \
@@ -71,7 +67,7 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
     'pydra>=0.17' 'pynwb>=2.3.1' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]"  \
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
-    tensorstore anndata
+    tensorstore anndata tensorflow
 
 
 # Ensure OpenSSL is up-to-date
