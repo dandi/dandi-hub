@@ -36,8 +36,8 @@ variable "secondary_cidr_blocks" {
 # Example of public domain name(<subdomain-name>.<domain-name>.com): eks.jupyter-doeks.dynamic-dns.com
 variable "jupyter_hub_auth_mechanism" {
   type        = string
-  description = "Allowed values: cognito, dummy"
-  default     = "dummy"
+  description = "Allowed values: cognito, dummy, oauth"
+  default     = "oauth"
 }
 
 #  Domain name is public so make sure you use a unique while deploying, Only needed if auth mechanism is set to cognito
