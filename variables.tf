@@ -55,6 +55,15 @@ variable "acm_certificate_domain" {
 }
 variable "jupyterhub_domain" {
   type        = string
-  description = "Enter sub-domain name for jupyterhub to be hosted,  e.g. eks.example.com. Only needed if auth mechanism is set to cognito"
-  default     = ""
+  description = "sub-domain name for jupyterhub to be hosted."
+  default     = "https://hub.dandiarchive.org"
+}
+variable "github_client_id" {
+  type        = string
+  description = "encrypted client id"
+}
+
+variable "github_client_secret" {
+  type        = string
+  description = "encrypted client secret"
 }
