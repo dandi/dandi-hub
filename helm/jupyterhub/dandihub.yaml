@@ -6,62 +6,53 @@ hub:
   authenticatePrometheus: false
   command: ["sh", "-c", "pip install boto3 && jupyterhub --config /usr/local/etc/jupyterhub/jupyterhub_config.py"]
   config:
-    GenericOAuthenticator:
-      oauth_callback_url: ${jupyterdomain}
+    GitHubOAuthenticator:
       client_id: ${client_id}
       client_secret: ${client_secret}
-      authorize_url: ${authorize_url}
-      token_url: ${token_url}
-      userdata_url: ${userdata_url}
-      scope:
-        - openid
-        - email
-      username_key: "username"
-      login_service : "AWS Cognito"
-      userdata_method: "POST"
+      oauth_callback_url: ${jupyterdomain}
     JupyterHub:
-      authenticator_class: generic-oauth
+      authenticator_class: github
   extraConfig:
     jupyterhub_config.py: |-
       c.KubeSpawner.start_timeout = 1200
       c.Authenticator.enable_auth_state = True
 
-    cognito_config.py: |-
-      import boto3
-      def auth_state_hook(spawner, auth_state):
-        client_idp = boto3.client('cognito-idp', region_name="${region}")
-        auth_response = client_idp.initiate_auth(
-          AuthFlow="REFRESH_TOKEN_AUTH",
-          AuthParameters={
-            "REFRESH_TOKEN": auth_state['refresh_token'],
-            "SECRET_HASH": "${client_secret}"
-          },
-          ClientId="${client_id}"
-        )
-        id_token = auth_response["AuthenticationResult"]["IdToken"]
-        client_identity = boto3.client("cognito-identity", region_name="${region}")
-        identity_response = client_identity.get_id(
-          IdentityPoolId="${identity_pool_id}",
-          Logins={
-            f"cognito-idp.${region}.amazonaws.com/${user_pool_id}": id_token
-          }
-        )
-        identity_id = identity_response['IdentityId']
-        credentials = client_identity.get_credentials_for_identity(
-          IdentityId=identity_id,
-          Logins={
-            f"cognito-idp.${region}.amazonaws.com/${user_pool_id}": id_token
-          }
-        )
-        key = credentials["Credentials"]["AccessKeyId"]
-        secret = credentials["Credentials"]["SecretKey"]
-        token = credentials["Credentials"]["SessionToken"]
-        spawner.environment['AWS_ACCESS_KEY_ID'] = key
-        spawner.environment['AWS_SECRET_ACCESS_KEY'] = secret
-        spawner.environment['AWS_SESSION_TOKEN'] = token
-
-      c.Spawner.auth_state_hook = auth_state_hook
-
+    # cognito_config.py: |-
+    #   import boto3
+    #   def auth_state_hook(spawner, auth_state):
+    #     client_idp = boto3.client('cognito-idp', region_name="${region}")
+    #     auth_response = client_idp.initiate_auth(
+    #       AuthFlow="REFRESH_TOKEN_AUTH",
+    #       AuthParameters={
+    #         "REFRESH_TOKEN": auth_state['refresh_token'],
+    #         "SECRET_HASH": "${client_secret}"
+    #       },
+    #       ClientId="${client_id}"
+    #     )
+    #     id_token = auth_response["AuthenticationResult"]["IdToken"]
+    #     client_identity = boto3.client("cognito-identity", region_name="${region}")
+    #     identity_response = client_identity.get_id(
+    #       IdentityPoolId="${identity_pool_id}",
+    #       Logins={
+    #         f"cognito-idp.${region}.amazonaws.com/${user_pool_id}": id_token
+    #       }
+    #     )
+    #     identity_id = identity_response['IdentityId']
+    #     credentials = client_identity.get_credentials_for_identity(
+    #       IdentityId=identity_id,
+    #       Logins={
+    #         f"cognito-idp.${region}.amazonaws.com/${user_pool_id}": id_token
+    #       }
+    #     )
+    #     key = credentials["Credentials"]["AccessKeyId"]
+    #     secret = credentials["Credentials"]["SecretKey"]
+    #     token = credentials["Credentials"]["SessionToken"]
+    #     spawner.environment['AWS_ACCESS_KEY_ID'] = key
+    #     spawner.environment['AWS_SECRET_ACCESS_KEY'] = secret
+    #     spawner.environment['AWS_SESSION_TOKEN'] = token
+    #
+    #   c.Spawner.auth_state_hook = auth_state_hook
+    #
 proxy:
   https:
     enabled: true
