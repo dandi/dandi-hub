@@ -1,6 +1,9 @@
 ansible_password
 .idea
 
-# Do not commit terraform cluster state
+# terraform cluster state
 .terraform*
 terraform.tfstate*
+
+# Env secrets
+.env
