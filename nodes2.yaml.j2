@@ -11,11 +11,12 @@ spec:
     k8s.io/cluster-autoscaler/enabled: ""
     k8s.io/cluster-autoscaler/{{ namespace }}.k8s.local: ""
     k8s.io/cluster-autoscaler/node-template/label: ""
-  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20211001
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240207.1
   machineType: {{ node_size }}
   maxSize: {{ max_node }}
   minSize: 1
   nodeLabels:
+    hub.jupyter.org/dedicated: core
     kops.k8s.io/instancegroup: nodes-us-east-2b
     on-demand: "true"
   role: Node
