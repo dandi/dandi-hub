@@ -5,41 +5,139 @@ hub:
       storageClassName: gp3
   authenticatePrometheus: false
   command: ["sh", "-c", "pip install boto3 && jupyterhub --config /usr/local/etc/jupyterhub/jupyterhub_config.py"]
+  extraConfig:
+    # TODO(asmacdo) store as python file
+    # {{ .Files.Get "files/myscript.py" | indent 4 }}
+    myConfig: |
+      from kubernetes_asyncio import client
+      def modify_pod_hook(spawner, pod):
+          pod.spec.containers[0].security_context = client.V1SecurityContext(
+              privileged=True
+          )
+          return pod
+      c.KubeSpawner.modify_pod_hook = modify_pod_hook
+
+      # Based on <https://github.com/jupyterhub/oauthenticator/blob/master/examples/auth_state/jupyterhub_config.py>:
+      import os
+      import warnings
+
+      from oauthenticator.github import GitHubOAuthenticator
+      from tornado.httpclient import HTTPRequest, HTTPClientError, AsyncHTTPClient
+      import json
+
+      # define our OAuthenticator with `.pre_spawn_start`
+      # for passing auth_state into the user environment
+
+      class IsDandiUserAuthenticator(GitHubOAuthenticator):
+
+          async def check_allowed(self, username, auth_model):
+              """
+              Overrides the OAuthenticator.check_allowed to check dandi registered users
+              """
+              if auth_model["auth_state"].get("scope", []):
+                 scopes = []
+                 for val in auth_model["auth_state"]["scope"]:
+                     scopes.extend(val.split(","))
+        - "dandibot"
+                 auth_model["auth_state"]["scope"] = scopes
+              auth_model = await self.update_auth_model(auth_model)
+              # print("check_allowed:", username, auth_model)
+              if await super().check_allowed(username, auth_model):
+                  return True
+              req = HTTPRequest(
+                          f"https://api.dandiarchive.org/api/users/search/?username={username}",
+                          method="GET",
+                          headers={"Accept": "application/json",
+                                   "User-Agent": "JupyterHub",
+                                   "Authorization": "token {{ danditoken }}"},
+                          validate_cert=self.validate_server_cert,
+                     )
+              try:
+                  client = AsyncHTTPClient()
+                  resp = await client.fetch(req)
+              except HTTPClientError:
+                  return False
+              else:
+                  if resp.body:
+                      resp_json = json.loads(resp.body.decode('utf8', 'replace'))
+                      for val in resp_json:
+                          if val["username"].lower() == username.lower():
+                              return True
+
+              # users should be explicitly allowed via config, otherwise they aren't
+              return False
+
+          async def pre_spawn_start(self, user, spawner):
+              auth_state = await user.get_auth_state()
+              if not auth_state:
+                  # user has no auth state
+                  return
+              # define some environment variables from auth_state
+              spawner.environment['GITHUB_TOKEN'] = auth_state['access_token']
+              spawner.environment['GITHUB_USER'] = auth_state['github_user']['login']
+              spawner.environment['GITHUB_EMAIL'] = auth_state['github_user']['email']
+
+      c.JupyterHub.authenticator_class = IsDandiUserAuthenticator
+
+      # enable authentication state
+      c.GitHubOAuthenticator.enable_auth_state = True
+
   config:
     Authenticator:
       admin_users:
-      - "satra"
-      - "yarikoptic"
-      - "dandibot"
+        - "asmacdo"
+        - "dandibot"
+        - "satra"
+        - "yarikoptic"
+
     GitHubOAuthenticator:
       client_id: github_client_id.id
       client_secret: github_client_secret.id
-      oauth_callback_url: ${jupyterdomain}
-    JupyterHub:
-      authenticator_class: github
-  extraConfig:
-    jupyterhub_config.py: |-
-      c.KubeSpawner.start_timeout = 1200
-      c.Authenticator.enable_auth_state = True
+      oauth_callback_url: "${ingress.hostname}/hub/oauth_callback"
+      scope:
+        - read:user
+        - gist
+        - user:email
+
+cull:
+  enabled: true
+  timeout: 3600
+  every: 300
 
 proxy:
+  # TODO(asmacdo) from ours secretToken: os.stdout
   https:
     enabled: true
     type: offload
+    # TODO(asmacdo) from ours hosts:
+      # - {{ ingress_host }}
   service:
     annotations:
+      # TODO(asmacdo) from both
       # service.beta.kubernetes.io/aws-load-balancer-ssl-cert: ${ssl_cert_arn}
       service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
       service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "3600"
-      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-      service.beta.kubernetes.io/aws-load-balancer-scheme: internal
-      service.beta.kubernetes.io/aws-load-balancer-type: external
-      service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: 'true'
-      service.beta.kubernetes.io/aws-load-balancer-ip-address-type: ipv4
+
+      # TODO(asmacdo) these are included in example but not ours
+      # service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+      # service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+      # service.beta.kubernetes.io/aws-load-balancer-type: external
+      # service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: 'true'
+      # service.beta.kubernetes.io/aws-load-balancer-ip-address-type: ipv4
 
 singleuser:
-  startTimeout: 1200 # 20 mins to spin up a notebook server for GPU including the image pull
+  defaultUrl: "/lab"
+  image:
+    name: {{ singleuser_image_repo }}
+    tag: {{ singleuser_image_tag }}
+  memory:
+    limit: 16G
+    guarantee: 1G
+  cpu:
+    limit: 12
+    guarantee: 0.5
+  startTimeout: 2400
   profileList:
     - display_name: Data Engineering (CPU)
       description: "PySpark Notebooks | Karpenter AutoScaling"
@@ -64,151 +162,231 @@ singleuser:
         cpu_limit: 4
         mem_limit: 8G
       cmd: null
-    # NOTE:
-    - display_name: Trainium (trn1)
-      description: "Trainium | Karpenter AutoScaling"
-      profile_options:
-        image:
-          display_name: "Image"
-          choices:
-            pytorch1131:
-              display_name: "PyTorch 1.13.1 + torch-neuronx"
-              default: true
-              kubespawner_override:
-                image: public.ecr.aws/data-on-eks/pytorch-neuronx:latest
-            tflow2101:
-              display_name: "Tensorflow 2.10.1 + tensorflow-neuronx"
-              kubespawner_override:
-                image: public.ecr.aws/data-on-eks/tensorflow-neuronx:latest
-      kubespawner_override:
-        node_selector:
-          NodePool: trainium
-        tolerations:
-          - key: aws.amazon.com/neuroncore
-            operator: Exists
-            effect: NoSchedule
-          - key: aws.amazon.com/neuron
-            operator: Exists
-            effect: NoSchedule
-          - key: "hub.jupyter.org/dedicated" # According to optimization docs https://z2jh.jupyter.org/en/latest/administrator/optimization.html
-            operator: "Equal"
-            value: "user"
-            effect: "NoSchedule"
-        cpu_guarantee: 2
-        mem_guarantee: 10G
-        cpu_limit: 2
-        mem_limit: 10G
-        extra_resource_limits:
-          aws.amazon.com/neuron: "1"
-        cmd: "start-singleuser.sh"
-    - display_name: Inferentia (inf2)
-      description: "Inferentia | Karpenter AutoScaling"
-      profile_options:
-        image:
-          display_name: "Image"
-          choices:
-            pytorch1131:
-              display_name: "PyTorch + torch-neuronx"
-              default: true
-              kubespawner_override:
-                image: public.ecr.aws/data-on-eks/pytorch-neuronx:latest
-            tflow2101:
-              display_name: "Tensorflow + tensorflow-neuronx"
-              kubespawner_override:
-                image: public.ecr.aws/data-on-eks/tensorflow-neuronx:latest
-      kubespawner_override:
-        node_selector:
-          NodePool: inferentia
-          hub.jupyter.org/node-purpose: user
-        tolerations:
-          - key: aws.amazon.com/neuroncore
-            operator: Exists
-            effect: NoSchedule
-          - key: aws.amazon.com/neuron
-            operator: Exists
-            effect: NoSchedule
-          - key: "hub.jupyter.org/dedicated" # According to optimization docs https://z2jh.jupyter.org/en/latest/administrator/optimization.html
-            operator: "Equal"
-            value: "user"
-            effect: "NoSchedule"
-        cpu_guarantee: 20
-        mem_guarantee: 100G
-        cpu_limit: 20
-        mem_limit: 100G
-        extra_resource_limits:
-          aws.amazon.com/neuron: "1"
-        cmd: null
-    - display_name: Data Science (GPU + Time-Slicing - G5)
-      default: true
-      description: "GPU Time-Slicing with Single GPU VMs (G5 2x, 4x, 8x, 16x) | nvidia.com/gpu: 1 | Karpenter AutoScaling"
-      kubespawner_override:
-        # namespace: data-team-a
-        image: cschranz/gpu-jupyter:v1.5_cuda-11.6_ubuntu-20.04_python-only
-        node_selector:
-          NodePool: gpu-ts # TIME-SLICING: Use this config with time-slicing mode
-        tolerations:
-          - key: "nvidia.com/gpu"
-            operator: "Exists"
-            effect: "NoSchedule"
-          - key: "hub.jupyter.org/dedicated" # According to optimization docs https://z2jh.jupyter.org/en/latest/administrator/optimization.html
-            operator: "Equal"
-            value: "user"
-            effect: "NoSchedule"
-        extra_resource_limits:
-          nvidia.com/gpu: "1" # TIME-SLICING: Use a slice of GPU using time-slicing mode
-        cpu_limit: 2
-        mem_limit: 4G
-        cpu_guarantee: 2
-        mem_guarantee: 4G
-        cmd: "start-singleuser.sh"
-    # Karpenter doesn't support for requesting resources with MIG slices e.g., nvidia.com/mig-1g.5gb: 1,  or nvidia.com/mig-2g.20gb: 1 etc.
-    # Hence, this profile relies on Managed node groups with GPU MIG enabled
-    - display_name: Data Science (GPU + MIG on P4d.24xlarge)
-      description: "GPU MIG with P4d instances | nvidia.com/mig-1g.5gb: 1 | Cluster Autoscaler"
-      kubespawner_override:
-        image: cschranz/gpu-jupyter:v1.5_cuda-11.6_ubuntu-20.04_python-only
-        node_selector:
-          provisioner: cluster-autoscaler
-          node.kubernetes.io/instance-type: p4d.24xlarge
-        tolerations:
-          - key: "nvidia.com/gpu"
-            operator: "Exists"
-            effect: "NoSchedule"
-          - key: "hub.jupyter.org/dedicated" # According to optimization docs https://z2jh.jupyter.org/en/latest/administrator/optimization.html
-            operator: "Equal"
-            value: "user"
-            effect: "NoSchedule"
-        extra_resource_guarantees:
-          nvidia.com/mig-1g.5gb: 1 # or nvidia.com/mig-2g.10gb OR nvidia.com/mig-3g.20gb
-        # extra_resource_limits:
-        #   nvidia.com/gpu: "8" # TIME-SLICING: Use a slice of GPU using time-slicing mode
-        cpu_guarantee: 2
-        mem_guarantee: 10G
-        cpu_limit: 2
-        mem_limit: 10G
-        cmd: "start-singleuser.sh"
-    - display_name: Data Science (GPU - P4d.24xlarge)
-      description: "GPU with P4d instances | Karpenter Autoscaler"
-      kubespawner_override:
-        image: cschranz/gpu-jupyter:v1.5_cuda-11.6_ubuntu-20.04_python-only
-        node_selector:
-          node.kubernetes.io/instance-type: p4d.24xlarge
-          NodePool: gpu
-        tolerations:
-          - key: "nvidia.com/gpu"
-            operator: "Exists"
-            effect: "NoSchedule"
-          - key: "hub.jupyter.org/dedicated" # According to optimization docs https://z2jh.jupyter.org/en/latest/administrator/optimization.html
-            operator: "Equal"
-            value: "user"
-            effect: "NoSchedule"
-        extra_resource_limits:
-          nvidia.com/gpu: "8"
-        cpu_guarantee: 2
-        mem_guarantee: 10G
-        cpu_limit: 2
-        mem_limit: 10G
-        cmd: "start-singleuser.sh"
+    # ===================================================================
+    # DO-EKS example profiles:
+    # ===================================================================
+    # - display_name: Trainium (trn1)
+    #   description: "Trainium | Karpenter AutoScaling"
+    #   profile_options:
+    #     image:
+    #       display_name: "Image"
+    #       choices:
+    #         pytorch1131:
+    #           display_name: "PyTorch 1.13.1 + torch-neuronx"
+    #           default: true
+    #           kubespawner_override:
+    #             image: public.ecr.aws/data-on-eks/pytorch-neuronx:latest
+    #         tflow2101:
+    #           display_name: "Tensorflow 2.10.1 + tensorflow-neuronx"
+    #           kubespawner_override:
+    #             image: public.ecr.aws/data-on-eks/tensorflow-neuronx:latest
+    #   kubespawner_override:
+    #     node_selector:
+    #       NodePool: trainium
+    #     tolerations:
+    #       - key: aws.amazon.com/neuroncore
+    #         operator: Exists
+    #         effect: NoSchedule
+    #       - key: aws.amazon.com/neuron
+    #         operator: Exists
+    #         effect: NoSchedule
+    #       - key: "hub.jupyter.org/dedicated" # According to optimization docs https://z2jh.jupyter.org/en/latest/administrator/optimization.html
+    #         operator: "Equal"
+    #         value: "user"
+    #         effect: "NoSchedule"
+    #     cpu_guarantee: 2
+    #     mem_guarantee: 10G
+    #     cpu_limit: 2
+    #     mem_limit: 10G
+    #     extra_resource_limits:
+    #       aws.amazon.com/neuron: "1"
+    #     cmd: "start-singleuser.sh"
+    # - display_name: Inferentia (inf2)
+    #   description: "Inferentia | Karpenter AutoScaling"
+    #   profile_options:
+    #     image:
+    #       display_name: "Image"
+    #       choices:
+    #         pytorch1131:
+    #           display_name: "PyTorch + torch-neuronx"
+    #           default: true
+    #           kubespawner_override:
+    #             image: public.ecr.aws/data-on-eks/pytorch-neuronx:latest
+    #         tflow2101:
+    #           display_name: "Tensorflow + tensorflow-neuronx"
+    #           kubespawner_override:
+    #             image: public.ecr.aws/data-on-eks/tensorflow-neuronx:latest
+    #   kubespawner_override:
+    #     node_selector:
+    #       NodePool: inferentia
+    #       hub.jupyter.org/node-purpose: user
+    #     tolerations:
+    #       - key: aws.amazon.com/neuroncore
+    #         operator: Exists
+    #         effect: NoSchedule
+    #       - key: aws.amazon.com/neuron
+    #         operator: Exists
+    #         effect: NoSchedule
+    #       - key: "hub.jupyter.org/dedicated" # According to optimization docs https://z2jh.jupyter.org/en/latest/administrator/optimization.html
+    #         operator: "Equal"
+    #         value: "user"
+    #         effect: "NoSchedule"
+    #     cpu_guarantee: 20
+    #     mem_guarantee: 100G
+    #     cpu_limit: 20
+    #     mem_limit: 100G
+    #     extra_resource_limits:
+    #       aws.amazon.com/neuron: "1"
+    #     cmd: null
+    # - display_name: Data Science (GPU + Time-Slicing - G5)
+    #   default: true
+    #   description: "GPU Time-Slicing with Single GPU VMs (G5 2x, 4x, 8x, 16x) | nvidia.com/gpu: 1 | Karpenter AutoScaling"
+    #   kubespawner_override:
+    #     # namespace: data-team-a
+    #     image: cschranz/gpu-jupyter:v1.5_cuda-11.6_ubuntu-20.04_python-only
+    #     node_selector:
+    #       NodePool: gpu-ts # TIME-SLICING: Use this config with time-slicing mode
+    #     tolerations:
+    #       - key: "nvidia.com/gpu"
+    #         operator: "Exists"
+    #         effect: "NoSchedule"
+    #       - key: "hub.jupyter.org/dedicated" # According to optimization docs https://z2jh.jupyter.org/en/latest/administrator/optimization.html
+    #         operator: "Equal"
+    #         value: "user"
+    #         effect: "NoSchedule"
+    #     extra_resource_limits:
+    #       nvidia.com/gpu: "1" # TIME-SLICING: Use a slice of GPU using time-slicing mode
+    #     cpu_limit: 2
+    #     mem_limit: 4G
+    #     cpu_guarantee: 2
+    #     mem_guarantee: 4G
+    #     cmd: "start-singleuser.sh"
+    # # Karpenter doesn't support for requesting resources with MIG slices e.g., nvidia.com/mig-1g.5gb: 1,  or nvidia.com/mig-2g.20gb: 1 etc.
+    # # Hence, this profile relies on Managed node groups with GPU MIG enabled
+    # - display_name: Data Science (GPU + MIG on P4d.24xlarge)
+    #   description: "GPU MIG with P4d instances | nvidia.com/mig-1g.5gb: 1 | Cluster Autoscaler"
+    #   kubespawner_override:
+    #     image: cschranz/gpu-jupyter:v1.5_cuda-11.6_ubuntu-20.04_python-only
+    #     node_selector:
+    #       provisioner: cluster-autoscaler
+    #       node.kubernetes.io/instance-type: p4d.24xlarge
+    #     tolerations:
+    #       - key: "nvidia.com/gpu"
+    #         operator: "Exists"
+    #         effect: "NoSchedule"
+    #       - key: "hub.jupyter.org/dedicated" # According to optimization docs https://z2jh.jupyter.org/en/latest/administrator/optimization.html
+    #         operator: "Equal"
+    #         value: "user"
+    #         effect: "NoSchedule"
+    #     extra_resource_guarantees:
+    #       nvidia.com/mig-1g.5gb: 1 # or nvidia.com/mig-2g.10gb OR nvidia.com/mig-3g.20gb
+    #     # extra_resource_limits:
+    #     #   nvidia.com/gpu: "8" # TIME-SLICING: Use a slice of GPU using time-slicing mode
+    #     cpu_guarantee: 2
+    #     mem_guarantee: 10G
+    #     cpu_limit: 2
+    #     mem_limit: 10G
+    #     cmd: "start-singleuser.sh"
+    # - display_name: Data Science (GPU - P4d.24xlarge)
+    #   description: "GPU with P4d instances | Karpenter Autoscaler"
+    #   kubespawner_override:
+    #     image: cschranz/gpu-jupyter:v1.5_cuda-11.6_ubuntu-20.04_python-only
+    #     node_selector:
+    #       node.kubernetes.io/instance-type: p4d.24xlarge
+    #       NodePool: gpu
+    #     tolerations:
+    #       - key: "nvidia.com/gpu"
+    #         operator: "Exists"
+    #         effect: "NoSchedule"
+    #       - key: "hub.jupyter.org/dedicated" # According to optimization docs https://z2jh.jupyter.org/en/latest/administrator/optimization.html
+    #         operator: "Equal"
+    #         value: "user"
+    #         effect: "NoSchedule"
+    #     extra_resource_limits:
+    #       nvidia.com/gpu: "8"
+    #     cpu_guarantee: 2
+    #     mem_guarantee: 10G
+    #     cpu_limit: 2
+    #     mem_limit: 10G
+    #     cmd: "start-singleuser.sh"
+    # ===================================================================
+    # DANDIHUB Custom Profiles
+    # ===================================================================
+    # TODO(asmacdo) enable Dandihub custom profiles
+    # - display_name: "Tiny. Useful for many quick things"
+    #   description: "0.5 CPU / 1 GB"
+    #   kubespawner_override:
+    #     image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+    #     image_pull_policy: Always
+    #     cpu_limit: 2
+    #     cpu_guarantee: 0.25
+    #     mem_limit: 2G
+    #     mem_guarantee: 0.5G
+    # - display_name: "Base"
+    #   description: "6 CPU / 16 GB upto 12C/32G. May take up to 15 mins to start."
+    #   default: true
+    #   kubespawner_override:
+    #     image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+    #     image_pull_policy: Always
+    #     cpu_limit: 12
+    #     cpu_guarantee: 6
+    #     mem_limit: 32G
+    #     mem_guarantee: 16G
+    # - display_name: "Medium"
+    #   description: "12C/32G upto 24C/64G. May take up to 15 mins to start."
+    #   kubespawner_override:
+    #     image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+    #     image_pull_policy: Always
+    #     cpu_limit: 24
+    #     cpu_guarantee: 12
+    #     mem_limit: 64G
+    #     mem_guarantee: 32G
+    # - display_name: "Large"
+    #   description: "24C/64G upto 48C/96G. May take up to 15 mins to start."
+    #   kubespawner_override:
+    #     image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
+    #     image_pull_policy: Always
+    #     cpu_limit: 48
+    #     cpu_guarantee: 24
+    #     mem_limit: 96G
+    #     mem_guarantee: 64G
+    # - display_name: "T4 GPU for inference"
+    #   description: "8 CPU / 30 GB / 1 T4 GPU. May take up to 15 mins to start."
+    #   kubespawner_override:
+    #     image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-gpu'
+    #     image_pull_policy: Always
+    #     cpu_limit: 8
+    #     cpu_guarantee: 6
+    #     mem_limit: 31G
+    #     mem_guarantee: 30G
+    #     extra_resource_limits:
+    #       nvidia.com/gpu: "1"
+    #     extra_pod_config:
+    #       runtimeClassName: nvidia
+    # - display_name: "Base (MATLAB)"
+    #   description: "6 CPU / 16 GB upto 12C/32G. May take up to 15 mins to start. This requires your own license."
+    #   kubespawner_override:
+    #     image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-matlab'
+    #     image_pull_policy: Always
+    #     cpu_limit: 12
+    #     cpu_guarantee: 6
+    #     mem_limit: 32G
+    #     mem_guarantee: 16G
+    # - display_name: "T4 GPU for inference"
+    #   description: "8 CPU / 30 GB / 1 T4 GPU. May take up to 15 mins to start. This requires your own license."
+    #   kubespawner_override:
+    #     image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-gpu-matlab'
+    #     image_pull_policy: Always
+    #     cpu_limit: 8
+    #     cpu_guarantee: 6
+    #     mem_limit: 31G
+    #     mem_guarantee: 30G
+    #     extra_resource_limits:
+    #       nvidia.com/gpu: "1"
+    #     extra_pod_config:
+    #       runtimeClassName: nvidia
+    #
+  # TODO(asmacdo) From DO-EKS, add Fuse from Dandi?
   storage:
     type: "static"
     static:
@@ -245,6 +423,7 @@ scheduling:
     enabled: true
   userPlaceholder:
     enabled: false
+    # TODO(asmacdo) 4 in dandi branch
     replicas: 1
   userPods:
     nodeAffinity:
@@ -254,6 +433,7 @@ prePuller:
   hook:
     enabled: false
   continuous:
+    # TODO(asmacdo) enable this for quicker deployment
     # NOTE: if used with Karpenter, also add user-placeholders
     enabled: false
 
