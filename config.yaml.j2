@@ -195,7 +195,7 @@ singleuser:
         cpu_guarantee: 6
         mem_limit: 32G
         mem_guarantee: 16G
-    - display_name: "T4 GPU for inference"
+    - display_name: "T4 GPU for inference (MATLAB)"
       description: "8 CPU / 30 GB / 1 T4 GPU. May take up to 15 mins to start. This requires your own license."
       kubespawner_override:
         image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-gpu-matlab'
