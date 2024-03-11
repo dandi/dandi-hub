@@ -36,7 +36,8 @@ proxy:
   https:
     enabled: true
     type: offload
-    # TODO(asmacdo) from ours hosts:
+    # TODO(asmacdo) from ours 
+    # hosts:
       # - {{ ingress_host }}
   service:
     annotations:

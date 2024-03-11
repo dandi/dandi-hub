@@ -35,6 +35,8 @@ class IsDandiUserAuthenticator(GitHubOAuthenticator):
             auth_model["auth_state"]["scope"] = scopes
         auth_model = await self.update_auth_model(auth_model)
         # print("check_allowed:", username, auth_model)
+
+        # TODO(asmacdo) we need danditoken here.
         if await super().check_allowed(username, auth_model):
             return True
         req = HTTPRequest(
