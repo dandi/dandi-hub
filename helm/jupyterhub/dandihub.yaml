@@ -32,7 +32,6 @@ cull:
   every: 300
 
 proxy:
-  # TODO(asmacdo) from ours secretToken: os.stdout
   https:
     enabled: true
     type: offload
