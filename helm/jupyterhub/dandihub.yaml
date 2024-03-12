@@ -20,7 +20,7 @@ hub:
       client_id: github_client_id.id
       client_secret: github_client_secret.id
       # TODO(asmacdo) can this be parameterized? # oauth_callback_url: "upyterhub_domain}/hub/oauth_callback"
-      oauth_callback_url: "hub.dandiarchive.org/hub/oauth_callback"
+      oauth_callback_url: "staging-hub.dandiarchive.org/hub/oauth_callback"
       scope:
         - read:user
         - gist
@@ -36,9 +36,9 @@ proxy:
   https:
     enabled: true
     type: offload
-    # TODO(asmacdo) from ours 
-    # hosts:
-      # - {{ ingress_host }}
+    hosts:
+      # TODO(asmacdo) can this be parameterized? # oauth_callback_url: "upyterhub_domain}/hub/oauth_callback"
+      - "https://staging-hub.dandiarchive.org/hub/oauth_callback"
   service:
     annotations:
       # TODO(asmacdo) from both
