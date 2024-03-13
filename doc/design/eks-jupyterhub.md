@@ -36,6 +36,8 @@ the fly.
 
 K8s Terminology - operators and controllers
 
+profile: A
+
 #### Terraform
 
 Terraform creates a Virtual Private Cluster, creates EKS cluster, and installs operators/controllers that manage each of the components.
@@ -62,3 +64,27 @@ Grafana and Prometheus are commonly used tools for metrics and monitoring with K
 ## Possible Setup Alternatives
 
 TODO: Ansible or Bash instead of terraform
+
+
+## User Stories:
+
+1. As a DANDI user I can dynamically log into a jupyterhub instance!
+1. As a polite DANDI user, I can select different jupyterhub instance options (differing resource usage), depending on my needs.
+1. As a DANDI user, my home directory /home/{username} persists even after I shut down my hub.
+1. As a team of DANDI users, we can be given access to a shared directory and this process is clearly documented.
+
+## Estimating and Limiting Cost
+
+All user-owned jupyterhub instances will default to SPOT only.
+All jupyterhub "infrastructure" will be ON_DEMAND
+
+As a Dandihub administrator, I can adjust the jupyterhub instance options (profiles) that are available to the users.
+As a Dandihub administrator, I can adjust the Node instance options (Karpenter CRDs? Thats how this was when these were called "provisioners"): TODO(asmacdo) needs research
+   - maxium instance count for each type of Node instance 
+   - instance types that Karpenter can autoscale to fit user-hubs onto.
+         instanceSizes: ["xlarge", "2xlarge", "4xlarge", "8xlarge", "16xlarge", "24xlarge"]
+         instanceFamilies: ["c5", "m5", "r5"]
+         instance_type is (instanceFamily.instanceSize)
+   -
+
+s
