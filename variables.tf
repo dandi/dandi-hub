@@ -67,3 +67,12 @@ variable "github_client_secret" {
   type        = string
   description = "encrypted client secret"
 }
+
+variable "singleuser_image_repo" {
+  type = string
+  description = "OCI repo(TODO or is docker hardcoded?) for single user Jupyterhub image"
+}
+variable "singleuser_image_tag" {
+  type = string
+  description = "tag of the container image"
+}
