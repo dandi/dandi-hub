@@ -7,7 +7,7 @@ variable "name" {
 variable "region" {
   description = "Region"
   type        = string
-  default     = "us-east-1"
+  default     = "us-west-1"
 }
 
 variable "eks_cluster_version" {
@@ -74,4 +74,10 @@ variable "singleuser_image_repo" {
 variable "singleuser_image_tag" {
   type = string
   description = "tag of the container image"
+}
+
+variable "dandi_authenticator" {
+  type = string
+  description = "jupyterhub extraConfig python, implents custom auth"
+  default = ""
 }
