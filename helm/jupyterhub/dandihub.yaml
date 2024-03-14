@@ -6,8 +6,7 @@ hub:
   authenticatePrometheus: false
   command: ["sh", "-c", "pip install boto3 && jupyterhub --config /usr/local/etc/jupyterhub/jupyterhub_config.py"]
   extraConfig:
-    myConfig: |
-      {{ .Files.Get "files/dandi_authenticator.py" | indent 4 }}
+    myConfig: dandi_authenticator.id
   config:
     Authenticator:
       admin_users:
