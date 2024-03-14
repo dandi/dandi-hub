@@ -274,7 +274,7 @@ module "eks_data_addons" {
   #---------------------------------------------------------------
   # Enable Neuron Device Plugin
   #---------------------------------------------------------------
-  enable_aws_neuron_device_plugin = true
+  enable_aws_neuron_device_plugin = false
 
   #---------------------------------------------------------------
   # Enable GPU operator
@@ -296,13 +296,14 @@ module "eks_data_addons" {
       jupyterdomain               = try("https://${var.jupyterhub_domain}/hub/oauth_callback", "")
       jupyter_single_user_sa_name = kubernetes_service_account_v1.jupyterhub_single_user_sa.metadata[0].name
       region                      = var.region
+      dandi_authenticator         = file("${path.module}/helm/jupyterhub/files/dandi_authenticator.py")
     })]
   }
 
   #---------------------------------------------------------------
   # Kubecost Add-on
   #---------------------------------------------------------------
-  enable_kubecost = true
+  enable_kubecost = false
   kubecost_helm_config = {
     values              = [templatefile("${path.module}/helm/kubecost/values.yaml", {})]
     repository_username = data.aws_ecrpublic_authorization_token.token.user_name
