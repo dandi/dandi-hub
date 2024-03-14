@@ -5,6 +5,10 @@ source ensure_vars.sh
 echo "Initializing ..."
 terraform init || echo "\"terraform init\" failed"
 
+lifecycle="dev"
+# lifecycle="test"
+# lifecycle="prod"
+
 # List of Terraform modules to apply in sequence
 targets=(
   "module.vpc"
@@ -15,7 +19,7 @@ targets=(
 for target in "${targets[@]}"
 do
   echo "Applying module $target..."
-  apply_output=$(terraform apply -target="$target" -auto-approve 2>&1 | tee /dev/tty)
+  apply_output=$(terraform apply -target="$target" -auto-approve --vars-file="$lifecycle.tfvars" 2>&1 | tee /dev/tty)
   if [[ ${PIPESTATUS[0]} -eq 0 && $apply_output == *"Apply complete"* ]]; then
     echo "SUCCESS: Terraform apply of $target completed successfully"
   else

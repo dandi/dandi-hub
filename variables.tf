@@ -7,7 +7,7 @@ variable "name" {
 variable "region" {
   description = "Region"
   type        = string
-  default     = "eu-west-1"
+  default     = "us-east-1"
 }
 
 variable "eks_cluster_version" {
@@ -56,7 +56,6 @@ variable "acm_certificate_domain" {
 variable "jupyterhub_domain" {
   type        = string
   description = "sub-domain name for jupyterhub to be hosted."
-  default     = "hub.dandiarchive.org"
 }
 variable "github_client_id" {
   type        = string
