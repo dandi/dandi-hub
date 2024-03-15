@@ -298,6 +298,7 @@ module "eks_data_addons" {
       region                      = var.region
       dandi_authenticator         = file("${path.module}/helm/jupyterhub/files/dandi_authenticator.py")
     })]
+    version                     = "3.2.1"
   }
 
   #---------------------------------------------------------------
