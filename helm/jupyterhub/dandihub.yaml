@@ -44,11 +44,11 @@ proxy:
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "3600"
 
       # TODO(asmacdo) these are included in example but not ours
-      # service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-      # service.beta.kubernetes.io/aws-load-balancer-scheme: internal
-      # service.beta.kubernetes.io/aws-load-balancer-type: external
-      # service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: 'true'
-      # service.beta.kubernetes.io/aws-load-balancer-ip-address-type: ipv4
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+      service.beta.kubernetes.io/aws-load-balancer-type: external
+      service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: 'true'
+      service.beta.kubernetes.io/aws-load-balancer-ip-address-type: ipv4
 
 singleuser:
   defaultUrl: "/lab"
