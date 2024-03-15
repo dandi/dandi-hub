@@ -81,3 +81,9 @@ variable "dandi_authenticator" {
   description = "jupyterhub extraConfig python, implents custom auth"
   default = ""
 }
+
+variable "aws_certificate_arn" {
+  type = string
+  description = "AWS certificate for the domain."
+  default = ""
+}

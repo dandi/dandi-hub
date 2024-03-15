@@ -1,9 +1,9 @@
 # Use this data source to get the ARN of a certificate in AWS Certificate Manager (ACM)
-data "aws_acm_certificate" "issued" {
-  count    = var.jupyter_hub_auth_mechanism == "cognito" ? 1 : 0
-  domain   = var.acm_certificate_domain
-  statuses = ["ISSUED"]
-}
+# data "aws_acm_certificate" "issued" {
+#   count    = var.jupyter_hub_auth_mechanism == "cognito" ? 1 : 0
+#   domain   = var.acm_certificate_domain
+#   statuses = ["ISSUED"]
+# }
 
 data "aws_ecrpublic_authorization_token" "token" {
   provider = aws.ecr
@@ -292,7 +292,7 @@ module "eks_data_addons" {
     values = [templatefile("${path.module}/helm/jupyterhub/dandihub.yaml", {
       client_id                   = var.github_client_id
       client_secret               = var.github_client_secret
-      ssl_cert_arn                = try(data.aws_acm_certificate.issued[0].arn, "")
+      ssl_cert_arn                = try(var.aws_certificate_arn, "")
       jupyterhub_domain           = try("https://${var.jupyterhub_domain}/hub/oauth_callback", "")
       jupyter_single_user_sa_name = kubernetes_service_account_v1.jupyterhub_single_user_sa.metadata[0].name
       region                      = var.region
