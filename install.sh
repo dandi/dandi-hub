@@ -37,3 +37,5 @@ else
   echo "FAILED: Terraform apply of all modules failed"
   exit 1
 fi
+
+echo "If you need to hook this up to DNS (Route 53) use this value:" kubectl get svc/proxy-public -n jupyterhub --output jsonpath='{.status.loadBalancer.ingress[].hostname}'

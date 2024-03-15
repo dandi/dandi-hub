@@ -167,96 +167,96 @@ module "eks_blueprints_addons" {
         EOT
       ]
     }
-    karpenter-resources-ts = {
-      name        = "karpenter-resources-ts"
-      description = "A Helm chart for karpenter GPU based resources - compatible with GPU time slicing"
-      chart       = "${path.module}/helm/karpenter-resources"
-      values = [
-        <<-EOT
-          name: gpu-ts
-          clusterName: ${module.eks.cluster_name}
-          karpenterRole: ${split("/", module.eks_blueprints_addons.karpenter.node_iam_role_arn)[1]}
-          instanceSizes: ["xlarge", "2xlarge", "4xlarge", "8xlarge", "16xlarge", "24xlarge"]
-          instanceFamilies: ["g5"]
-          taints:
-            - key: hub.jupyter.org/dedicated
-              value: "user"
-              effect: "NoSchedule"
-            - key: nvidia.com/gpu
-              effect: "NoSchedule"
-          amiFamily: Ubuntu
-        EOT
-      ]
-    }
-    karpenter-resources-mig = {
-      name        = "karpenter-resources-gpu"
-      description = "A Helm chart for karpenter GPU based resources - compatible with P4d instances"
-      chart       = "${path.module}/helm/karpenter-resources"
-      values = [
-        <<-EOT
-          name: gpu
-          clusterName: ${module.eks.cluster_name}
-          karpenterRole: ${split("/", module.eks_blueprints_addons.karpenter.node_iam_role_arn)[1]}
-          instanceSizes: ["24xlarge"]
-          instanceFamilies: ["p4d"]
-          taints:
-            - key: hub.jupyter.org/dedicated
-              value: "user"
-              effect: "NoSchedule"
-            - key: nvidia.com/gpu
-              effect: "NoSchedule"
-          amiFamily: Ubuntu
-        EOT
-      ]
-    }
-    karpenter-resources-inf = {
-      name        = "karpenter-resources-inf"
-      description = "A Helm chart for karpenter Inferentia based resources"
-      chart       = "${path.module}/helm/karpenter-resources"
-      values = [
-        <<-EOT
-          name: inferentia
-          clusterName: ${module.eks.cluster_name}
-          karpenterRole: ${split("/", module.eks_blueprints_addons.karpenter.node_iam_role_arn)[1]}
-          instanceSizes: ["8xlarge", "24xlarge"]
-          instanceFamilies: ["inf2"]
-          taints:
-            - key: aws.amazon.com/neuroncore
-              value: "true"
-              effect: "NoSchedule"
-            - key: aws.amazon.com/neuron
-              value: "true"
-              effect: "NoSchedule"
-            - key: hub.jupyter.org/dedicated
-              value: "user"
-              effect: "NoSchedule"
-        EOT
-      ]
-    }
-    karpenter-resources-trn = {
-      name        = "karpenter-resources-trn"
-      description = "A Helm chart for karpenter Trainium based resources"
-      chart       = "${path.module}/helm/karpenter-resources"
-      values = [
-        <<-EOT
-          name: trainium
-          clusterName: ${module.eks.cluster_name}
-          karpenterRole: ${split("/", module.eks_blueprints_addons.karpenter.node_iam_role_arn)[1]}
-          instanceSizes: ["32xlarge"]
-          instanceFamilies: ["trn1"]
-          taints:
-            - key: aws.amazon.com/neuroncore
-              value: "true"
-              effect: "NoSchedule"
-            - key: aws.amazon.com/neuron
-              value: "true"
-              effect: "NoSchedule"
-            - key: hub.jupyter.org/dedicated
-              value: "user"
-              effect: "NoSchedule"
-        EOT
-      ]
-    }
+    # karpenter-resources-ts = {
+    #   name        = "karpenter-resources-ts"
+    #   description = "A Helm chart for karpenter GPU based resources - compatible with GPU time slicing"
+    #   chart       = "${path.module}/helm/karpenter-resources"
+    #   values = [
+    #     <<-EOT
+    #       name: gpu-ts
+    #       clusterName: ${module.eks.cluster_name}
+    #       karpenterRole: ${split("/", module.eks_blueprints_addons.karpenter.node_iam_role_arn)[1]}
+    #       instanceSizes: ["xlarge", "2xlarge", "4xlarge", "8xlarge", "16xlarge", "24xlarge"]
+    #       instanceFamilies: ["g5"]
+    #       taints:
+    #         - key: hub.jupyter.org/dedicated
+    #           value: "user"
+    #           effect: "NoSchedule"
+    #         - key: nvidia.com/gpu
+    #           effect: "NoSchedule"
+    #       amiFamily: Ubuntu
+    #     EOT
+    #   ]
+    # }
+    # karpenter-resources-mig = {
+    #   name        = "karpenter-resources-gpu"
+    #   description = "A Helm chart for karpenter GPU based resources - compatible with g4dn instances"
+    #   chart       = "${path.module}/helm/karpenter-resources"
+    #   values = [
+    #     <<-EOT
+    #       name: gpu
+    #       clusterName: ${module.eks.cluster_name}
+    #       karpenterRole: ${split("/", module.eks_blueprints_addons.karpenter.node_iam_role_arn)[1]}
+    #       instanceSizes: ["2xlarge"]
+    #       instanceFamilies: ["g4dn"]
+    #       taints:
+    #         - key: hub.jupyter.org/dedicated
+    #           value: "user"
+    #           effect: "NoSchedule"
+    #         - key: nvidia.com/gpu
+    #           effect: "NoSchedule"
+    #       amiFamily: Ubuntu
+    #     EOT
+    #   ]
+    # }
+    # karpenter-resources-inf = {
+    #   name        = "karpenter-resources-inf"
+    #   description = "A Helm chart for karpenter Inferentia based resources"
+    #   chart       = "${path.module}/helm/karpenter-resources"
+    #   values = [
+    #     <<-EOT
+    #       name: inferentia
+    #       clusterName: ${module.eks.cluster_name}
+    #       karpenterRole: ${split("/", module.eks_blueprints_addons.karpenter.node_iam_role_arn)[1]}
+    #       instanceSizes: ["8xlarge", "24xlarge"]
+    #       instanceFamilies: ["inf2"]
+    #       taints:
+    #         - key: aws.amazon.com/neuroncore
+    #           value: "true"
+    #           effect: "NoSchedule"
+    #         - key: aws.amazon.com/neuron
+    #           value: "true"
+    #           effect: "NoSchedule"
+    #         - key: hub.jupyter.org/dedicated
+    #           value: "user"
+    #           effect: "NoSchedule"
+    #     EOT
+    #   ]
+    # }
+    # karpenter-resources-trn = {
+    #   name        = "karpenter-resources-trn"
+    #   description = "A Helm chart for karpenter Trainium based resources"
+    #   chart       = "${path.module}/helm/karpenter-resources"
+    #   values = [
+    #     <<-EOT
+    #       name: trainium
+    #       clusterName: ${module.eks.cluster_name}
+    #       karpenterRole: ${split("/", module.eks_blueprints_addons.karpenter.node_iam_role_arn)[1]}
+    #       instanceSizes: ["32xlarge"]
+    #       instanceFamilies: ["trn1"]
+    #       taints:
+    #         - key: aws.amazon.com/neuroncore
+    #           value: "true"
+    #           effect: "NoSchedule"
+    #         - key: aws.amazon.com/neuron
+    #           value: "true"
+    #           effect: "NoSchedule"
+    #         - key: hub.jupyter.org/dedicated
+    #           value: "user"
+    #           effect: "NoSchedule"
+    #     EOT
+    #   ]
+    # }
   }
 
   tags = local.tags
