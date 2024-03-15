@@ -19,7 +19,7 @@ hub:
     GitHubOAuthenticator:
       client_id: "${client_id}"
       client_secret: "${client_secret}"
-      oauth_callback_url: "${jupyterhub_domain}/hub/oauth_callback"
+      oauth_callback_url: "https://${jupyterhub_domain}/hub/oauth_callback"
       scope:
         - read:user
         - gist
@@ -35,7 +35,7 @@ proxy:
     enabled: true
     type: offload
     hosts:
-      - "${jupyterhub_domain}/hub/oauth_callback"
+      - "${jupyterhub_domain}"
   service:
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-ssl-cert: ${ssl_cert_arn}
@@ -45,7 +45,7 @@ proxy:
 
       # TODO(asmacdo) these are included in example but not ours
       service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-      service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
       service.beta.kubernetes.io/aws-load-balancer-type: external
       service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: 'true'
       service.beta.kubernetes.io/aws-load-balancer-ip-address-type: ipv4

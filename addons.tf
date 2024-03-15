@@ -293,7 +293,7 @@ module "eks_data_addons" {
       client_id                   = var.github_client_id
       client_secret               = var.github_client_secret
       ssl_cert_arn                = try(var.aws_certificate_arn, "")
-      jupyterhub_domain           = try("https://${var.jupyterhub_domain}/hub/oauth_callback", "")
+      jupyterhub_domain           = var.jupyterhub_domain
       jupyter_single_user_sa_name = kubernetes_service_account_v1.jupyterhub_single_user_sa.metadata[0].name
       region                      = var.region
       dandi_authenticator         = file("${path.module}/helm/jupyterhub/files/dandi_authenticator.py")
