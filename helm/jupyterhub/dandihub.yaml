@@ -156,9 +156,12 @@ singleuser:
       - name: shm-volume
         emptyDir:
           medium: Memory
+      - name: persistent-storage-shared
+        persistentVolumeClaim:
+          claimName: efs-persist-shared
       - name: persistent-storage
         persistentVolumeClaim:
-          claimName: efs-claim
+          claimName: efs-persist
     extraVolumeMounts:
       - name: fuse
         mountPath: /dev/fuse
@@ -167,10 +170,10 @@ singleuser:
       - name: persistent-storage
         mountPath: '/home/jovyan'
         subPath: 'home/{username}'
-      - name: persistent-storage
+      - name: persistent-storage-shared
         mountPath: '/shared'
         subPath: 'shared'
-      - name: persistent-storage
+      - name: persistent-storage-shared
         mountPath: '/readonly'
         readOnly: true
         subPath: 'readonly'
