@@ -22,7 +22,7 @@ hub:
       oauth_callback_url: "https://${jupyterhub_domain}/hub/oauth_callback"
       scope:
         - read:user
-        - gist
+        - read:gist
         - user:email
 
 cull:
