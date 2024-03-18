@@ -64,42 +64,17 @@ singleuser:
     guarantee: 0.5
   startTimeout: 2400
   profileList:
-    - display_name: Data Engineering (CPU)
-      description: "PySpark Notebooks | Karpenter AutoScaling"
-      profile_options:
-        image:
-          display_name: "Image"
-          choices:
-            pyspark350:
-              display_name: "PySpark 3.5.0 + Python 3.11"
-              default: true
-              kubespawner_override:
-                image: jupyter/pyspark-notebook:spark-3.5.0
-            pyspark341:
-              display_name: "PySpark 3.4.1 + Python 3.11"
-              kubespawner_override:
-                image: jupyter/pyspark-notebook:spark-3.4.1
+    - display_name: "Tiny. Useful for many quick things"
+      description: "0.5 CPU / 1 GB"
       kubespawner_override:
+        image: "${singleuser_image_repo}:${singleuser_image_tag}"
+        image_pull_policy: Always
+        cpu_limit: 2
+        cpu_guarantee: 0.25
+        mem_limit: 2G
+        mem_guarantee: 0.5G
         node_selector:
           NodePool: default
-        cpu_guarantee: 2
-        mem_guarantee: 8G
-        cpu_limit: 4
-        mem_limit: 8G
-      cmd: null
-    # ===================================================================
-    # DANDIHUB Custom Profiles
-    # ===================================================================
-    # TODO(asmacdo) enable
-    # - display_name: "Tiny. Useful for many quick things"
-    #   description: "0.5 CPU / 1 GB"
-    #   kubespawner_override:
-    #     image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}'
-    #     image_pull_policy: Always
-    #     cpu_limit: 2
-    #     cpu_guarantee: 0.25
-    #     mem_limit: 2G
-    #     mem_guarantee: 0.5G
     # TODO(asmacdo) enable
     # - display_name: "Base"
     #   description: "6 CPU / 16 GB upto 12C/32G. May take up to 15 mins to start."
