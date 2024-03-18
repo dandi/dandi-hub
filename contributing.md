@@ -26,3 +26,35 @@ Note on terraform blueprint
 
 Ive needed to add an "All traffic" override to the Security Group for
 the VPC
+
+Manually change route53 record to the proxy
+
+manually add admins to aws-auth  via mapUsers
+
+$ k get configMap -n kube-system aws-auth -o yaml
+```
+apiVersion: v1
+data:
+  mapAccounts: |
+    []
+  mapRoles: |
+    - "groups":
+      - "system:bootstrappers"
+      - "system:nodes"
+      "rolearn": "arn:aws:iam::278212569472:role/jupyterhub-node-group-eks-node-group-20240315201456887100000003"
+      "username": "system:node:{{EC2PrivateDNSName}}"
+    - "groups":
+      - "system:bootstrappers"
+      - "system:nodes"
+      "rolearn": "arn:aws:iam::278212569472:role/karpenter-jupyterhub-on-eks-2024031520225643870000000d"
+      "username": "system:node:{{EC2PrivateDNSName}}"
+  mapUsers: |
+    []
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2024-03-15T20:24:26Z"
+  name: aws-auth
+  namespace: kube-system
+  resourceVersion: "1548"
+  uid: 3539c124-e643-430b-998d-12b01230c2f7
+```
