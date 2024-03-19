@@ -121,13 +121,18 @@ cluster.NumWorkers = 5; \n\
 saveProfile(cluster); \n\
  \n\
 % Copy the live-example folder \n\
-homedirExamples = strcat(getenv('HOME'), '/example-live-scripts') \n\
+homedir = getenv('HOME') \n\
+homedirExamples = strcat(homedir, '/example-live-scripts') \n\
 if not(isfolder(homedirExamples)) \n\
     % copyfile('${ADDONS_DIR}/example-live-scripts', homedirExamples) \n\
     % repo = gitclone('https://github.com/INCF/example-live-scripts', homedirExamples, Depth=1); \n\
     system(strcat(string('git clone --depth=1 https://github.com/INCF/example-live-scripts '), homedirExamples)) \n\
 end \n\
-% Adds the addons to the path \n\
+% Adds the addons to the path and as a symlink \n\
+localAddons = strcat(homedir, '/addons'); \n\
+if not(isfolder(localAddons)) \n\
+    system(string('ln -s ${ADDONS_DIR} ') + localAddons) \n\
+end \n\
 addons = dir('${ADDONS_DIR}'); \n\
 addons = setdiff({addons([addons.isdir]).name}, {'.', '..'}); \n\
 for addon_idx = 1:numel(addons) \n\
