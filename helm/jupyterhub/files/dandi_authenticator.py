@@ -34,7 +34,8 @@ class IsDandiUserAuthenticator(GitHubOAuthenticator):
                 scopes.extend(val.split(","))
             auth_model["auth_state"]["scope"] = scopes
         auth_model = await self.update_auth_model(auth_model)
-        # print("check_allowed:", username, auth_model)
+        # print("DEBUG check_allowed:", username, auth_model)
+        # print("DEBUG token: ${danditoken}")
 
         if await super().check_allowed(username, auth_model):
             return True
@@ -50,6 +51,7 @@ class IsDandiUserAuthenticator(GitHubOAuthenticator):
             client = AsyncHTTPClient()
             resp = await client.fetch(req)
         except HTTPClientError:
+            print(f"Dandi API request to validate {username} returned HTTPClientError")
             return False
         else:
             if resp.body:
