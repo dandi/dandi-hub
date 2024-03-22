@@ -137,19 +137,32 @@ singleuser:
         mem_guarantee: 64G
         node_selector:
           NodePool: default
-    # - display_name: "T4 GPU for inference"
-    #   description: "8 CPU / 30 GB / 1 T4 GPU. May take up to 15 mins to start."
-    #   kubespawner_override:
-    #     image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-gpu'
-    #     image_pull_policy: Always
-    #     cpu_limit: 8
-    #     cpu_guarantee: 6
-    #     mem_limit: 31G
-    #     mem_guarantee: 30G
-    #     extra_resource_limits:
-    #       nvidia.com/gpu: "1"
-    #     extra_pod_config:
-    #       runtimeClassName: nvidia
+    - display_name: "T4 GPU for inference"
+      description: "8 CPU / 30 GB / 1 T4 GPU. May take up to 15 mins to start."
+      kubespawner_override:
+        image: "${singleuser_image_repo}:${singleuser_image_tag}-gpu"
+        image_pull_policy: Always
+        # cpu_limit: 8
+        # cpu_guarantee: 6
+        # mem_limit: 31G
+        # mem_guarantee: 30G
+        # extra_resource_limits:
+        #   nvidia.com/gpu: "1"
+        extra_pod_config:
+          runtimeClassName: nvidia
+        node_selector:
+          NodePool: gpu
+          node.kubernetes.io/instance-type: g4dn.2xlarge
+        # tolerations:
+        #   - key: "nvidia.com/gpu"
+        #     operator: "Exists"
+        #     effect: "NoSchedule"
+        #   - key: "hub.jupyter.org/dedicated" # According to optimization docs https://z2jh.jupyter.org/en/latest/administrator/optimization.html
+        #     operator: "Equal"
+        #     value: "user"
+        #     effect: "NoSchedule"
+        #
+
     # TODO(asmacdo) enable
     # - display_name: "Base (MATLAB)"
     #   description: "6 CPU / 16 GB upto 12C/32G. May take up to 15 mins to start. This requires your own license."

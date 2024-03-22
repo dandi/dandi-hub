@@ -188,27 +188,27 @@ module "eks_blueprints_addons" {
     #     EOT
     #   ]
     # }
-    # karpenter-resources-mig = {
-    #   name        = "karpenter-resources-gpu"
-    #   description = "A Helm chart for karpenter GPU based resources - compatible with g4dn instances"
-    #   chart       = "${path.module}/helm/karpenter-resources"
-    #   values = [
-    #     <<-EOT
-    #       name: gpu
-    #       clusterName: ${module.eks.cluster_name}
-    #       karpenterRole: ${split("/", module.eks_blueprints_addons.karpenter.node_iam_role_arn)[1]}
-    #       instanceSizes: ["2xlarge"]
-    #       instanceFamilies: ["g4dn"]
-    #       taints:
-    #         - key: hub.jupyter.org/dedicated
-    #           value: "user"
-    #           effect: "NoSchedule"
-    #         - key: nvidia.com/gpu
-    #           effect: "NoSchedule"
-    #       amiFamily: Ubuntu
-    #     EOT
-    #   ]
-    # }
+    karpenter-resources-mig = {
+      name        = "karpenter-resources-gpu"
+      description = "A Helm chart for karpenter GPU based resources - compatible with g4dn instances"
+      chart       = "${path.module}/helm/karpenter-resources"
+      values = [
+        <<-EOT
+          name: gpu
+          clusterName: ${module.eks.cluster_name}
+          karpenterRole: ${split("/", module.eks_blueprints_addons.karpenter.node_iam_role_arn)[1]}
+          instanceSizes: ["2xlarge"]
+          instanceFamilies: ["g4dn"]
+        EOT
+      ]
+    }
+          # taints:
+          #   - key: hub.jupyter.org/dedicated
+          #     value: "user"
+          #     effect: "NoSchedule"
+          #   - key: nvidia.com/gpu
+          #     effect: "NoSchedule"
+          # amiFamily: Ubuntu
     # karpenter-resources-inf = {
     #   name        = "karpenter-resources-inf"
     #   description = "A Helm chart for karpenter Inferentia based resources"
@@ -282,6 +282,10 @@ module "eks_data_addons" {
   enable_nvidia_gpu_operator = true
   nvidia_gpu_operator_helm_config = {
     values = [templatefile("${path.module}/helm/nvidia-gpu-operator/values.yaml", {})]
+    set = [{
+      name  = "toolkit.version",
+      value = "v1.14.6-ubi8",
+    }]
   }
 
   #---------------------------------------------------------------
