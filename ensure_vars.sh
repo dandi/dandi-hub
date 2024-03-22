@@ -9,3 +9,7 @@ if [ -z "${TF_VAR_github_client_secret-}" ]; then
    echo "Must provide github client secret env var. Exiting...."
    exit 1
 fi
+if [ -z "${TF_VAR_danditoken-}" ]; then
+   echo "Must provide DANDI API key. Exiting...."
+   exit 1
+fi

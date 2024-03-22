@@ -36,7 +36,6 @@ class IsDandiUserAuthenticator(GitHubOAuthenticator):
         auth_model = await self.update_auth_model(auth_model)
         # print("check_allowed:", username, auth_model)
 
-        # TODO(asmacdo) we need danditoken here.
         if await super().check_allowed(username, auth_model):
             return True
         req = HTTPRequest(
@@ -44,7 +43,7 @@ class IsDandiUserAuthenticator(GitHubOAuthenticator):
                     method="GET",
                     headers={"Accept": "application/json",
                              "User-Agent": "JupyterHub",
-                             "Authorization": "token {{ danditoken }}"},
+                             "Authorization": "token ${danditoken}"},
                     validate_cert=self.validate_server_cert,
                )
         try:

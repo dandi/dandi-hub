@@ -299,6 +299,7 @@ module "eks_data_addons" {
       dandi_authenticator         = file("${path.module}/helm/jupyterhub/files/dandi_authenticator.py")
       singleuser_image_repo       = var.singleuser_image_repo
       singleuser_image_tag        = var.singleuser_image_tag
+      danditoken                  = var.danditoken
     })]
     version                     = "3.2.1"
   }
