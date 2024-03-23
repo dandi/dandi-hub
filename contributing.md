@@ -24,8 +24,8 @@ Note on terraform blueprint
   however first thing to try is just run install.sh a few times
   sometimes it can fix itself.
 
-Ive needed to add an "All traffic" override to the Security Group for
-the VPC
+~Ive needed to add an "All traffic" override to the Security Group for
+the VPC~ ruled out.
 
 Manually change route53 record to the proxy
 
