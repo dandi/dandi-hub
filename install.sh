@@ -5,9 +5,7 @@ source ensure_vars.sh
 echo "Initializing ..."
 terraform init || echo "\"terraform init\" failed"
 
-lifecycle="dev"
-# lifecycle="test"
-# lifecycle="prod"
+varfile="$HUB_DEPLOYMENT_NAME.tfvars"
 
 # List of Terraform modules to apply in sequence
 targets=(
@@ -19,7 +17,7 @@ targets=(
 for target in "${targets[@]}"
 do
   echo "Applying module $target..."
-  apply_output=$(terraform apply -target="$target" -auto-approve -var-file="dev.tfvars" 2>&1 | tee /dev/tty)
+  apply_output=$(terraform apply -target="$target" -auto-approve -var-file="$varfile" 2>&1 | tee /dev/tty)
   if [[ ${PIPESTATUS[0]} -eq 0 && $apply_output == *"Apply complete"* ]]; then
     echo "SUCCESS: Terraform apply of $target completed successfully"
   else
@@ -30,7 +28,7 @@ done
 
 # Final apply to catch any remaining resources
 echo "Applying remaining resources..."
-apply_output=$(terraform apply -auto-approve -var-file="dev.tfvars" 2>&1 | tee /dev/tty)
+apply_output=$(terraform apply -auto-approve -var-file="$varfile" 2>&1 | tee /dev/tty)
 if [[ ${PIPESTATUS[0]} -eq 0 && $apply_output == *"Apply complete"* ]]; then
   echo "SUCCESS: Terraform apply of all modules completed successfully"
 else

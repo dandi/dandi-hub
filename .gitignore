@@ -6,4 +6,4 @@ ansible_password
 terraform.tfstate*
 
 # Env secrets
-.env
+*.env
