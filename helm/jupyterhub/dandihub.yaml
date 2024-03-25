@@ -143,7 +143,7 @@ singleuser:
         image: "${singleuser_image_repo}:${singleuser_image_tag}-gpu"
         image_pull_policy: Always
         cpu_limit: 8
-        # cpu_guarantee: 6
+        cpu_guarantee: 6
         mem_limit: 31G
         # mem_guarantee: 30G
         extra_resource_limits:
