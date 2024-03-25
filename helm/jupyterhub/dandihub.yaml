@@ -42,8 +42,6 @@ proxy:
       service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
       service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "3600"
-
-      # TODO(asmacdo) these are included in example but not ours
       service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
       service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
       service.beta.kubernetes.io/aws-load-balancer-type: external
@@ -90,6 +88,10 @@ singleuser:
               default: true
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}"
+            matlab:
+              display_name: "Matlab (must provide your own license)"
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}}-matlab"
       default: true
       kubespawner_override:
         image_pull_policy: Always
@@ -139,8 +141,20 @@ singleuser:
           NodePool: default
     - display_name: "T4 GPU for inference"
       description: "8 CPU / 30 GB / 1 T4 GPU. May take up to 15 mins to start."
+      profile_options:
+        image:
+          display_name: "Image"
+          choices:
+            standard:
+              display_name: "Dandihub Standard"
+              default: true
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-gpu"
+            matlab:
+              display_name: "Matlab (must provide your own license)"
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}}-gpu-matlab"
       kubespawner_override:
-        image: "${singleuser_image_repo}:${singleuser_image_tag}-gpu"
         image_pull_policy: Always
         cpu_limit: 8
         cpu_guarantee: 6
@@ -159,34 +173,6 @@ singleuser:
             operator: "Equal"
             value: "user"
             effect: "NoSchedule"
-        #
-
-    # TODO(asmacdo) enable
-    # - display_name: "Base (MATLAB)"
-    #   description: "6 CPU / 16 GB upto 12C/32G. May take up to 15 mins to start. This requires your own license."
-    #   kubespawner_override:
-    #     image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-matlab'
-    #     image_pull_policy: Always
-    #     cpu_limit: 12
-    #     cpu_guarantee: 6
-    #     mem_limit: 32G
-    #     mem_guarantee: 16G
-    # TODO(asmacdo) enable
-    # - display_name: "T4 GPU for inference"
-    #   description: "8 CPU / 30 GB / 1 T4 GPU. May take up to 15 mins to start. This requires your own license."
-    #   kubespawner_override:
-    #     image: '{{ singleuser_image_repo }}:{{ singleuser_image_tag }}-gpu-matlab'
-    #     image_pull_policy: Always
-    #     cpu_limit: 8
-    #     cpu_guarantee: 6
-    #     mem_limit: 31G
-    #     mem_guarantee: 30G
-    #     extra_resource_limits:
-    #       nvidia.com/gpu: "1"
-    #     extra_pod_config:
-    #       runtimeClassName: nvidia
-    #
-    # TODO(asmacdo) Copy the persistant behavior from: https://github.com/dandi/dandi-hub/blob/f14ccdda524ee573fd28512791826f8a13ddd78a/config.yaml.j2#L211-L237
   storage:
     type: none
     extraVolumes:
