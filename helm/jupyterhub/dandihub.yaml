@@ -145,7 +145,7 @@ singleuser:
         cpu_limit: 8
         cpu_guarantee: 6
         mem_limit: 31G
-        # mem_guarantee: 30G
+        mem_guarantee: 25G
         extra_resource_limits:
           nvidia.com/gpu: "1"
         node_selector:
