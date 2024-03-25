@@ -6,17 +6,14 @@ hub:
   authenticatePrometheus: false
   command: ["sh", "-c", "pip install boto3 && jupyterhub --config /usr/local/etc/jupyterhub/jupyterhub_config.py"]
   extraConfig:
-    # Extend GitHubOauthenticator
     myConfig: |
       ${indent(6, dandi_authenticator)}
   config:
     Authenticator:
       admin_users:
-        - "asmacdo"
-        - "dandibot"
-        - "satra"
-        - "yarikoptic"
-
+%{ for admin_user in admin_users ~}
+        - "${admin_user}"
+%{ endfor ~}
     GitHubOAuthenticator:
       client_id: "${client_id}"
       client_secret: "${client_secret}"
@@ -92,7 +89,7 @@ singleuser:
             matlab:
               display_name: "Matlab (must provide your own license)"
               kubespawner_override:
-                image: "${singleuser_image_repo}:${singleuser_image_tag}}-matlab"
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-matlab"
       default: true
       kubespawner_override:
         image_pull_policy: Always

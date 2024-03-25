@@ -284,7 +284,6 @@ module "eks_data_addons" {
     values = [templatefile("${path.module}/helm/nvidia-gpu-operator/values.yaml", {})]
     version = "23.9.2"
   }
-
   #---------------------------------------------------------------
   # JupyterHub Add-on
   #---------------------------------------------------------------
@@ -302,6 +301,7 @@ module "eks_data_addons" {
       })
       singleuser_image_repo       = var.singleuser_image_repo
       singleuser_image_tag        = var.singleuser_image_tag
+      admin_users                 = var.admin_users
     })]
     version                     = "3.2.1"
   }

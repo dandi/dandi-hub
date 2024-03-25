@@ -92,3 +92,8 @@ variable "aws_certificate_arn" {
   description = "AWS certificate for the domain."
   default = ""
 }
+
+variable "admin_users" {
+  description = "List of admin users"
+  type        = list(string)
+}
