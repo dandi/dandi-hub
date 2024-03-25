@@ -1,32 +1,28 @@
+# `extraConfig` in hub config is evaluated at the end of jupyterhub_config.py
+import json
+import os
+import warnings
+
 from kubernetes_asyncio import client
+from oauthenticator.github import GitHubOAuthenticator
+from tornado.httpclient import HTTPRequest, HTTPClientError, AsyncHTTPClient
 
 
-def modify_pod_hook(spawner, pod):
+def modify_pod_hook(spawner, pod):  # noqa
     pod.spec.containers[0].security_context = client.V1SecurityContext(
         privileged=True
     )
     return pod
 
 
-c.KubeSpawner.modify_pod_hook = modify_pod_hook
-
-# Based on <https://github.com/jupyterhub/oauthenticator/blob/master/examples/auth_state/jupyterhub_config.py>:
-import os
-import warnings
-
-from oauthenticator.github import GitHubOAuthenticator
-from tornado.httpclient import HTTPRequest, HTTPClientError, AsyncHTTPClient
-import json
-
 # define our OAuthenticator with `.pre_spawn_start`
 # for passing auth_state into the user environment
-
-
+# Based on <https://github.com/jupyterhub/oauthenticator/blob/master/examples/auth_state/jupyterhub_config.py>:  # noqa
 class IsDandiUserAuthenticator(GitHubOAuthenticator):
 
     async def check_allowed(self, username, auth_model):
         """
-        Overrides the OAuthenticator.check_allowed to check dandi registered users
+        Query DANDI API to ensure user is registered.
         """
         if auth_model["auth_state"].get("scope", []):
             scopes = []
@@ -34,11 +30,11 @@ class IsDandiUserAuthenticator(GitHubOAuthenticator):
                 scopes.extend(val.split(","))
             auth_model["auth_state"]["scope"] = scopes
         auth_model = await self.update_auth_model(auth_model)
-        # print("DEBUG check_allowed:", username, auth_model)
-        # print("DEBUG token: ${danditoken}")
 
-        if await super().check_allowed(username, auth_model):
-            return True
+        # Allowed if admin
+        return await super().check_allowed(username, auth_model)
+
+        # Allowd if user is a registered DANDI user.
         req = HTTPRequest(
                     f"https://api.dandiarchive.org/api/users/search/?username={username}",
                     method="GET",
@@ -50,8 +46,8 @@ class IsDandiUserAuthenticator(GitHubOAuthenticator):
         try:
             client = AsyncHTTPClient()
             resp = await client.fetch(req)
-        except HTTPClientError:
-            print(f"Dandi API request to validate {username} returned HTTPClientError")
+        except HTTPClientError as e:
+            print(f"Dandi API request to validate {username} returned HTTPClientError: {e}")
             return False
         else:
             if resp.body:
@@ -60,7 +56,7 @@ class IsDandiUserAuthenticator(GitHubOAuthenticator):
                     if val["username"].lower() == username.lower():
                         return True
 
-        # users should be explicitly allowed via config, otherwise they aren't
+        # If not explicitly allowed, not allowed.
         return False
 
     async def pre_spawn_start(self, user, spawner):
@@ -73,8 +69,6 @@ class IsDandiUserAuthenticator(GitHubOAuthenticator):
         spawner.environment['GITHUB_USER'] = auth_state['github_user']['login']
         spawner.environment['GITHUB_EMAIL'] = auth_state['github_user']['email']
 
-
-c.JupyterHub.authenticator_class = IsDandiUserAuthenticator
-
-# enable authentication state
-c.GitHubOAuthenticator.enable_auth_state = True
+c.KubeSpawner.modify_pod_hook = modify_pod_hook  # noqa
+c.JupyterHub.authenticator_class = IsDandiUserAuthenticator  # noqa
+c.GitHubOAuthenticator.enable_auth_state = True  # noqa

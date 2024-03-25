@@ -6,6 +6,7 @@ hub:
   authenticatePrometheus: false
   command: ["sh", "-c", "pip install boto3 && jupyterhub --config /usr/local/etc/jupyterhub/jupyterhub_config.py"]
   extraConfig:
+    # Extend GitHubOauthenticator
     myConfig: |
       ${indent(6, dandi_authenticator)}
   config:
