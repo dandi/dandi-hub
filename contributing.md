@@ -48,8 +48,12 @@ data:
       - "system:nodes"
       "rolearn": "arn:aws:iam::278212569472:role/karpenter-jupyterhub-on-eks-2024031520225643870000000d"
       "username": "system:node:{{EC2PrivateDNSName}}"
-  mapUsers: |
-    []
+
+  mapUsers: |                                                                                                                              
+    - groups:                                                                                                                              
+      - system:masters                                                                                                                     
+      userarn: arn:aws:iam::278212569472:user/aaron                                                                                        
+      username: aaron   
 kind: ConfigMap
 metadata:
   creationTimestamp: "2024-03-15T20:24:26Z"
