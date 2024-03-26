@@ -303,7 +303,7 @@ module "eks_data_addons" {
       singleuser_image_tag        = var.singleuser_image_tag
       admin_users                 = var.admin_users
     })]
-    version                     = "3.2.1"
+    version                     = "3.3.5"
   }
 
   #---------------------------------------------------------------
