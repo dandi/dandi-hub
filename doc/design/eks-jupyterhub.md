@@ -70,7 +70,6 @@ TODO: Ansible or Bash instead of terraform
 
 1. As a DANDI user I can dynamically log into a jupyterhub instance!
 1. As a polite DANDI user, I can select different jupyterhub instance options (differing resource usage), depending on my needs.
-1. As a DANDI user, my home directory /home/{username} persists even after I shut down my hub.
 1. As a team of DANDI users, we can be given access to a shared directory and this process is clearly documented.
 
 ## Estimating and Limiting Cost
