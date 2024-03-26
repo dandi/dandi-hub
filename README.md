@@ -100,3 +100,8 @@ metadata:
 These are the options for user-facing machines that run as a pod on the node and they are configured
 in `profileList` in `dandihub.yaml`
 
+### Adjusting Available Nodes
+
+These are the EKS machines that may run underneath one or more user-hub pods and they are configured via Karpenter.
+
+The nodepools are configured in addons.tf with `karpenter-resources-*` objects.
