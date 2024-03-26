@@ -94,3 +94,9 @@ metadata:
   name: aws-auth
   namespace: kube-system
 ```
+
+### Adjusting Available "Server Options"
+
+These are the options for user-facing machines that run as a pod on the node and they are configured
+in `profileList` in `dandihub.yaml`
+
