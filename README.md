@@ -19,6 +19,7 @@ Create a variables file `$HUB_DEPLOYMENT_NAME.tfvars` (ie dandihub.tfvars)
  - singleuser_image_tag: tag
  - jupyterhub_domain: The domain to hust the jupytehub landing page: (ie "hub.dandiarchive.org")
  - admin_users: List of adming github usernames (ie: ["github_username"])
+ - region: Cloud vendor region (ie us-west-1)
 
 ### Github Oauth
 
