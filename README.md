@@ -108,3 +108,29 @@ Each profile can have multiple user-facing `profile_options` including `images`.
 These are the EKS machines that may run underneath one or more user-hub pods and they are configured via Karpenter.
 
 The nodepools are configured in addons.tf with `karpenter-resources-*` objects.
+
+
+## Kubernetes Layer Tour
+
+### Jupyterhub Namespace
+
+These objects are created by z2jh. 
+
+https://z2jh.jupyter.org/en/stable/
+
+`kubectl get all -n jupyterhub`
+
+Notable objects:
+
+  - `pod/jupyter-<github_username>`: User pod 
+  - `pod/user-scheduler-5d8b9567-26x6j`: Creates user pods. There are 2 one has been elected leader, with one backup.
+  - `service/proxy-public`: LoadBalancer, External IP must be connected to DNS (Route 53)
+
+### Karpenter Namespace
+
+`pod/karpenter-75fc7784bf-cjddv` responds similarly to the cluster-autoscaler. 
+
+When Jupyterhub user pods are scheduled and sufficient Nodes are not available, Karpenter creates a NodeClaim and then interacts with AWS to spin up machines.
+
+  `nodeclaims`: Create a node from one of the Karpenter Nodepools. (This is where spot/on demand is configured for user-pods)
+
