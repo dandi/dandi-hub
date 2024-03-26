@@ -20,7 +20,7 @@ Create a variables file `$HUB_DEPLOYMENT_NAME.tfvars` (ie dandihub.tfvars)
  - jupyterhub_domain: The domain to hust the jupytehub landing page: (ie "hub.dandiarchive.org")
  - admin_users: List of adming github usernames (ie: ["github_username"])
 
-### Github Oauth 
+### Github Oauth
 
 1. Open the GitHub OAuth App Wizard: GitHub settings -> Developer settings -> Oauth Apps.
    For dandihub, this is owned by a bot GitHub user account (e.g. dandibot).
@@ -33,12 +33,12 @@ Most of the configuration is set in the template `helm/jupyterhub/dandihub.yaml`
 This template is configuration for the jupyterhub helmchart [administrator guide for jupyerhub](https://z2jh.jupyter.org/en/stable/administrator/index.html)
 
 
-The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/data-on-eks/docs/blueprints/ai-ml/jupyterhub) may be helpful. 
+The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/data-on-eks/docs/blueprints/ai-ml/jupyterhub) may be helpful.
 
 ### Installation
 
 WARNING: Amazon Key Management Service objects have a 7 day waiting period to delete.
-Be absolutely sure that tfstate is up to date before runnning. 
+Be absolutely sure that tfstate is up to date before runnning.
 
 `./install.sh`
 
@@ -84,9 +84,9 @@ apiVersion: v1
 data:
   mapAccounts: <snip>
   mapRoles: <snip>
-  mapUsers: |                                                                                                                              
-    - groups:                                                                                                                              
-      - system:masters                                                                                                                     
+  mapUsers: |
+    - groups:
+      - system:masters
       userarn: arn:aws:iam::<acct_id>:user/<iam_username>
       username: <iam_username>
 kind: ConfigMap
@@ -99,6 +99,8 @@ metadata:
 
 These are the options for user-facing machines that run as a pod on the node and they are configured
 in `profileList` in `dandihub.yaml`
+
+Each profile can have multiple user-facing `profile_options` including `images`.
 
 ### Adjusting Available Nodes
 
