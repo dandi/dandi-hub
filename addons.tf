@@ -309,7 +309,7 @@ module "eks_data_addons" {
   #---------------------------------------------------------------
   # Kubecost Add-on
   #---------------------------------------------------------------
-  enable_kubecost = false
+  enable_kubecost = true
   kubecost_helm_config = {
     values              = [templatefile("${path.module}/helm/kubecost/values.yaml", {})]
     repository_username = data.aws_ecrpublic_authorization_token.token.user_name
