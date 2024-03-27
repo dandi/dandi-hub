@@ -78,7 +78,7 @@ variable "singleuser_image_tag" {
 
 variable "dandi_authenticator" {
   type = string
-  description = "jupyterhub extraConfig python, implents custom auth"
+  description = "jupyterhub extraConfig python, implements custom auth"
   default = ""
 }
 

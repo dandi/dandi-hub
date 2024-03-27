@@ -145,4 +145,3 @@
     cpu_limit: 2
     mem_limit: 10G
     cmd: "start-singleuser.sh"
-

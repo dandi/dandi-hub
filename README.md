@@ -40,11 +40,11 @@ The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/d
 ### Installation
 
 WARNING: Amazon Key Management Service objects have a 7 day waiting period to delete.
-Be absolutely sure that tfstate is up to date before runnning.
+Be absolutely sure that tfstate is up to date before running.
 
 `./install.sh`
 
-Occassionally there are timeout and race condition failures.
+Occasionally there are timeout and race condition failures.
 Usually these are resolved by simply retrying the install script.
 
 
@@ -52,7 +52,7 @@ Usually these are resolved by simply retrying the install script.
 
 Cleanup requires the same variables and is run `./cleanup.sh`
 
-NOTE: Occassionally the kubernetes namespace fails to delete.
+NOTE: Occasionally the kubernetes namespace fails to delete.
 
 WARNING: Sometimes AWS VPCs are left up due to an upstream terraform race condition, and must be deleted by hand (including hand-deleting each nested object)
 
@@ -115,7 +115,7 @@ The nodepools are configured in addons.tf with `karpenter-resources-*` objects.
 
 ### Jupyterhub Namespace
 
-These objects are created by z2jh. 
+These objects are created by z2jh.
 
 https://z2jh.jupyter.org/en/stable/
 
@@ -123,15 +123,14 @@ https://z2jh.jupyter.org/en/stable/
 
 Notable objects:
 
-  - `pod/jupyter-<github_username>`: User pod 
+  - `pod/jupyter-<github_username>`: User pod
   - `pod/user-scheduler-5d8b9567-26x6j`: Creates user pods. There are 2 one has been elected leader, with one backup.
   - `service/proxy-public`: LoadBalancer, External IP must be connected to DNS (Route 53)
 
 ### Karpenter Namespace
 
-`pod/karpenter-75fc7784bf-cjddv` responds similarly to the cluster-autoscaler. 
+`pod/karpenter-75fc7784bf-cjddv` responds similarly to the cluster-autoscaler.
 
 When Jupyterhub user pods are scheduled and sufficient Nodes are not available, Karpenter creates a NodeClaim and then interacts with AWS to spin up machines.
 
   `nodeclaims`: Create a node from one of the Karpenter Nodepools. (This is where spot/on demand is configured for user-pods)
-

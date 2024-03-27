@@ -76,7 +76,7 @@ singleuser:
         node_selector:
           NodePool: default
     - display_name: "Base"
-      description: "6 CPU / 16 GB upto 12C/32G. May take up to 15 mins to start."
+      description: "6 CPU / 16 GB up to 12C/32G. May take up to 15 mins to start."
       profile_options:
         image:
           display_name: "Image"
@@ -100,7 +100,7 @@ singleuser:
         node_selector:
           NodePool: default
     - display_name: "Medium"
-      description: "12C/32G upto 24C/64G. May take up to 15 mins to start."
+      description: "12C/32G up to 24C/64G. May take up to 15 mins to start."
       profile_options:
         image:
           display_name: "Image"
@@ -119,7 +119,7 @@ singleuser:
         node_selector:
           NodePool: default
     - display_name: "Large"
-      description: "24C/64G upto 48C/96G. May take up to 15 mins to start."
+      description: "24C/64G up to 48C/96G. May take up to 15 mins to start."
       profile_options:
         image:
           display_name: "Image"

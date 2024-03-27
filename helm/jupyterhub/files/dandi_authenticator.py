@@ -1,17 +1,15 @@
 # `extraConfig` in hub config is evaluated at the end of jupyterhub_config.py
 import json
-import os
-import warnings
+import os  # noqa
+import warnings  # noqa
 
 from kubernetes_asyncio import client
 from oauthenticator.github import GitHubOAuthenticator
-from tornado.httpclient import HTTPRequest, HTTPClientError, AsyncHTTPClient
+from tornado.httpclient import AsyncHTTPClient, HTTPClientError, HTTPRequest
 
 
 def modify_pod_hook(spawner, pod):  # noqa
-    pod.spec.containers[0].security_context = client.V1SecurityContext(
-        privileged=True
-    )
+    pod.spec.containers[0].security_context = client.V1SecurityContext(privileged=True)
     return pod
 
 
@@ -19,7 +17,6 @@ def modify_pod_hook(spawner, pod):  # noqa
 # for passing auth_state into the user environment
 # Based on <https://github.com/jupyterhub/oauthenticator/blob/master/examples/auth_state/jupyterhub_config.py>:  # noqa
 class IsDandiUserAuthenticator(GitHubOAuthenticator):
-
     async def check_allowed(self, username, auth_model):
         """
         Query DANDI API to ensure user is registered.
@@ -34,24 +31,28 @@ class IsDandiUserAuthenticator(GitHubOAuthenticator):
         # Allowed if admin
         return await super().check_allowed(username, auth_model)
 
-        # Allowd if user is a registered DANDI user.
+        # Allowed if user is a registered DANDI user.
         req = HTTPRequest(
-                    f"${dandi_api_domain}/api/users/search/?username={username}",  # noqa
-                    method="GET",
-                    headers={"Accept": "application/json",
-                             "User-Agent": "JupyterHub",
-                             "Authorization": "token ${danditoken}"},
-                    validate_cert=self.validate_server_cert,
-               )
+            f"${dandi_api_domain}/api/users/search/?username={username}",  # noqa
+            method="GET",
+            headers={
+                "Accept": "application/json",
+                "User-Agent": "JupyterHub",
+                "Authorization": "token ${danditoken}",
+            },
+            validate_cert=self.validate_server_cert,
+        )
         try:
             client = AsyncHTTPClient()
             resp = await client.fetch(req)
         except HTTPClientError as e:
-            print(f"Dandi API request to validate {username} returned HTTPClientError: {e}")
+            print(
+                f"Dandi API request to validate {username} returned HTTPClientError: {e}"
+            )
             return False
         else:
             if resp.body:
-                resp_json = json.loads(resp.body.decode('utf8', 'replace'))
+                resp_json = json.loads(resp.body.decode("utf8", "replace"))
                 for val in resp_json:
                     if val["username"].lower() == username.lower():
                         return True
@@ -65,9 +66,10 @@ class IsDandiUserAuthenticator(GitHubOAuthenticator):
             # user has no auth state
             return
         # define some environment variables from auth_state
-        spawner.environment['GITHUB_TOKEN'] = auth_state['access_token']
-        spawner.environment['GITHUB_USER'] = auth_state['github_user']['login']
-        spawner.environment['GITHUB_EMAIL'] = auth_state['github_user']['email']
+        spawner.environment["GITHUB_TOKEN"] = auth_state["access_token"]
+        spawner.environment["GITHUB_USER"] = auth_state["github_user"]["login"]
+        spawner.environment["GITHUB_EMAIL"] = auth_state["github_user"]["email"]
+
 
 c.KubeSpawner.modify_pod_hook = modify_pod_hook  # noqa
 c.JupyterHub.authenticator_class = IsDandiUserAuthenticator  # noqa
