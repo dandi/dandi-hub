@@ -100,7 +100,7 @@ module "eks" {
       max_size     = 8
       desired_size = 4
 
-      instance_types = ["t3a.medium"]
+      instance_types = ["m5.xlarge"]
 
       ebs_optimized = true
       block_device_mappings = {
