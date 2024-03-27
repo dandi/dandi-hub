@@ -29,7 +29,8 @@ class IsDandiUserAuthenticator(GitHubOAuthenticator):
         auth_model = await self.update_auth_model(auth_model)
 
         # Allowed if admin
-        return await super().check_allowed(username, auth_model)
+        if await super().check_allowed(username, auth_model):
+            return True
 
         # Allowed if user is a registered DANDI user.
         req = HTTPRequest(
@@ -44,6 +45,7 @@ class IsDandiUserAuthenticator(GitHubOAuthenticator):
         )
         try:
             client = AsyncHTTPClient()
+            print(f"Attempting to validate {username} with ${dandi_api_domain}")  # noqa
             resp = await client.fetch(req)
         except HTTPClientError as e:
             print(
