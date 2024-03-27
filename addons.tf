@@ -75,7 +75,7 @@ module "eks_blueprints_addons" {
   #---------------------------------------
   # Metrics Server
   #---------------------------------------
-  enable_metrics_server = true
+  enable_metrics_server = false
   metrics_server = {
     timeout = "300"
     values  = [templatefile("${path.module}/helm/metrics-server/values.yaml", {})]
@@ -119,7 +119,7 @@ module "eks_blueprints_addons" {
   # 2- Grafana Admin user: admin
   # 3- Get admin user password: `aws secretsmanager get-secret-value --secret-id <output.grafana_secret_name> --region $AWS_REGION --query "SecretString" --output text`
   #---------------------------------------------------------------
-  enable_kube_prometheus_stack = true
+  enable_kube_prometheus_stack = false
   kube_prometheus_stack = {
     values        = [templatefile("${path.module}/helm/kube-prometheus-stack/values.yaml", {})]
     chart_version = "48.1.1"
@@ -310,7 +310,7 @@ module "eks_data_addons" {
   #---------------------------------------------------------------
   # Kubecost Add-on
   #---------------------------------------------------------------
-  enable_kubecost = true
+  enable_kubecost = false
   kubecost_helm_config = {
     values              = [templatefile("${path.module}/helm/kubecost/values.yaml", {})]
     repository_username = data.aws_ecrpublic_authorization_token.token.user_name
