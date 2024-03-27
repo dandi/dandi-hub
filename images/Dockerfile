@@ -62,7 +62,8 @@ RUN pip install --no-cache-dir -U plotly jupyter_bokeh jupytext nbgitpuller data
     'pydra>=0.17' 'pynwb>=2.3.1' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]"  \
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
-    tensorstore anndata
+    tensorstore anndata \
+    jupyterlab_h5web
 
 RUN pip install --no-cache-dir multiscale_spatial_image jupyterlab-git \
         datalad-fuse
