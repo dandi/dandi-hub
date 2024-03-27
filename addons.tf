@@ -1,3 +1,7 @@
+# Derived from Data On EKS under Apache License 2.0.
+# Source: https://github.com/awslabs/data-on-eks/tree/main/ai-ml/jupyterhub
+# See LICENSE file in the root directory of this source code or at http://www.apache.org/licenses/LICENSE-2.0.html.
+
 # Use this data source to get the ARN of a certificate in AWS Certificate Manager (ACM)
 # data "aws_acm_certificate" "issued" {
 #   count    = var.jupyter_hub_auth_mechanism == "cognito" ? 1 : 0

@@ -1,3 +1,7 @@
+# Derived from Data On EKS under Apache License 2.0.
+# Source: https://github.com/awslabs/data-on-eks/tree/main/ai-ml/jupyterhub
+# See LICENSE file in the root directory of this source code or at http://www.apache.org/licenses/LICENSE-2.0.html.
+
 locals {
   # Routable Private subnets only for Private NAT Gateway -> Transit Gateway -> Second VPC for overlapping CIDRs
   # e.g., var.vpc_cidr = "10.1.0.0/21" => output: ["10.1.0.0/24", "10.1.1.0/24"] => 256-2 = 254 usable IPs per subnet/AZ
