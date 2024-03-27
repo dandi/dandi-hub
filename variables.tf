@@ -97,3 +97,8 @@ variable "admin_users" {
   description = "List of admin users"
   type        = list(string)
 }
+
+variable "dandi_api_domain" {
+  description = "Domain of DANDI API used to check user registration"
+  type = string
+}

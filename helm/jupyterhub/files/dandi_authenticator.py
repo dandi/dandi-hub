@@ -36,7 +36,7 @@ class IsDandiUserAuthenticator(GitHubOAuthenticator):
 
         # Allowd if user is a registered DANDI user.
         req = HTTPRequest(
-                    f"https://api.dandiarchive.org/api/users/search/?username={username}",
+                    f"${dandi_api_domain}/api/users/search/?username={username}",  # noqa
                     method="GET",
                     headers={"Accept": "application/json",
                              "User-Agent": "JupyterHub",

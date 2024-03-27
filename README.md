@@ -17,7 +17,8 @@ Create a variables file `$HUB_DEPLOYMENT_NAME.tfvars` (ie dandihub.tfvars)
 
  - singleuser_image_repo: Dockerhub repository containing custom jupyterhub image
  - singleuser_image_tag: tag
- - jupyterhub_domain: The domain to hust the jupytehub landing page: (ie "hub.dandiarchive.org")
+ - jupyterhub_domain: The domain to host the jupytehub landing page: (ie "hub.dandiarchive.org")
+ - dandi_api_domain: The domain that hosts the DANDI API with list of registered users
  - admin_users: List of adming github usernames (ie: ["github_username"])
  - region: Cloud vendor region (ie us-west-1)
 

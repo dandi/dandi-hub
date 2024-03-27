@@ -298,6 +298,7 @@ module "eks_data_addons" {
       region                      = var.region
       dandi_authenticator         = templatefile("${path.module}/helm/jupyterhub/files/dandi_authenticator.py", {
         danditoken                  = var.danditoken
+        dandi_api_domain            = var.dandi_api_domain
       })
       singleuser_image_repo       = var.singleuser_image_repo
       singleuser_image_tag        = var.singleuser_image_tag
