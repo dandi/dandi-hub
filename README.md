@@ -110,6 +110,9 @@ These are the EKS machines that may run underneath one or more user-hub pods and
 
 The nodepools are configured in addons.tf with `karpenter-resources-*` objects.
 
+### Adjusting Core Node
+
+The configuration for the machines that run the autoscaling and montitoring layer is `eks_managed_node_groups` in `main.tf`
 
 ## Kubernetes Layer Tour
 
