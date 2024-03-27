@@ -126,6 +126,7 @@ https://z2jh.jupyter.org/en/stable/
 
 Notable objects:
 
+  - `pod/hub-23490-393` Jupyterhub server and culler pod
   - `pod/jupyter-<github_username>`: User pod
   - `pod/user-scheduler-5d8b9567-26x6j`: Creates user pods. There are 2 one has been elected leader, with one backup.
   - `service/proxy-public`: LoadBalancer, External IP must be connected to DNS (Route 53)
