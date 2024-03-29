@@ -63,7 +63,7 @@ singleuser:
           display_name: "Image"
           choices:
             standard:
-              display_name: "Dandihub Standard"
+              display_name: "Standard"
               default: true
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}"
@@ -82,12 +82,12 @@ singleuser:
           display_name: "Image"
           choices:
             standard:
-              display_name: "Dandihub Standard"
+              display_name: "Standard"
               default: true
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}"
             matlab:
-              display_name: "Matlab (must provide your own license)"
+              display_name: "MATLAB (must provide your own license)"
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}-matlab"
       default: true
@@ -106,10 +106,14 @@ singleuser:
           display_name: "Image"
           choices:
             standard:
-              display_name: "Dandihub Standard"
+              display_name: "Standard"
               default: true
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}"
+            matlab:
+              display_name: "MATLAB (must provide your own license)"
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-matlab"
       kubespawner_override:
         image_pull_policy: Always
         cpu_limit: 24
@@ -125,10 +129,14 @@ singleuser:
           display_name: "Image"
           choices:
             standard:
-              display_name: "Dandihub Standard"
+              display_name: "Standard"
               default: true
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}"
+            matlab:
+              display_name: "MATLAB (must provide your own license)"
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-matlab"
       kubespawner_override:
         image_pull_policy: Always
         cpu_limit: 48
@@ -144,12 +152,12 @@ singleuser:
           display_name: "Image"
           choices:
             standard:
-              display_name: "Dandihub Standard"
+              display_name: "Standard GPU"
               default: true
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}-gpu"
             matlab:
-              display_name: "Matlab (must provide your own license)"
+              display_name: "MATLAB GPU (must provide your own license)"
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}-gpu-matlab"
       kubespawner_override:
