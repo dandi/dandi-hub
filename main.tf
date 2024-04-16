@@ -100,9 +100,9 @@ module "eks" {
       # Filtering only Secondary CIDR private subnets starting with "100.". Subnet IDs where the nodes/node groups will be provisioned
       subnet_ids = compact([for subnet_id, cidr_block in zipmap(module.vpc.private_subnets, module.vpc.private_subnets_cidr_blocks) : substr(cidr_block, 0, 4) == "100." ? subnet_id : null])
 
-      min_size     = 4
+      min_size     = 1
       max_size     = 8
-      desired_size = 4
+      desired_size = 1
 
       instance_types = ["t3a.medium"]
 
