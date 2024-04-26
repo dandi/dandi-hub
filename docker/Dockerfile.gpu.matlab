@@ -1,4 +1,4 @@
-ARG MATLAB_RELEASE=r2023a
+ARG MATLAB_RELEASE=r2023b
 FROM --platform=linux/amd64 ghcr.io/mathworks-ref-arch/matlab-integration-for-jupyter/jupyter-byoi-matlab-notebook:${MATLAB_RELEASE}
 
 USER root
