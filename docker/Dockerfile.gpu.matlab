@@ -1,4 +1,4 @@
-ARG MATLAB_RELEASE=r2023a
+ARG MATLAB_RELEASE=r2023b
 FROM --platform=linux/amd64 ghcr.io/mathworks-ref-arch/matlab-integration-for-jupyter/jupyter-byoi-matlab-notebook:${MATLAB_RELEASE}
 
 USER root
@@ -133,7 +133,8 @@ homedirExamples = strcat(homedir, '/example-live-scripts') \n\
 if not(isfolder(homedirExamples)) \n\
     % copyfile('${ADDONS_DIR}/example-live-scripts', homedirExamples) \n\
     % repo = gitclone('https://github.com/INCF/example-live-scripts', homedirExamples, Depth=1); \n\
-    system(strcat(string('git clone --depth=1 https://github.com/INCF/example-live-scripts '), homedirExamples)) \n\
+    system(strcat(string('git clone --depth=1 https://github.com/INCF/example-live-scripts '), homedirExamples)); \n\
+    addpath(genpath(homedirExamples)); \n\
 end \n\
 % Adds the addons to the path and as a symlink \n\
 localAddons = strcat(homedir, '/addons'); \n\
@@ -153,7 +154,9 @@ clear" >> ${STARTUP_SCRIPT}
 # Variables for addons management that are tied to a specific release
 ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/refs/tags/v2.6.0.2.zip \
                      https://github.com/schnitzer-lab/EXTRACT-public/archive/refs/heads/master.zip \
-                     https://github.com/bahanonu/ciatah/archive/refs/heads/master.zip"
+                     https://github.com/bahanonu/ciatah/archive/refs/heads/master.zip \
+                     https://github.com/MATLAB-Community-Toolboxes-at-INCF/DeepInterpolation-MATLAB/archive/refs/tags/v0.7.0.zip \
+                     https://github.com/MATLAB-Community-Toolboxes-at-INCF/Brain-Observatory-Toolbox/archive/refs/tags/v0.9.3.5.zip"
 
 # Add add-ons for Dandi: create the addons folder and download/unzip the addons
 RUN mkdir -p ${ADDONS_DIR} && \
@@ -165,7 +168,8 @@ RUN mkdir -p ${ADDONS_DIR} && \
     done
 
 # Variables for addons management that always takes the last release
-ARG ADDONS_LATEST="https://github.com/emeyers/Brain-Observatory-Toolbox"
+# ARG ADDONS_LATEST="https://github.com/emeyers/Brain-Observatory-Toolbox"
+ARG ADDONS_LATEST=""
 
 # Add add-ons for Dandi: detect/download/unzip the last release version
 RUN cd ${ADDONS_DIR} && \
