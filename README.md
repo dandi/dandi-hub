@@ -51,7 +51,7 @@ The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/d
 
 Preflight checklist:
 
- - Ensure the correct AWS profile is currently enabled, `echo $AWS_PROFILE` should match the desired entry in `~/.aws/credientials`
+ - Ensure the correct AWS profile is currently enabled, `echo $AWS_PROFILE` should match the desired entry in `~/.aws/credentials`
  - Make sure your IAM has permissions to run spot `aws iam create-service-linked-role --aws-service-name spot.amazonaws.com`
  - If you are spinning up a new instance, make sure that you don't have old tfstate in the working dir.
 
