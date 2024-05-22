@@ -106,3 +106,8 @@ variable "dandi_api_domain" {
   description = "Domain of DANDI API used to check user registration"
   type = string
 }
+
+variable "profile_list_path" {
+  description = "Path to the profile list file"
+  type = string
+}
