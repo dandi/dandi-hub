@@ -111,3 +111,8 @@ variable "profile_list_path" {
   description = "Path to the profile list file"
   type = string
 }
+
+variable "github_organization" {
+  description = "Github organization to check for user membership"
+  type = string
+}
