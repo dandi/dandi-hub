@@ -4,7 +4,7 @@
 
 #!/bin/bash
 
-source ensure_vars.sh
+source ./ensure_vars.sh
 
 echo "Initializing ..."
 terraform init || echo "\"terraform init\" failed"

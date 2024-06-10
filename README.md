@@ -3,6 +3,14 @@
 This terraform blueprint creates a Kubernetes environment (EKS) and installs jupyterhub.
 Based on https://github.com/awslabs/data-on-eks/tree/main/ai-ml/jupyterhub
 
+### Prerequisites
+
+This guide assumes that you have:
+ - a registered domain
+ - an AWS Cert for the domain and subdomains
+ - AWS IAM account
+ - AWS CLI profile for the account (`aws configure --profile bican`)
+
 ### Environment variables
 
 Environment variables store secrets and hub deployment name:
@@ -10,6 +18,7 @@ Environment variables store secrets and hub deployment name:
   - `TF_VAR_github_client_id`: See Github Oauth Step
   - `TF_VAR_github_client_secret` See Github Oauth Step
   - `TF_VAR_aws_certificate_arn` See Create Cert Step
+  - `TF_VAR_danditoken` Api token for the dandi instance used for user auth
 
 ### Variables File
 
@@ -37,7 +46,15 @@ This template is configuration for the jupyterhub helmchart [administrator guide
 
 The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/data-on-eks/docs/blueprints/ai-ml/jupyterhub) may be helpful.
 
+
 ### Installation
+
+Preflight checklist:
+
+ - Ensure the correct AWS profile is currently enabled, `echo $AWS_PROFILE` should match the desired entry in `~/.aws/credentials`
+ - Make sure your IAM has permissions to run spot `aws iam create-service-linked-role --aws-service-name spot.amazonaws.com`
+ - If you are spinning up a new instance, make sure that you don't have old tfstate in the working dir.
+
 
 WARNING: Amazon Key Management Service objects have a 7 day waiting period to delete.
 Be absolutely sure that tfstate is up to date before running.
