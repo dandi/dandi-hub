@@ -6,6 +6,8 @@
 set -o errexit
 set -o pipefail
 
+varfile="$HUB_DEPLOYMENT_NAME.tfvars"
+
 targets=(
   "module.eks_data_addons"
   "module.eks_blueprints_addons"
@@ -34,7 +36,7 @@ done
 #-------------------------------------------
 for target in "${targets[@]}"
 do
-  destroy_output=$(terraform destroy -target="$target" -var-file="dev.tfvars" -auto-approve | tee /dev/tty)
+  destroy_output=$(terraform destroy -target="$target" -var-file="$varfile" -auto-approve | tee /dev/tty)
   if [[ ${PIPESTATUS[0]} -eq 0 && $destroy_output == *"Destroy complete!"* ]]; then
     echo "SUCCESS: Terraform destroy of $target completed successfully"
   else
@@ -46,7 +48,7 @@ done
 #-------------------------------------------
 # Terraform destroy full
 #-------------------------------------------
-destroy_output=$(terraform destroy -target="$target" -auto-approve | tee /dev/tty)
+destroy_output=$(terraform destroy -target="$target" -var-file="$varfile" -auto-approve | tee /dev/tty)
 if [[ ${PIPESTATUS[0]} -eq 0 && $destroy_output == *"Destroy complete!"* ]]; then
   echo "SUCCESS: Terraform destroy of all targets completed successfully"
 else
