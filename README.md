@@ -35,6 +35,12 @@ This guide assumes that you have:
  - Terraform >= 1.8.3 ([installation guide](https://learn.hashicorp.com/tutorials/terraform/install-cli))
  - kubectl >= 1.26.15 ([installation guide](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
 
+## Directory Layout
+
+The project directory is structured to separate environment-specific configurations from the main
+Terraform configuration. This allows for easier management and scalability when dealing with
+multiple environments. Each deployment is given its own directory in `envs/`.
+
 ## AWS Cloud Configuration for Terraform
 
 This document explains how to set up the necessary AWS resources and configurations for using Terraform to provision JupyterHub.
@@ -50,7 +56,7 @@ This document explains how to set up the necessary AWS resources and configurati
     - Create the bucket.
 
 2. **Configure Terraform to Use the S3 Bucket**:
-    - In your Terraform project directory, create a file named `backend.tf` with the following content:
+    - In the `envs/<deployment>` directory, create a file named `backend.tf` with the following content:
 
     ```hcl
     terraform {
@@ -78,69 +84,59 @@ This document explains how to set up the necessary AWS resources and configurati
 1. **Create an IAM Role**:
     - Go to the IAM console in AWS.
     - Click "Roles" and then "Create role".
-    - Choose `AWS service` and select `EC2` (or other relevant service).
-    - Attach the following managed policies:
-        - `AmazonS3FullAccess`
-        - `AmazonDynamoDBFullAccess`
-        - `AmazonEC2FullAccess`
-        - `AmazonEKSClusterPolicy`
-        - `CloudWatchLogsFullAccess`
-        - `IAMFullAccess`
-        - `SecretsManagerReadWrite`
-    - Name the role `JupyterhubProvisioningRole`.
+    - Choose `AWS service` and select `Custom trust policy`
+
 
 2. **Set Up the Trust Policy**:
     - Edit the trust relationship for the `JupyterhubProvisioningRole` role to allow the necessary entities to assume the role. The trust policy might look something like this:
 
-    ```json
-    {
-      "Version": "2012-10-17",
-      "Statement": [
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
         {
-          "Effect": "Allow",
-          "Principal": {
-            "Service": "ec2.amazonaws.com"
-          },
-          "Action": "sts:AssumeRole"
-        }
-      ]
-    }
-    ```
-
-3. **Attach Inline Policy for Additional Permissions**:
-    - Create a JSON policy document with the necessary actions and attach it to the role as an inline policy. Below is an example policy:
-
-    ```json
-    {
-      "Version": "2012-10-17",
-      "Statement": [
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::278212569472:root"
+            },
+            "Action": "sts:AssumeRole",
+            "Condition": {
+                "StringEquals": {
+                    "aws:PrincipalType": "User"
+                }
+            }
+        },
         {
-          "Effect": "Allow",
-          "Action": [
-            "ec2:RunInstances",
-            "ec2:CreateLaunchTemplate",
-            "ec2:DeleteLaunchTemplate",
-            "ec2:DescribeLaunchTemplates",
-            "ec2:CreateLaunchTemplateVersion",
-            "ec2:DeleteLaunchTemplateVersions",
-            "ec2:DescribeLaunchTemplateVersions",
-            "iam:PassRole",
-            "elasticfilesystem:DescribeLifecycleConfiguration",
-            "elasticfilesystem:PutLifecycleConfiguration",
-            "elasticfilesystem:DeleteLifecycleConfiguration",
-            "secretsmanager:PutSecretValue",
-            "secretsmanager:UpdateSecretVersionStage",
-            "elasticfilesystem:CreateMountTarget",
-            "elasticfilesystem:DeleteMountTarget",
-            "elasticfilesystem:DescribeMountTargets",
-            "elasticfilesystem:ModifyMountTargetSecurityGroups",
-            "elasticfilesystem:DescribeMountTargetSecurityGroups"
-          ],
-          "Resource": "*"
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "ec2.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        },
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "lambda.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
         }
-      ]
-    }
-    ```
+    ]
+}
+```
+
+3. **Attach the following managed policies**:
+    - `AmazonS3FullAccess`
+    - `AmazonDynamoDBFullAccess`
+    - `AmazonEC2FullAccess`
+    - `AmazonEKSClusterPolicy`
+    - `CloudWatchLogsFullAccess`
+    - `IAMFullAccess`
+    - `SecretsManagerReadWrite`
+    - `AmazonElasticFileSystemFullAccess`
+    - Name the role `JupyterhubProvisioningRole`.
+
+
+```
 
 ### AWS CLI Configuration for Multiple Accounts and Environments
 
@@ -231,17 +227,20 @@ The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/d
 
 ## Deployment
 
-Preflight checklist:
-
-- Ensure the correct AWS profile is currently enabled, `echo $AWS_PROFILE` should match the desired entry in `~/.aws/credentials`.
-- Make sure your IAM has permissions to run spot `aws iam create-service-linked-role --aws-service-name spot.amazonaws.com`.
-
-WARNING: Amazon Key Management Service objects have a 7-day waiting period to delete.
-If there is a problem with tfstate and KMS fails due to a duplicate resource, the workaround is to change/add a `name` var to the tfvars (and mark the existing KMS for deletion).
+**Execute install script**
 
 `./install.sh <env>`
 
-Occasionally there are timeout and race condition failures. Usually, these are resolved by simply retrying the install script.
+**Route the Domain in Route 53**
+
+In Route 53 -> Hosted Zones -> <jupyterhub_domain> create an `A` type Record that routes to an
+`Alias to Network Load Balancer`. Set the region and the EXTERNAL_IP of the `service/proxy-public`
+Kubernetes object in the `jupyterhub` namespace.
+
+This will need to be redone each time the `proxy-public` service is recreated (occurs during
+`./cleanup.sh`).
+
+
 
 ## Cleanup
 
@@ -251,19 +250,21 @@ NOTE: Occasionally the Kubernetes namespace fails to delete.
 
 WARNING: Sometimes AWS VPCs are left up due to an upstream Terraform race condition and must be deleted by hand (including hand-deleting each nested object).
 
+## Troubleshooting
+
+**Timeouts and race conditions**
+This just happens sometimes, usually, resolved by rerunning the install script.
+
+**Key Management Service Duplicate Resource**
+This is usually caused by a problem with tfstate, it can't be immediately fixed because Amazon Key Management Service objects have a 7-day waiting period to delete.
+The workaround is to change/add a `name` var to the tfvars (ie `jupyerhub-on-eks-2`)
+Mark the existing KMS for deletion.
+
+
 ## Update
 
 Changes to variables or the template configuration usually are updated idempotently by running
 `./install.sh <env>` **without the need to cleanup prior**.
-
-## Route the Domain in Route 53
-
-In Route 53 -> Hosted Zones -> <jupyterhub_domain> create an `A` type Record that routes to an
-`Alias to Network Load Balancer`. Set the region and the EXTERNAL_IP of the `service/proxy-public`
-Kubernetes object in the `jupyterhub` namespace.
-
-This will need to be redone each time the `proxy-public` service is recreated (occurs during
-`./cleanup.sh`).
 
 ## Manual Takedown of Just the Hub
 
