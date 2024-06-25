@@ -6,7 +6,32 @@
 set -o errexit
 set -o pipefail
 
-varfile="$HUB_DEPLOYMENT_NAME.tfvars"
+# Check if environment is provided
+if [ -z "$1" ]; then
+  echo "Usage: ./cleanup.sh <environment>"
+  exit 1
+fi
+
+
+
+ENV=$1
+ENV_DIR="envs/$ENV"
+VARFILE="$ENV_DIR/terraform.tfvars"
+BACKEND_FILE="$ENV_DIR/backend.tf"
+
+source ./ensure_vars.sh
+
+# Check if the environment directory exists
+if [ ! -d "$ENV_DIR" ]; then
+  echo "Environment directory $ENV_DIR does not exist."
+  exit 1
+fi
+
+# Initialize Terraform with the local backend configuration for the specified environment
+echo "Initializing ..."
+terraform init -backend-config="$BACKEND_FILE" -var-file="$VARFILE" || echo "\"terraform init\" failed"
+
+terraform workspace select $ENV
 
 targets=(
   "module.eks_data_addons"
@@ -36,7 +61,7 @@ done
 #-------------------------------------------
 for target in "${targets[@]}"
 do
-  destroy_output=$(terraform destroy -target="$target" -var-file="$varfile" -auto-approve | tee /dev/tty)
+  destroy_output=$(terraform destroy -target="$target" -var-file="$VARFILE" -auto-approve | tee /dev/tty)
   if [[ ${PIPESTATUS[0]} -eq 0 && $destroy_output == *"Destroy complete!"* ]]; then
     echo "SUCCESS: Terraform destroy of $target completed successfully"
   else
@@ -48,7 +73,7 @@ done
 #-------------------------------------------
 # Terraform destroy full
 #-------------------------------------------
-destroy_output=$(terraform destroy -target="$target" -var-file="$varfile" -auto-approve | tee /dev/tty)
+destroy_output=$(terraform destroy  -target="$target" -var-file="$VARFILE" -auto-approve | tee /dev/tty)
 if [[ ${PIPESTATUS[0]} -eq 0 && $destroy_output == *"Destroy complete!"* ]]; then
   echo "SUCCESS: Terraform destroy of all targets completed successfully"
 else
