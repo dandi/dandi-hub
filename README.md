@@ -3,18 +3,177 @@
 This terraform blueprint creates a Kubernetes environment (EKS) and installs jupyterhub.
 Based on https://github.com/awslabs/data-on-eks/tree/main/ai-ml/jupyterhub
 
-### Prerequisites
+## Prerequisites
 
 This guide assumes that you have:
  - a registered domain
  - an AWS Cert for the domain and subdomains
  - AWS IAM account
- - AWS CLI profile for the account (`aws configure --profile bican`)
+ - terraform >= 1.8.3
+ - kubectl >= 1.26.15
+
+## AWS Cloud Configuration for Terraform
+
+This document explains how to set up the necessary AWS resources and configurations for using Terraform to provision JupyterHub.
+
+### 1. Create and Configure an S3 Bucket for Terraform State Storage
+
+1. **Create an S3 Bucket**:
+    - Go to the S3 console in AWS.
+    - Click "Create bucket".
+    - Name the bucket `jupyterhub-terraform-state-bucket` (ensure the name is unique per AWS account. ).
+    - Choose the region `us-east-2`.
+    - Enable default encryption
+    - Create the bucket.
+
+2. **Configure Terraform to Use the S3 Bucket**:
+    - In your Terraform project directory, create a file named `backend.tf` with the following content:
+
+    ```hcl
+    terraform {
+      backend "s3" {
+        bucket         = "jupyterhub-terraform-state-bucket"
+        key            = "terraform.tfstate"
+        region         = "us-east-2"
+        encrypt        = true
+        dynamodb_table = "jupyterhub-terraform-lock-table"
+      }
+    }
+    ```
+
+### 2. Set Up DynamoDB for State Locking
+
+1. **Create a DynamoDB Table**:
+    - Go to the DynamoDB console in AWS.
+    - Click "Create table".
+    - Name the table `jupyterhub-terraform-lock-table`.
+    - Set the primary key to `LockID` (String).
+    - Create the table.
+
+### 3. Set Up IAM Roles and Policies
+
+1. **Create an IAM Role**:
+    - Go to the IAM console in AWS.
+    - Click "Roles" and then "Create role".
+    - Choose `AWS service` and select `EC2` (or other relevant service).
+    - Attach the following managed policies:
+        - `AmazonS3FullAccess`
+        - `AmazonDynamoDBFullAccess`
+        - `AmazonEC2FullAccess`
+        - `AmazonEKSClusterPolicy`
+        - `CloudWatchLogsFullAccess`
+        - `IAMFullAccess`
+        - `SecretsManagerReadWrite`
+    - Name the role `JupyterhubProvisioningRole`.
+
+2. **Attach Inline Policy for Additional Permissions**:
+    - Create a JSON policy document with the necessary actions and attach it to the role as an inline policy. Below is an example policy:
+
+    ```json
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "ec2:RunInstances",
+            "ec2:CreateLaunchTemplate",
+            "ec2:DeleteLaunchTemplate",
+            "ec2:DescribeLaunchTemplates",
+            "ec2:CreateLaunchTemplateVersion",
+            "ec2:DeleteLaunchTemplateVersions",
+            "ec2:DescribeLaunchTemplateVersions",
+            "iam:PassRole",
+            "elasticfilesystem:DescribeLifecycleConfiguration",
+            "elasticfilesystem:PutLifecycleConfiguration",
+            "elasticfilesystem:DeleteLifecycleConfiguration",
+            "secretsmanager:PutSecretValue",
+            "secretsmanager:UpdateSecretVersionStage",
+            "elasticfilesystem:CreateMountTarget",
+            "elasticfilesystem:DeleteMountTarget",
+            "elasticfilesystem:DescribeMountTargets",
+            "elasticfilesystem:ModifyMountTargetSecurityGroups",
+            "elasticfilesystem:DescribeMountTargetSecurityGroups"
+          ],
+          "Resource": "*"
+        }
+      ]
+    }
+    ```
+3. **Set Up the Trust Policy**:
+    - Edit the trust relationship for the `JupyterhubProvisioningRole` role to allow the necessary entities to assume the role. The trust policy might look something like this:
+
+    ```json
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Principal": {
+            "Service": "ec2.amazonaws.com"
+          },
+          "Action": "sts:AssumeRole"
+        }
+      ]
+    }
+    ```
+
+ 
+### AWS CLI Configuration for Multiple Accounts and Environments
+
+To manage multiple AWS accounts and environments, you need to configure your AWS CLI with the appropriate profiles. Follow the steps below to set up your `.aws/config` and `.aws/credentials` files.
+
+#### Step 1: Set Up AWS Credentials
+
+1. **Obtain Your AWS Access Keys**:
+   - Log in to the AWS Management Console.
+   - Navigate to the **IAM** service.
+   - Select **Users** and click on your user name.
+   - Go to the **Security credentials** tab.
+   - Click **Create access key** and note down the **Access key ID** and **Secret access key**.
+
+2. **Edit Your `.aws/credentials` File**:
+   - Open the `.aws/credentials` file in your home directory. If it doesn't exist, create it.
+   - Add your access keys for each profile:
+
+    ```ini
+    [mcgovern]
+    aws_access_key_id = YOUR_MCGOVERN_ACCESS_KEY_ID
+    aws_secret_access_key = YOUR_MCGOVERN_SECRET_ACCESS_KEY
+
+    [bican]
+    aws_access_key_id = YOUR_BICAN_ACCESS_KEY_ID
+    aws_secret_access_key = YOUR_BICAN_SECRET_ACCESS_KEY
+    ```
+
+#### Step 2: Set Up AWS Config
+
+1. **Obtain Your Role ARN**:
+   - Log in to the AWS Management Console.
+   - Navigate to the **IAM** service.
+   - Select **Roles** and find the role you will assume (e.g., `JupyterhubProvisioningRole`).
+   - Note down the **Role ARN**.
+
+2. **Edit Your `.aws/config` File**:
+   - Open the `.aws/config` file in your home directory. If it doesn't exist, create it.
+   - Add the region, role ARN, and source profile for each environment. Here’s an example:
+
+    ```ini
+    [profile mcgovern]
+    region = us-east-2
+    role_arn = arn:aws:iam::MCGOVERN_ACCOUNT_ID:role/JupyterhubProvisioningRole
+    source_profile = mcgovern
+
+    [profile bican]
+    region = us-east-2
+    role_arn = arn:aws:iam::BICAN_ACCOUNT_ID:role/JupyterhubProvisioningRole
+    source_profile = bican
+    ```
 
 ### Environment variables
 
 Environment variables store secrets and hub deployment name:
-  - `HUB_DEPLOYMENT_NAME`: (ie dandihub)
+  - `AWS_PROFILE` ie `mcgovern`, the profile for the AWS account to deploy to, see AWS config above
   - `TF_VAR_github_client_id`: See Github Oauth Step
   - `TF_VAR_github_client_secret` See Github Oauth Step
   - `TF_VAR_aws_certificate_arn` See Create Cert Step
@@ -22,14 +181,17 @@ Environment variables store secrets and hub deployment name:
 
 ### Variables File
 
-Create a variables file `$HUB_DEPLOYMENT_NAME.tfvars` (ie dandihub.tfvars)
+The variables are set in a `terraform.tfvars` for each `env`, ie `envs/dandi/terraform.tfvars`
 
+ - name: (optional, defaults to jupyerhub-on-eks)
  - singleuser_image_repo: Dockerhub repository containing custom jupyterhub image
  - singleuser_image_tag: tag
  - jupyterhub_domain: The domain to host the jupytehub landing page: (ie "hub.dandiarchive.org")
  - dandi_api_domain: The domain that hosts the DANDI API with list of registered users
  - admin_users: List of adming github usernames (ie: ["github_username"])
  - region: Cloud vendor region (ie us-west-1)
+
+WARNING: If changing `region` it must be changed both in the tfvars and in the `backend.tf`
 
 ### Github Oauth
 
@@ -52,14 +214,14 @@ The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/d
 Preflight checklist:
 
  - Ensure the correct AWS profile is currently enabled, `echo $AWS_PROFILE` should match the desired entry in `~/.aws/credentials`
+TODO(asmacdo) probably this needs to be added to JupyterhubProvisioningRole?
  - Make sure your IAM has permissions to run spot `aws iam create-service-linked-role --aws-service-name spot.amazonaws.com`
- - If you are spinning up a new instance, make sure that you don't have old tfstate in the working dir.
 
 
 WARNING: Amazon Key Management Service objects have a 7 day waiting period to delete.
-Be absolutely sure that tfstate is up to date before running.
+If there is a problem with tfstate and KMS fails due to a duplicate resource, the workaround is to change/add a `name` var to the tfvars (and mark the existing KMS for deletion).
 
-`./install.sh`
+`./install.sh <env>`
 
 Occasionally there are timeout and race condition failures.
 Usually these are resolved by simply retrying the install script.
@@ -67,7 +229,7 @@ Usually these are resolved by simply retrying the install script.
 
 ### Cleanup
 
-Cleanup requires the same variables and is run `./cleanup.sh`
+Cleanup requires the same variables and is run `./cleanup.sh <env>`
 
 NOTE: Occasionally the kubernetes namespace fails to delete.
 
@@ -76,7 +238,7 @@ WARNING: Sometimes AWS VPCs are left up due to an upstream terraform race condit
 ### Update
 
 Changes to variables or the template configuration usually is updated idempotently by running
-`./install.sh` **without the need to cleanup prior**.
+`./install.sh <env>` **without the need to cleanup prior**.
 
 ### Route the domain in Route 53
 
