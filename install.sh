@@ -1,8 +1,8 @@
+#!/bin/bash
 # Derived from Data On EKS under Apache License 2.0.
 # Source: https://github.com/awslabs/data-on-eks/tree/main/ai-ml/jupyterhub
 # See LICENSE file in the root directory of this source code or at http://www.apache.org/licenses/LICENSE-2.0.html.
 
-#!/bin/bash
 
 # Check if environment is provided
 if [ -z "$1" ]; then
