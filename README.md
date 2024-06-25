@@ -88,7 +88,7 @@ This document explains how to set up the necessary AWS resources and configurati
 
 
 2. **Set Up the Trust Policy**:
-    - Edit the trust relationship for the `JupyterhubProvisioningRole` role to allow the necessary entities to assume the role. The trust policy might look something like this:
+    - Edit the trust relationship for the `JupyterhubProvisioningRole` role to allow the necessary entities to assume the role. Copy and paste below:
 
 ```json
 {
@@ -100,7 +100,7 @@ This document explains how to set up the necessary AWS resources and configurati
                 "AWS": "arn:aws:iam::278212569472:root"
             },
             "Action": "sts:AssumeRole",
-            "Condition": {
+              "Condition": {
                 "StringEquals": {
                     "aws:PrincipalType": "User"
                 }
@@ -134,6 +134,29 @@ This document explains how to set up the necessary AWS resources and configurati
     - `SecretsManagerReadWrite`
     - `AmazonElasticFileSystemFullAccess`
     - Name the role `JupyterhubProvisioningRole`.
+
+4. **Create and attach Jupyterhub-misc inline policy**
+    - From the `JupyterhubProvisioningRole` under the `permissions` tab, select `create inline policy`
+    - Select `JSON` and paste the policy below:
+
+```json
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "Statement1",
+			"Effect": "Allow",
+			"Action": [
+				"ecr-public:GetAuthorizationToken",
+				"sts:GetServiceBearerToken",
+				"kms:CreateKey"
+			],
+			"Resource": "*"
+		}
+	]
+}
+```
+
 
 
 ```
