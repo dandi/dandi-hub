@@ -336,4 +336,3 @@ Notable objects:
 When Jupyterhub user pods are scheduled and sufficient Nodes are not available, Karpenter creates a NodeClaim and then interacts with AWS to spin up machines.
 
 - `nodeclaims`: Create a node from one of the Karpenter Nodepools. (This is where spot/on-demand is configured for user-pods).
-```
