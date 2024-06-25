@@ -15,7 +15,7 @@ This Terraform blueprint creates a Kubernetes environment (EKS) and installs Jup
 - [Environment Variables](#environment-variables)
 - [Variables File](#variables-file)
 - [Github OAuth](#github-oauth)
-- [Installation](#installation)
+- [Deployment](#deployment)
 - [Cleanup](#cleanup)
 - [Update](#update)
 - [Route the Domain in Route 53](#route-the-domain-in-route-53)
