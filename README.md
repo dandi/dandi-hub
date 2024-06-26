@@ -124,37 +124,12 @@ This document explains how to set up the necessary AWS resources and configurati
 }
 ```
 
-3. **Attach the following managed policies**:
-    - `AmazonS3FullAccess`
-    - `AmazonDynamoDBFullAccess`
-    - `AmazonEC2FullAccess`
-    - `AmazonEKSClusterPolicy`
-    - `CloudWatchLogsFullAccess`
-    - `IAMFullAccess`
-    - `SecretsManagerReadWrite`
-    - `AmazonElasticFileSystemFullAccess`
-    - Name the role `JupyterhubProvisioningRole`.
-
-4. **Create and attach Jupyterhub-misc inline policy**
+3. **Create and attach Jupyterhub-misc inline policy**
     - From the `JupyterhubProvisioningRole` under the `permissions` tab, select `create inline policy`
     - Select `JSON` and paste the policy below:
 
 ```json
-{
-	"Version": "2012-10-17",
-	"Statement": [
-		{
-			"Sid": "Statement1",
-			"Effect": "Allow",
-			"Action": [
-				"ecr-public:GetAuthorizationToken",
-				"sts:GetServiceBearerToken",
-				"kms:CreateKey"
-			],
-			"Resource": "*"
-		}
-	]
-}
+
 ```
 
 
