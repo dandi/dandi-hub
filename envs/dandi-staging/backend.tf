@@ -1,9 +1,0 @@
-terraform {
-  backend "s3" {
-    bucket =  "dandihub-staging-tfstate"
-    key = "terraform.tfstate"
-    region = "us-east-2"
-    encrypt = true
-    dynamodb_table = "dandihub-staging-tf-lock"
-  }
-}

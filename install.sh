@@ -28,7 +28,7 @@ fi
 
 # Initialize Terraform with the local backend configuration for the specified environment
 echo "Initializing ..."
-terraform init -backend-config="$ENV_DIR/backend.tf" -var-file="$VARFILE" || echo "\"terraform init\" failed"
+terraform init -backend-config="$ENV_DIR/s3.tfbackend" -var-file="$VARFILE" || echo "\"terraform init\" failed"
 
 # Select or create the workspace
 terraform workspace select $ENV || terraform workspace new $ENV

@@ -17,7 +17,7 @@ fi
 ENV=$1
 ENV_DIR="envs/$ENV"
 VARFILE="$ENV_DIR/terraform.tfvars"
-BACKEND_FILE="$ENV_DIR/backend.tf"
+BACKEND_FILE="$ENV_DIR/s3.tfbackend"
 
 source ./ensure_vars.sh
 
