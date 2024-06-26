@@ -222,14 +222,17 @@ The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/d
 
 `./install.sh <env>`
 
+### Common deployment issues
+
 **Timeouts and race conditions**
-This just happens sometimes, usually resolved by rerunning the install script.
+`Context Deadline Exceeded`: This just happens sometimes, usually resolved by rerunning the install script.
 
 **Key Management Service Duplicate Resource**
 This is usually caused by a problem with tfstate, it can't be immediately fixed because Amazon Key Management Service objects have a 7-day waiting period to delete.
 The workaround is to change/add a `name` var to the tfvars (ie `jupyerhub-on-eks-2`)
 Mark the existing KMS for deletion.
 
+### Connect Jupyterhub proxy to DNS
 
 **Route the Domain in Route 53**
 
@@ -240,6 +243,10 @@ Kubernetes object in the `jupyterhub` namespace.
 This will need to be redone each time the `proxy-public` service is recreated (occurs during
 `./cleanup.sh`).
 
+## Update
+
+Changes to variables or the template configuration usually are updated idempotently by running
+`./install.sh <env>` **without the need to cleanup prior**.
 
 ## Cleanup
 
@@ -248,12 +255,6 @@ Cleanup requires the same variables and is run `./cleanup.sh <env>`.
 NOTE: Occasionally the Kubernetes namespace fails to delete.
 
 WARNING: Sometimes AWS VPCs are left up due to an upstream Terraform race condition and must be deleted by hand (including hand-deleting each nested object).
-
-## Update
-
-Changes to variables or the template configuration usually are updated idempotently by running
-`./install.sh <env>` **without the need to cleanup prior**.
-
 ## Take Down Jupyterhub, leave up EKS
 
 `terraform destroy -target=module.eks_data_addons.helm_release.jupyterhub -auto-approve` will
