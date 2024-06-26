@@ -124,17 +124,10 @@ This document explains how to set up the necessary AWS resources and configurati
 }
 ```
 
-3. **Create and attach Jupyterhub-misc inline policy**
+3. **Create and attach inline policies**
     - From the `JupyterhubProvisioningRole` under the `permissions` tab, select `create inline policy`
-    - Select `JSON` and paste the policy below:
-
-```json
-
-```
-
-
-
-```
+    - From the `JSON` tab, create `terraform-jupyterhub-backend-policies` using the json in `.aws`
+    - From the `JSON` tab, create `terraform-jupyterhub-provisioning-policies` using the json in `.aws`
 
 ### AWS CLI Configuration for Multiple Accounts and Environments
 
@@ -229,6 +222,15 @@ The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/d
 
 `./install.sh <env>`
 
+**Timeouts and race conditions**
+This just happens sometimes, usually resolved by rerunning the install script.
+
+**Key Management Service Duplicate Resource**
+This is usually caused by a problem with tfstate, it can't be immediately fixed because Amazon Key Management Service objects have a 7-day waiting period to delete.
+The workaround is to change/add a `name` var to the tfvars (ie `jupyerhub-on-eks-2`)
+Mark the existing KMS for deletion.
+
+
 **Route the Domain in Route 53**
 
 In Route 53 -> Hosted Zones -> <jupyterhub_domain> create an `A` type Record that routes to an
@@ -239,7 +241,6 @@ This will need to be redone each time the `proxy-public` service is recreated (o
 `./cleanup.sh`).
 
 
-
 ## Cleanup
 
 Cleanup requires the same variables and is run `./cleanup.sh <env>`.
@@ -248,23 +249,12 @@ NOTE: Occasionally the Kubernetes namespace fails to delete.
 
 WARNING: Sometimes AWS VPCs are left up due to an upstream Terraform race condition and must be deleted by hand (including hand-deleting each nested object).
 
-## Troubleshooting
-
-**Timeouts and race conditions**
-This just happens sometimes, usually, resolved by rerunning the install script.
-
-**Key Management Service Duplicate Resource**
-This is usually caused by a problem with tfstate, it can't be immediately fixed because Amazon Key Management Service objects have a 7-day waiting period to delete.
-The workaround is to change/add a `name` var to the tfvars (ie `jupyerhub-on-eks-2`)
-Mark the existing KMS for deletion.
-
-
 ## Update
 
 Changes to variables or the template configuration usually are updated idempotently by running
 `./install.sh <env>` **without the need to cleanup prior**.
 
-## Manual Takedown of Just the Hub
+## Take Down Jupyterhub, leave up EKS
 
 `terraform destroy -target=module.eks_data_addons.helm_release.jupyterhub -auto-approve` will
 destroy all the jupyterhub assets, but will leave the EKS and VPC infrastructure intact.
