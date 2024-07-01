@@ -300,13 +300,16 @@ module "eks_data_addons" {
       jupyterhub_domain           = var.jupyterhub_domain
       jupyter_single_user_sa_name = kubernetes_service_account_v1.jupyterhub_single_user_sa.metadata[0].name
       region                      = var.region
+      admin_users                 = var.admin_users
       dandi_authenticator         = templatefile("${path.module}/helm/jupyterhub/files/dandi_authenticator.py", {
         danditoken                  = var.danditoken
         dandi_api_domain            = var.dandi_api_domain
       })
-      singleuser_image_repo       = var.singleuser_image_repo
-      singleuser_image_tag        = var.singleuser_image_tag
       admin_users                 = var.admin_users
+      profile_list                = templatefile("${path.module}/envs/${terraform.workspace}/profile_list.yaml", {
+        singleuser_image_repo       = var.singleuser_image_repo
+        singleuser_image_tag        = var.singleuser_image_tag
+      })
     })]
     version                     = "3.3.5"
   }
