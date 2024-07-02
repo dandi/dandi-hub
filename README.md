@@ -264,6 +264,12 @@ Changes to variables or the template configuration usually are updated idempoten
 
 ## Cleanup
 
+Prior to cleanup ensure that kubectl and helm are using the appropriate `kubeconfig`.
+(`<name>` is the value `name` `in terraform.tfvars`.)
+
+```
+aws eks --region us-east-2 update-kubeconfig --name <name-prefix>
+```
 Cleanup requires the same variables and is run `./cleanup.sh <env>`.
 
 NOTE: Occasionally the Kubernetes namespace fails to delete.

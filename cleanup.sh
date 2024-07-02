@@ -19,7 +19,7 @@ ENV_DIR="envs/$ENV"
 VARFILE="$ENV_DIR/terraform.tfvars"
 BACKEND_FILE="$ENV_DIR/backend.tf"
 
-source ./ensure_vars.sh
+source ./scripts/ensure-vars.sh
 
 # Check if the environment directory exists
 if [ ! -d "$ENV_DIR" ]; then
