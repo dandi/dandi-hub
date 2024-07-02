@@ -54,7 +54,7 @@ if [ ! -f "$OUTPUT" ]; then
 fi
 
 if git diff --exit-code "$OUTPUT" > /dev/null; then
-  # No changes, continue
+  # No changes to managed config, continue
   :
 else
   echo "Changes detected in $OUTPUT."
@@ -63,11 +63,8 @@ fi
 
 # Initialize Terraform with environment-provided backend configuration
 echo "Initializing $ENV..."
-# TODO exit code if failed
 terraform init -backend-config="$ENV_DIR/backend.tf" -var-file="$VARFILE" || echo "\"terraform init\" failed"
-
-# Select or create the workspace
-terraform workspace select $ENV || terraform workspace new $ENV
+terraform workspace select -or-create $ENV
 
 # # List of Terraform modules to apply in sequence
 # targets=(
