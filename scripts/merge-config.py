@@ -1,7 +1,25 @@
 #!/usr/bin/env python3
 import os
+import re
 import sys
 import yaml
+
+
+def str_presenter(dumper, data):
+    """configures yaml for dumping multiline strings
+    Ref: https://stackoverflow.com/questions/8640959/how-can-i-control-what-scalar-form-pyyaml-uses-for-my-data"""
+    if len(data.splitlines()) > 1:  # check for multiline string
+        return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data)
+
+
+yaml.add_representer(str, str_presenter)
+yaml.representer.SafeRepresenter.add_representer(str, str_presenter) # to use with safe_dum
+
+
+class IndentDumper(yaml.Dumper):
+    def increase_indent(self, flow=False, indentless=False):
+        return super(IndentDumper, self).increase_indent(flow, False)
 
 
 def load_yaml(file_path):
@@ -38,8 +56,9 @@ def main():
     else:
         merged_config = base_config
 
+    # import ipdb; ipdb.set_trace()
     with open(output_path, 'w') as output_file:
-        yaml.safe_dump(merged_config, output_file)
+        yaml.dump(merged_config, output_file, Dumper=IndentDumper)
 
 
 if __name__ == "__main__":
