@@ -63,7 +63,7 @@ fi
 
 # Initialize Terraform with environment-provided backend configuration
 echo "Initializing $ENV..."
-terraform init -backend-config="$ENV_DIR/backend.tf" -var-file="$VARFILE" || echo "\"terraform init\" failed"
+terraform init -backend-config="$ENV_DIR/backend.tf" -var-file="$VARFILE"
 terraform workspace select -or-create $ENV
 
 # # List of Terraform modules to apply in sequence
