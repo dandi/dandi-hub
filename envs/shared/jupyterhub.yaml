@@ -6,11 +6,6 @@ hub:
   authenticatePrometheus: false
   command: ["sh", "-c", "pip install boto3 && jupyterhub --config /usr/local/etc/jupyterhub/jupyterhub_config.py"]
   config:
-    Authenticator:
-      admin_users:
-%{ for admin_user in admin_users ~}
-        - "${admin_user}"
-%{ endfor ~}
     GitHubOAuthenticator:
       client_id: "${client_id}"
       client_secret: "${client_secret}"

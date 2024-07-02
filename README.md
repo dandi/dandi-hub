@@ -195,10 +195,26 @@ The variables are set in a `terraform.tfvars` for each `env`, ie `envs/dandi/ter
 - `singleuser_image_tag`: tag
 - `jupyterhub_domain`: The domain to host the jupyterhub landing page: (ie "hub.dandiarchive.org")
 - `dandi_api_domain`: The domain that hosts the DANDI API with list of registered users
-- `admin_users`: List of admin GitHub usernames (ie: ["github_username"])
 - `region`: Cloud vendor region (ie us-west-1)
 
 WARNING: If changing `region` it must be changed both in the tfvars and in the `backend.tf`.
+
+## Jupyterhub Configuration
+
+
+Jupyterhub is configured using an additive merge of `envs/shared/jupyterhub.yaml` and `envs/$ENV/jupyterhub-overrides.yaml`, which is templated by terraform.
+
+Env Minimum Requirements:
+    - hub.config.Authenticator.admin_users
+    - singleuser.ProfileList
+
+This template is configuration for the jupyterhub helmchart [administrator guide for jupyerhub](https://z2jh.jupyter.org/en/stable/administrator/index.html).
+
+The `jupyterhub.yaml` and `jupyterhub-overrides.yaml` can use `${terraform.templating.syntax}`, but
+can only use the values that are explicitly passed to the `jupyterhub_helm_config` template object
+in `addons.tf`
+
+The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/data-on-eks/docs/blueprints/ai-ml/jupyterhub) may be helpful.
 
 ## Github OAuth
 
@@ -208,16 +224,6 @@ WARNING: If changing `region` it must be changed both in the tfvars and in the `
   - `Homepage URL` to the site root (e.g., `https://hub.dandiarchive.org`). Must be the same as jupyterhub_domain.
   - `Authorization callback URL` must be <jupyterhub_domain>/hub/oauth_callback.
 
-## Customization
-
-Jupyterhub is configured using an additive merge of `envs/shared/jupyterhub.yaml` and `envs/$ENV/jupyterhub-overrides.yaml`, which is templated by terraform.
-This template is configuration for the jupyterhub helmchart [administrator guide for jupyerhub](https://z2jh.jupyter.org/en/stable/administrator/index.html).
-
-The `jupyterhub.yaml` and `jupyterhub-overrides.yaml` can use `${terraform.templating.syntax}`, but
-can only use the values that are explicitly passed to the `jupyterhub_helm_config` template object
-in `addons.tf`
-
-The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/data-on-eks/docs/blueprints/ai-ml/jupyterhub) may be helpful.
 
 ## Deployment
 
