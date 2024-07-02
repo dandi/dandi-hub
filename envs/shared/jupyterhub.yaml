@@ -5,9 +5,6 @@ hub:
       storageClassName: gp3
   authenticatePrometheus: false
   command: ["sh", "-c", "pip install boto3 && jupyterhub --config /usr/local/etc/jupyterhub/jupyterhub_config.py"]
-  extraConfig:
-    myConfig: |
-      ${indent(6, dandi_authenticator)}
   config:
     Authenticator:
       admin_users:
@@ -47,6 +44,27 @@ proxy:
       service.beta.kubernetes.io/aws-load-balancer-ip-address-type: ipv4
 
 singleuser:
+  # Additive merge with overrides, so avoid needing to remove profiles
+  profileList:
+   - display_name: "Tiny. Useful for many quick things"
+     description: "0.5 CPU / 1 GB"
+     profile_options:
+       image:
+         display_name: "Image"
+         choices:
+           standard:
+             display_name: "Standard"
+             default: true
+             kubespawner_override:
+               image: "${singleuser_image_repo}:${singleuser_image_tag}"
+     kubespawner_override:
+       image_pull_policy: Always
+       cpu_limit: 2
+       cpu_guarantee: 0.25
+       mem_limit: 2G
+       mem_guarantee: 0.5G
+       node_selector:
+         NodePool: default
   defaultUrl: "/lab"
   memory:
     limit: 16G
@@ -55,8 +73,6 @@ singleuser:
     limit: 12
     guarantee: 0.5
   startTimeout: 2400
-  profileList:
-    ${indent(4, profile_list)}
   storage:
     type: none
     extraVolumes:
