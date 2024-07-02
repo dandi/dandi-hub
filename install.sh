@@ -18,7 +18,7 @@ source ./scripts/ensure-vars.sh
 ENV=$1
 
 # TODO
-# ./scripts/enforcer.sh $ENV
+./scripts/account-enforcer.sh $ENV
 
 # TODO preface all env vars
 ENV_DIR="envs/$ENV"
@@ -42,10 +42,25 @@ fi
 # Merge Overrides into managed config file
 ./scripts/merge-config.py $BASE_CONFIG $ENV_OVERRIDE $OUTPUT
 
-# Ensure that $OUTPUT is not dirty (if changes, they should be committed prior to execution, except during development)
-# TODO
-# ./scripts/fail-dirty.sh
-#
+yamllint -d "{extends: default, rules: {line-length: disable, document-start: disable}}" "$OUTPUT"
+if [ $? -ne 0 ]; then
+  echo "Invalid YAML file: $OUTPUT"
+  exit 1
+fi
+
+if [ ! -f "$OUTPUT" ]; then
+  echo "Managed jupyterhub config file not found: $OUTPUT"
+  exit 1
+fi
+
+if git diff --exit-code "$OUTPUT" > /dev/null; then
+  # No changes, continue
+  :
+else
+  echo "Changes detected in $OUTPUT."
+  exit 1
+fi
+
 # # Validate yaml
 # # TODO
 #
