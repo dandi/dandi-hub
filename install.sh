@@ -38,7 +38,7 @@ if [ ! -d "$ENV_DIR" ]; then
   exit 1
 fi
 
-./scripts/merge-config.py $BASE_CONFIG $ENV_OVERRIDE $OUTPUT
+./scripts/merge_config.py $BASE_CONFIG $ENV_OVERRIDE $OUTPUT
 echo "Initializing ..."
 
 yamllint -d "{extends: default, rules: {line-length: disable, document-start: disable}}" "$OUTPUT"
