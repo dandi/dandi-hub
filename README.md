@@ -208,8 +208,14 @@ WARNING: If changing `region` it must be changed both in the tfvars and in the `
   - `Homepage URL` to the site root (e.g., `https://hub.dandiarchive.org`). Must be the same as jupyterhub_domain.
   - `Authorization callback URL` must be <jupyterhub_domain>/hub/oauth_callback.
 
-Most of the configuration is set in the template `helm/jupyterhub/dandihub.yaml` using the variables described here.
+## Customization
+
+Jupyterhub is configured using an additive merge of `envs/shared/jupyterhub.yaml` and `envs/$ENV/jupyterhub-overrides.yaml`, which is templated by terraform.
 This template is configuration for the jupyterhub helmchart [administrator guide for jupyerhub](https://z2jh.jupyter.org/en/stable/administrator/index.html).
+
+The `jupyterhub.yaml` and `jupyterhub-overrides.yaml` can use `${terraform.templating.syntax}`, but
+can only use the values that are explicitly passed to the `jupyterhub_helm_config` template object
+in `addons.tf`
 
 The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/data-on-eks/docs/blueprints/ai-ml/jupyterhub) may be helpful.
 
