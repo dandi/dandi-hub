@@ -96,6 +96,9 @@ else
   exit 1
 fi
 
+# Set kubeconfig to point kubectl to cluster
+$(terraform output -raw configure_kubectl)
+
 INGRESS_HOSTNAME=$(kubectl get svc/proxy-public -n jupyterhub --output jsonpath="{.status.loadBalancer.ingress[0].hostname}")
 echo "Jupyterhub is running!"
 echo "Set DNS record (Route53) to Ingress Hostname: $INGRESS_HOSTNAME"
