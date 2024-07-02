@@ -60,15 +60,11 @@ This document explains how to set up the necessary AWS resources and configurati
     - In the `envs/<deployment>` directory, create a file named `backend.tf` with the following content:
 
     ```hcl
-    terraform {
-      backend "s3" {
-        bucket         = "jupyterhub-terraform-state-bucket"
-        key            = "terraform.tfstate"
-        region         = "us-east-2"
-        encrypt        = true
-        dynamodb_table = "jupyterhub-terraform-lock-table"
-      }
-    }
+    bucket         = "jupyterhub-terraform-state-bucket"
+    key            = "terraform.tfstate"
+    region         = "us-east-2"
+    encrypt        = true
+    dynamodb_table = "jupyterhub-terraform-lock-table"
     ```
 
 ### 2. Set Up DynamoDB for State Locking
