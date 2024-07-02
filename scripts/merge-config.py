@@ -45,9 +45,6 @@ def main():
     base_config_path = sys.argv[1]
     env_config_path = sys.argv[2]
     output_path = sys.argv[3]
-    # base_config_path = "jupyterhub.yaml"
-    # env_config_path = "envs/test/z2jh_overrides.yaml"
-    # output_path = "merged_jupyterhub.yaml"
 
     base_config = load_yaml(base_config_path)
     # import ipdb; ipdb.set_trace()
@@ -57,11 +54,9 @@ def main():
     else:
         merged_config = base_config
 
-    # import ipdb; ipdb.set_trace()
     with open(output_path, 'w') as output_file:
         yaml.dump(merged_config, output_file, Dumper=IndentDumper)
 
 
 if __name__ == "__main__":
     main()
-
