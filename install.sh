@@ -12,8 +12,8 @@ fi
 source ./ensure_vars.sh
 
 # TODO check tf version
-
-cat $OUTPUT
+# TODO check aws cli version
+# TODO check kubectl version
 
 ENV=$1
 
