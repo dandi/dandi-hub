@@ -61,9 +61,7 @@ else
   exit 1
 fi
 
-# # Validate yaml
-# # TODO
-#
+
 # # Initialize Terraform with environment-provided backend configuration
 # echo "Initializing ..."
 # # TODO exit code if failed
