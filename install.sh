@@ -96,5 +96,6 @@ else
   exit 1
 fi
 
-# TODO route 53 aws CLI
-echo "If you need to hook this up to DNS (Route 53) use this value:" kubectl get svc/proxy-public -n jupyterhub --output jsonpath='{.status.loadBalancer.ingress[].hostname}'
+INGRESS_HOSTNAME=$(kubectl get svc/proxy-public -n jupyterhub --output jsonpath="{.status.loadBalancer.ingress[0].hostname}")
+echo "Jupyterhub is running!"
+echo "Set DNS record (Route53) to Ingress Hostname: $INGRESS_HOSTNAME"
