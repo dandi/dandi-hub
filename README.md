@@ -239,7 +239,7 @@ The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/d
 **Key Management Service Duplicate Resource**
 This is usually caused by a problem with tfstate, it can't be immediately fixed because Amazon Key Management Service objects have a 7-day waiting period to delete.
 The workaround is to change/add a `name` var to the tfvars (ie `jupyerhub-on-eks-2`)
-Mark the existing KMS for deletion.
+Mark the existing KMS for deletion. You will need to assume the AWS IAM Role used to create it (ie `JupyterhubProvisioningRole`)
 
 **Show config of current jupyterhub deployment**
 
