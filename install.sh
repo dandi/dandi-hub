@@ -61,15 +61,14 @@ else
   exit 1
 fi
 
+# Initialize Terraform with environment-provided backend configuration
+echo "Initializing $ENV..."
+# TODO exit code if failed
+terraform init -backend-config="$ENV_DIR/backend.tf" -var-file="$VARFILE" || echo "\"terraform init\" failed"
 
-# # Initialize Terraform with environment-provided backend configuration
-# echo "Initializing ..."
-# # TODO exit code if failed
-# terraform init -backend-config="$ENV_DIR/backend.tf" -var-file="$VARFILE" || echo "\"terraform init\" failed"
-#
-# # Select or create the workspace
-# terraform workspace select $ENV || terraform workspace new $ENV
-#
+# Select or create the workspace
+terraform workspace select $ENV || terraform workspace new $ENV
+
 # # List of Terraform modules to apply in sequence
 # targets=(
 #   "module.vpc"
