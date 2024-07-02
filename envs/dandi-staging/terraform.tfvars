@@ -1,4 +1,4 @@
-name = "jupyterhub-on-eks-2"
+name = "dandihub-staging-on-eks"
 singleuser_image_repo = "dandiarchive/dandihub"
 region = "us-east-2"
 singleuser_image_tag = "latest"
