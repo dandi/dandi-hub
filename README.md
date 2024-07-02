@@ -201,20 +201,51 @@ WARNING: If changing `region` it must be changed both in the tfvars and in the `
 
 ## Jupyterhub Configuration
 
-
-Jupyterhub is configured using an additive merge of `envs/shared/jupyterhub.yaml` and `envs/$ENV/jupyterhub-overrides.yaml`, which is templated by terraform.
+JupyterHub is configured by merging two YAML files:
+    - envs/shared/jupyterhub.yaml
+    - envs/$ENV/jupyterhub-overrides.yaml
 
 Env Minimum Requirements:
     - hub.config.Authenticator.admin_users
-    - singleuser.ProfileList
 
 This template is configuration for the jupyterhub helmchart [administrator guide for jupyerhub](https://z2jh.jupyter.org/en/stable/administrator/index.html).
 
-The `jupyterhub.yaml` and `jupyterhub-overrides.yaml` can use `${terraform.templating.syntax}`, but
-can only use the values that are explicitly passed to the `jupyterhub_helm_config` template object
+The `jupyterhub.yaml` and `jupyterhub-overrides.yaml` can use `${terraform.templating.syntax}`
+with values that are explicitly passed to the `jupyterhub_helm_config` template object
 in `addons.tf`
 
 The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/data-on-eks/docs/blueprints/ai-ml/jupyterhub) may be helpful.
+
+**Merge Strategy**:
+    - Additive: New fields are added.
+    - Clobbering: Existing values, including lists, are overwritten.
+
+*example*
+
+Base Configuration (envs/shared/jupyterhub.yaml)
+```yaml
+singleuser:
+  some_key: some_val
+  profileList:
+    - item1
+    - item2
+```
+Override Configuration (envs/$ENV/jupyterhub-overrides.yaml)
+```yaml
+singleuser:
+  new_key: new_val
+  profileList:
+    - item3
+```
+Resulting Configuration
+```yaml
+singleuser:
+  some_key: some_val
+  new_key: new_val
+  profileList:
+    - item3
+```
+
 
 ## Github OAuth
 
@@ -275,6 +306,7 @@ Cleanup requires the same variables and is run `./cleanup.sh <env>`.
 NOTE: Occasionally the Kubernetes namespace fails to delete.
 
 WARNING: Sometimes AWS VPCs are left up due to an upstream Terraform race condition and must be deleted by hand (including hand-deleting each nested object).
+
 ## Take Down Jupyterhub, leave up EKS
 
 `terraform destroy -target=module.eks_data_addons.helm_release.jupyterhub -auto-approve` will
