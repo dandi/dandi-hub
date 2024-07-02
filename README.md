@@ -31,7 +31,8 @@ This Terraform blueprint creates a Kubernetes environment (EKS) and installs Jup
 This guide assumes that you have:
  - A registered domain
  - An AWS Certificate for the domain and subdomains
- - An AWS IAM account
+ - An AWS IAM account (Trust Policy to assume JupyerhubProvisioningRole, or Admin if Role has not
+     been created). 
  - Terraform >= 1.8.3 ([installation guide](https://learn.hashicorp.com/tutorials/terraform/install-cli))
  - kubectl >= 1.26.15 ([installation guide](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
 
@@ -231,6 +232,11 @@ The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/d
 This is usually caused by a problem with tfstate, it can't be immediately fixed because Amazon Key Management Service objects have a 7-day waiting period to delete.
 The workaround is to change/add a `name` var to the tfvars (ie `jupyerhub-on-eks-2`)
 Mark the existing KMS for deletion.
+
+**Show config of current jupyterhub deployment**
+
+Warning: This is the fully templated jupyterhub. Be careful not to expose secrets.
+`helm get values jupyterhub -n jupyterhub`
 
 ### Connect Jupyterhub proxy to DNS
 
