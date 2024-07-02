@@ -47,7 +47,6 @@ def main():
     output_path = sys.argv[3]
 
     base_config = load_yaml(base_config_path)
-    # import ipdb; ipdb.set_trace()
     if os.path.exists(env_config_path):
         env_config = load_yaml(env_config_path)
         merged_config = merge_dicts(base_config, env_config)
