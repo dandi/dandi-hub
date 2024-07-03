@@ -5,15 +5,7 @@ hub:
       storageClassName: gp3
   authenticatePrometheus: false
   command: ["sh", "-c", "pip install boto3 && jupyterhub --config /usr/local/etc/jupyterhub/jupyterhub_config.py"]
-  extraConfig:
-    myConfig: |
-      ${indent(6, dandi_authenticator)}
   config:
-    Authenticator:
-      admin_users:
-%{ for admin_user in admin_users ~}
-        - "${admin_user}"
-%{ endfor ~}
     GitHubOAuthenticator:
       client_id: "${client_id}"
       client_secret: "${client_secret}"
@@ -47,14 +39,6 @@ proxy:
       service.beta.kubernetes.io/aws-load-balancer-ip-address-type: ipv4
 
 singleuser:
-  defaultUrl: "/lab"
-  memory:
-    limit: 16G
-    guarantee: 1G
-  cpu:
-    limit: 12
-    guarantee: 0.5
-  startTimeout: 2400
   profileList:
     - display_name: "Tiny. Useful for many quick things"
       description: "0.5 CPU / 1 GB"
@@ -179,6 +163,14 @@ singleuser:
             operator: "Equal"
             value: "user"
             effect: "NoSchedule"
+  defaultUrl: "/lab"
+  memory:
+    limit: 16G
+    guarantee: 1G
+  cpu:
+    limit: 12
+    guarantee: 0.5
+  startTimeout: 2400
   storage:
     type: none
     extraVolumes:

@@ -31,7 +31,8 @@ This Terraform blueprint creates a Kubernetes environment (EKS) and installs Jup
 This guide assumes that you have:
  - A registered domain
  - An AWS Certificate for the domain and subdomains
- - An AWS IAM account
+ - An AWS IAM account (Trust Policy to assume JupyerhubProvisioningRole, or Admin if Role has not
+     been created). 
  - Terraform >= 1.8.3 ([installation guide](https://learn.hashicorp.com/tutorials/terraform/install-cli))
  - kubectl >= 1.26.15 ([installation guide](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
 
@@ -59,15 +60,11 @@ This document explains how to set up the necessary AWS resources and configurati
     - In the `envs/<deployment>` directory, create a file named `backend.tf` with the following content:
 
     ```hcl
-    terraform {
-      backend "s3" {
-        bucket         = "jupyterhub-terraform-state-bucket"
-        key            = "terraform.tfstate"
-        region         = "us-east-2"
-        encrypt        = true
-        dynamodb_table = "jupyterhub-terraform-lock-table"
-      }
-    }
+    bucket         = "jupyterhub-terraform-state-bucket"
+    key            = "terraform.tfstate"
+    region         = "us-east-2"
+    encrypt        = true
+    dynamodb_table = "jupyterhub-terraform-lock-table"
     ```
 
 ### 2. Set Up DynamoDB for State Locking
@@ -198,10 +195,57 @@ The variables are set in a `terraform.tfvars` for each `env`, ie `envs/dandi/ter
 - `singleuser_image_tag`: tag
 - `jupyterhub_domain`: The domain to host the jupyterhub landing page: (ie "hub.dandiarchive.org")
 - `dandi_api_domain`: The domain that hosts the DANDI API with list of registered users
-- `admin_users`: List of admin GitHub usernames (ie: ["github_username"])
 - `region`: Cloud vendor region (ie us-west-1)
 
 WARNING: If changing `region` it must be changed both in the tfvars and in the `backend.tf`.
+
+## Jupyterhub Configuration
+
+JupyterHub is configured by merging two YAML files:
+    - envs/shared/jupyterhub.yaml
+    - envs/$ENV/jupyterhub-overrides.yaml
+
+Env Minimum Requirements:
+    - hub.config.Authenticator.admin_users
+
+This template is configuration for the jupyterhub helmchart [administrator guide for jupyerhub](https://z2jh.jupyter.org/en/stable/administrator/index.html).
+
+The `jupyterhub.yaml` and `jupyterhub-overrides.yaml` can use `${terraform.templating.syntax}`
+with values that are explicitly passed to the `jupyterhub_helm_config` template object
+in `addons.tf`
+
+The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/data-on-eks/docs/blueprints/ai-ml/jupyterhub) may be helpful.
+
+**Merge Strategy**:
+    - Additive: New fields are added.
+    - Clobbering: Existing values, including lists, are overwritten.
+
+*example*
+
+Base Configuration (envs/shared/jupyterhub.yaml)
+```yaml
+singleuser:
+  some_key: some_val
+  profileList:
+    - item1
+    - item2
+```
+Override Configuration (envs/$ENV/jupyterhub-overrides.yaml)
+```yaml
+singleuser:
+  new_key: new_val
+  profileList:
+    - item3
+```
+Resulting Configuration
+```yaml
+singleuser:
+  some_key: some_val
+  new_key: new_val
+  profileList:
+    - item3
+```
+
 
 ## Github OAuth
 
@@ -211,10 +255,6 @@ WARNING: If changing `region` it must be changed both in the tfvars and in the `
   - `Homepage URL` to the site root (e.g., `https://hub.dandiarchive.org`). Must be the same as jupyterhub_domain.
   - `Authorization callback URL` must be <jupyterhub_domain>/hub/oauth_callback.
 
-Most of the configuration is set in the template `helm/jupyterhub/dandihub.yaml` using the variables described here.
-This template is configuration for the jupyterhub helmchart [administrator guide for jupyerhub](https://z2jh.jupyter.org/en/stable/administrator/index.html).
-
-The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/data-on-eks/docs/blueprints/ai-ml/jupyterhub) may be helpful.
 
 ## Deployment
 
@@ -230,7 +270,12 @@ The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/d
 **Key Management Service Duplicate Resource**
 This is usually caused by a problem with tfstate, it can't be immediately fixed because Amazon Key Management Service objects have a 7-day waiting period to delete.
 The workaround is to change/add a `name` var to the tfvars (ie `jupyerhub-on-eks-2`)
-Mark the existing KMS for deletion.
+Mark the existing KMS for deletion. You will need to assume the AWS IAM Role used to create it (ie `JupyterhubProvisioningRole`)
+
+**Show config of current jupyterhub deployment**
+
+Warning: This is the fully templated jupyterhub. Be careful not to expose secrets.
+`helm get values jupyterhub -n jupyterhub`
 
 ### Connect Jupyterhub proxy to DNS
 
@@ -250,11 +295,18 @@ Changes to variables or the template configuration usually are updated idempoten
 
 ## Cleanup
 
+Prior to cleanup ensure that kubectl and helm are using the appropriate `kubeconfig`.
+(`<name>` is the value `name` `in terraform.tfvars`.)
+
+```
+aws eks --region us-east-2 update-kubeconfig --name <name-prefix>
+```
 Cleanup requires the same variables and is run `./cleanup.sh <env>`.
 
 NOTE: Occasionally the Kubernetes namespace fails to delete.
 
 WARNING: Sometimes AWS VPCs are left up due to an upstream Terraform race condition and must be deleted by hand (including hand-deleting each nested object).
+
 ## Take Down Jupyterhub, leave up EKS
 
 `terraform destroy -target=module.eks_data_addons.helm_release.jupyterhub -auto-approve` will
