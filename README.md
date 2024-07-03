@@ -94,7 +94,7 @@ This document explains how to set up the necessary AWS resources and configurati
         {
             "Effect": "Allow",
             "Principal": {
-                "AWS": "arn:aws:iam::278212569472:root"
+                "AWS": "arn:aws:iam::<account>:root"
             },
             "Action": "sts:AssumeRole",
               "Condition": {
