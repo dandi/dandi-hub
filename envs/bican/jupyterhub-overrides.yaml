@@ -1,0 +1,30 @@
+hub:
+  extraConfig:
+    myConfig: |
+      # Python executed by jupyterhub at startup
+      from kubernetes_asyncio import client
+      from oauthenticator.github import GitHubOAuthenticator
+      def modify_pod_hook(spawner, pod):  # noqa
+          pod.spec.containers[0].security_context = client.V1SecurityContext(privileged=True)
+          return pod
+
+      c.KubeSpawner.modify_pod_hook = modify_pod_hook  # noqa
+      c.JupyterHub.authenticator_class = GitHubOAuthenticator  # noqa
+      c.GitHubOAuthenticator.enable_auth_state = True  # noqa
+  config:
+    Authenticator:
+      admin_users:
+        - "asmacdo"
+        - "dandibot"
+        - "satra"
+        - "yarikoptic"
+    GitHubOAuthenticator:
+      client_id: "${client_id}"
+      client_secret: "${client_secret}"
+      oauth_callback_url: "https://${jupyterhub_domain}/hub/oauth_callback"
+      scope:
+        - read:org
+        - read:gist
+        - user:email
+      allowed_organizations:
+        - "brain-bican:kbhub-users"

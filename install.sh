@@ -39,7 +39,6 @@ if [ ! -d "$ENV_DIR" ]; then
 fi
 
 ./scripts/merge_config.py $BASE_CONFIG $ENV_OVERRIDE $OUTPUT
-echo "Initializing ..."
 
 yamllint -d "{extends: default, rules: {line-length: disable, document-start: disable}}" "$OUTPUT"
 if [ $? -ne 0 ]; then
@@ -62,8 +61,8 @@ fi
 
 # Initialize Terraform with environment-provided backend configuration
 echo "Initializing $ENV..."
-terraform init -backend-config="$ENV_DIR/s3.tfbackend" -var-file="$VARFILE"
 terraform workspace select -or-create $ENV
+terraform init -backend-config="$ENV_DIR/s3.tfbackend" -var-file="$VARFILE"
 
 # From here forward, we should continue even if there is a failure
 set +e
