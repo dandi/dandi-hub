@@ -5,5 +5,7 @@ ansible_password
 .terraform*
 terraform.tfstate*
 
+scripts/__pycache__/
+
 # Env secrets
 *.env
