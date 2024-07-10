@@ -126,6 +126,10 @@ This document explains how to set up the necessary AWS resources and configurati
     - From the `JSON` tab, create `terraform-jupyterhub-backend-policies` using the json in `.aws`
     - From the `JSON` tab, create `terraform-jupyterhub-provisioning-policies` using the json in `.aws`
 
+4. **Set Maximum Session Duration**
+    - 1 hour is usually sufficient, but will occassionally fail.
+    - Recommend 4 hours.
+
 ### AWS CLI Configuration for Multiple Accounts and Environments
 
 To manage multiple AWS accounts and environments, you need to configure your AWS CLI with the appropriate profiles. Follow the steps below to set up your `.aws/config` and `.aws/credentials` files.
