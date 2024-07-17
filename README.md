@@ -132,7 +132,7 @@ This document explains how to set up the necessary AWS resources and configurati
 
 ### AWS CLI Configuration for Multiple Accounts and Environments
 
-To manage multiple AWS accounts and environments, you need to configure your AWS CLI with the appropriate profiles. Follow the steps below to set up your `.aws/config` and `.aws/credentials` files.
+To manage multiple AWS accounts and environments, you need to configure your AWS CLI with the appropriate profiles. Follow the steps below to set up your `~/.aws/config` and `~/.aws/credentials` files.
 
 #### Step 1: Set Up AWS Credentials
 
