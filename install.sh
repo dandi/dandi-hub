@@ -59,45 +59,45 @@ else
   exit 1
 fi
 
-# Initialize Terraform with environment-provided backend configuration
-echo "Initializing $ENV..."
-terraform workspace select -or-create $ENV
-terraform init -backend-config="$ENV_DIR/s3.tfbackend" -var-file="$VARFILE"
-
-# From here forward, we should continue even if there is a failure
-set +e
-# List of Terraform modules to apply in sequence
-targets=(
-  "module.vpc"
-  "module.eks"
-)
-
-# Apply modules in sequence
-for target in "${targets[@]}"
-do
-  echo "Applying module $target..."
-  apply_output=$(terraform apply -target="$target" -auto-approve -var-file="$VARFILE" 2>&1 | tee /dev/tty)
-  if [[ ${PIPESTATUS[0]} -eq 0 && $apply_output == *"Apply complete"* ]]; then
-    echo "SUCCESS: Terraform apply of $target completed successfully"
-  else
-    echo "FAILED: Terraform apply of $target failed"
-    exit 1
-  fi
-done
-
-# Final apply to catch any remaining resources
-echo "Applying remaining resources..."
-apply_output=$(terraform apply -auto-approve -var-file="$VARFILE" 2>&1 | tee /dev/tty)
-if [[ ${PIPESTATUS[0]} -eq 0 && $apply_output == *"Apply complete"* ]]; then
-  echo "SUCCESS: Terraform apply of all modules completed successfully"
-else
-  echo "FAILED: Terraform apply of all modules failed"
-  exit 1
-fi
-
-# Set kubeconfig to point kubectl to cluster
-$(terraform output -raw configure_kubectl)
-
-INGRESS_HOSTNAME=$(kubectl get svc/proxy-public -n jupyterhub --output jsonpath="{.status.loadBalancer.ingress[0].hostname}")
-echo "Jupyterhub is running!"
-echo "Set DNS record (Route53) to Ingress Hostname: $INGRESS_HOSTNAME"
+# # Initialize Terraform with environment-provided backend configuration
+# echo "Initializing $ENV..."
+# terraform workspace select -or-create $ENV
+# terraform init -backend-config="$ENV_DIR/s3.tfbackend" -var-file="$VARFILE"
+#
+# # From here forward, we should continue even if there is a failure
+# set +e
+# # List of Terraform modules to apply in sequence
+# targets=(
+#   "module.vpc"
+#   "module.eks"
+# )
+#
+# # Apply modules in sequence
+# for target in "${targets[@]}"
+# do
+#   echo "Applying module $target..."
+#   apply_output=$(terraform apply -target="$target" -auto-approve -var-file="$VARFILE" 2>&1 | tee /dev/tty)
+#   if [[ ${PIPESTATUS[0]} -eq 0 && $apply_output == *"Apply complete"* ]]; then
+#     echo "SUCCESS: Terraform apply of $target completed successfully"
+#   else
+#     echo "FAILED: Terraform apply of $target failed"
+#     exit 1
+#   fi
+# done
+#
+# # Final apply to catch any remaining resources
+# echo "Applying remaining resources..."
+# apply_output=$(terraform apply -auto-approve -var-file="$VARFILE" 2>&1 | tee /dev/tty)
+# if [[ ${PIPESTATUS[0]} -eq 0 && $apply_output == *"Apply complete"* ]]; then
+#   echo "SUCCESS: Terraform apply of all modules completed successfully"
+# else
+#   echo "FAILED: Terraform apply of all modules failed"
+#   exit 1
+# fi
+#
+# # Set kubeconfig to point kubectl to cluster
+# $(terraform output -raw configure_kubectl)
+#
+# INGRESS_HOSTNAME=$(kubectl get svc/proxy-public -n jupyterhub --output jsonpath="{.status.loadBalancer.ingress[0].hostname}")
+# echo "Jupyterhub is running!"
+# echo "Set DNS record (Route53) to Ingress Hostname: $INGRESS_HOSTNAME"
