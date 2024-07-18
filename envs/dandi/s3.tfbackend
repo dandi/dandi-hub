@@ -2,4 +2,4 @@ bucket =  "eks-dandihub-tfstate"
 key = "terraform.tfstate"
 region = "us-east-2"
 encrypt = true
-dynamodb_table = "eks-dandihub-tf-lock"
+dynamodb_table = "eks-jupyterhub-tf-lock"
