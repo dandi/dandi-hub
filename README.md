@@ -132,7 +132,7 @@ This document explains how to set up the necessary AWS resources and configurati
 
 ### AWS CLI Configuration for Multiple Accounts and Environments
 
-To manage multiple AWS accounts and environments, you need to configure your AWS CLI with the appropriate profiles. Follow the steps below to set up your `.aws/config` and `.aws/credentials` files.
+To manage multiple AWS accounts and environments, you need to configure your AWS CLI with the appropriate profiles. Follow the steps below to set up your `~/.aws/config` and `~/.aws/credentials` files.
 
 #### Step 1: Set Up AWS Credentials
 
@@ -206,11 +206,13 @@ WARNING: If changing `region` it must be changed both in the tfvars and in the `
 ## Jupyterhub Configuration
 
 JupyterHub is configured by merging two YAML files:
-    - envs/shared/jupyterhub.yaml
-    - envs/$ENV/jupyterhub-overrides.yaml
+
+- `envs/shared/jupyterhub.yaml`
+- `envs/$ENV/jupyterhub-overrides.yaml`
 
 Env Minimum Requirements:
-    - hub.config.Authenticator.admin_users
+
+- hub.config.Authenticator.admin_users
 
 This template is configuration for the jupyterhub helmchart [administrator guide for jupyerhub](https://z2jh.jupyter.org/en/stable/administrator/index.html).
 
@@ -221,8 +223,9 @@ in `addons.tf`
 The original [AWS Jupyterhub Example Blueprint docs](https://awslabs.github.io/data-on-eks/docs/blueprints/ai-ml/jupyterhub) may be helpful.
 
 **Merge Strategy**:
-    - Additive: New fields are added.
-    - Clobbering: Existing values, including lists, are overwritten.
+
+- Additive: New fields are added.
+- Clobbering: Existing values, including lists, are overwritten.
 
 *example*
 
