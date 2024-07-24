@@ -61,8 +61,8 @@ fi
 
 # Initialize Terraform with environment-provided backend configuration
 echo "Initializing $ENV..."
+terraform init -reconfigure -backend-config="$ENV_DIR/s3.tfbackend" -var-file="$VARFILE"
 terraform workspace select -or-create $ENV
-terraform init -backend-config="$ENV_DIR/s3.tfbackend" -var-file="$VARFILE"
 
 # From here forward, we should continue even if there is a failure
 set +e

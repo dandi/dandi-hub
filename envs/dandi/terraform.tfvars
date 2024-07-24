@@ -1,4 +1,4 @@
-name = "dandihub-on-eks"
+name = "eks-dandihub"
 singleuser_image_repo = "dandiarchive/dandihub"
 region = "us-east-2"
 singleuser_image_tag = "latest"
