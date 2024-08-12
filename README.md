@@ -35,6 +35,7 @@ This guide assumes that you have:
      been created). 
  - Terraform >= 1.8.3 ([installation guide](https://learn.hashicorp.com/tutorials/terraform/install-cli))
  - kubectl >= 1.26.15 ([installation guide](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
+ - yamllint >= 1.35.1 ([installation guide](https://yamllint.readthedocs.io/en/stable/quickstart.html#installing-yamllint)
 
 ## Directory Layout
 
