@@ -7,7 +7,7 @@ currently stored are no longer used. Data migration is where the cost becomes ex
 
 Each user has access to 2 locations: `/home/{user}` and `/shared/`
 
-(Within jupyterhub `/home/{user}` the user always sees `/home/jovyan`, but is stored in EFS as their GitHub
+Within jupyterhub `/home/{user}` the user always sees `/home/jovyan`, but is stored in EFS as their GitHub
 username.
 
 ## Known cache file cleanup 
