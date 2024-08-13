@@ -24,6 +24,7 @@ This Terraform blueprint creates a Kubernetes environment (EKS) and installs Jup
 - [Adjusting Available Server Options](#adjusting-available-server-options)
 - [Adjusting Available Nodes](#adjusting-available-nodes)
 - [Adjusting Core Node](#adjusting-core-node)
+- [Upgrading Kubernetes](#upgrading-kubernetes)
 - [Kubernetes Layer Tour](#kubernetes-layer-tour)
 
 ## Prerequisites
@@ -32,7 +33,7 @@ This guide assumes that you have:
  - A registered domain
  - An AWS Certificate for the domain and subdomains
  - An AWS IAM account (Trust Policy to assume JupyerhubProvisioningRole, or Admin if Role has not
-     been created). 
+     been created).
  - Terraform >= 1.8.3 ([installation guide](https://learn.hashicorp.com/tutorials/terraform/install-cli))
  - kubectl >= 1.26.15 ([installation guide](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
 
@@ -358,6 +359,16 @@ The node pools are configured in `addons.tf` with `karpenter-resources-*` object
 ## Adjusting Core Node
 
 The configuration for the machines that run the autoscaling and monitoring layer is `eks_managed_node_groups` in `main.tf`.
+
+## Upgrading Kubernetes
+
+**⚠️ Warning:** Do not click the "Upgrade k8s" button in AWS Console.
+When AWS manages upgrade it will go slowly and upgrade components carefully to avoid downtime.
+When the upgrade is finished however, on the next run tfstate will not match and terraform will destroy the
+cluster and bring it back up.
+
+Kuberenetes version is controlled via the terraform variable `eks_cluster_version`, the default is
+in `versions.tf`, but each deployment can specify their own value in their `tfvars`.
 
 ## Kubernetes Layer Tour
 
