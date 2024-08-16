@@ -367,7 +367,7 @@ When AWS manages upgrade it will go slowly and upgrade components carefully to a
 When the upgrade is finished however, on the next run tfstate will not match and terraform will destroy the
 cluster and bring it back up.
 
-Kuberenetes version is controlled via the terraform variable `eks_cluster_version`, the default is
+Kubernetes version is controlled via the terraform variable `eks_cluster_version`, the default is
 in `versions.tf`, but each deployment can specify their own value in their `tfvars`.
 
 ## Kubernetes Layer Tour
