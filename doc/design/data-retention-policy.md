@@ -32,7 +32,7 @@ Alternatives:
 ## Automated Data Audit
 
 At some interval (30 days with no login?):
-   - find files larger than 1GB and mtime > 30 (?) days -- get total size and count
+   - find files larger than 1 (?) GB and mtime > 30 (?) days -- get total size and count
    - find _pycache_ and nwb-cache folders and pip cache and mtime > 30? days -- total sizes and list of them
 
 Notify user if:
@@ -51,7 +51,7 @@ Notification information:
 If a user has not logged in for 60 days (30 days initial + 30 days following audit), send a warning: 
 `In 10 days the following files will be cleaned up`
 
-If the user has not logged in for 60 days (30 initial + 30 after audit + 10 warning):
+If the user has not logged in for 70 days (30 initial + 30 after audit + 10 warning):
 `The following files were removed`
 
 Reset timer. 
