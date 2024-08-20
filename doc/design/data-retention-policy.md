@@ -5,7 +5,7 @@ currently stored are no longer used. Data migration is where the cost becomes ex
 
 ## Persistent Data locations
 
-Each user has access to 2 locations: `/home/{user}` and `/shared/`
+Each user has access to 2 locations: `/home/{user}` and `/shared/`.
 
 Within jupyterhub `/home/{user}` the user always sees `/home/jovyan`, but is stored in EFS as their GitHub
 username.
@@ -22,8 +22,7 @@ We should be able to safely remove the following:
 
 ## Determining Last Access
 
-EFS does not store metadata for the last access of the data. (Though they must track somehow to move
-to `Infrequent Access`)
+EFS does not store metadata for the last access of the data. (Though they must track somehow to move to `Infrequent Access`)
 
 Alternatives: 
  - use the [jupyterhub REST API](https://jupyterhub.readthedocs.io/en/stable/reference/rest-api.html#operation/get-users) check when user last used/logged in to hub.
@@ -32,10 +31,12 @@ Alternatives:
 ## Automated Data Audit
 
 At some interval (30 days with no login?):
+   - find files larger than 100 (?) GB and mtime > 10 (?) days -- get total size and count
    - find files larger than 1 (?) GB and mtime > 30 (?) days -- get total size and count
    - find _pycache_ and nwb-cache folders and pip cache and mtime > 30? days -- total sizes and list of them
 
 Notify user if:
+   - any of the above listed thresholds were reached
    - total du exceeds some threshold (e.g. 100G)
    - total outdated caches size exceeds some threshold (e.g. 1G)
    - prior notification was sent more than a week ago
