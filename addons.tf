@@ -181,6 +181,7 @@ module "eks_blueprints_addons" {
           name: cpu-on-demand
           clusterName: ${module.eks.cluster_name}
           instanceSizes: ["xlarge", "2xlarge", "4xlarge", "8xlarge", "16xlarge", "24xlarge"]
+          instanceFamilies: ["c5", "m5", "r5"]
           karpenterRole: ${split("/", module.eks_blueprints_addons.karpenter.node_iam_role_arn)[1]}
           capacityTypes: ["on-demand"]
         EOT
