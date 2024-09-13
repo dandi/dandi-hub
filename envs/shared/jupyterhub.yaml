@@ -59,30 +59,30 @@ singleuser:
         mem_guarantee: 0.5G
         node_selector:
           NodePool: default
-    - display_name: "MIT Workshop (tmp)"
-      description: "6 CPU / 16 GB up to 12C/32G. May take up to 15 mins to start."
-      profile_options:
-        image:
-          display_name: "Image"
-          choices:
-            standard:
-              display_name: "Standard"
-              default: true
-              kubespawner_override:
-                image: "${singleuser_image_repo}:${singleuser_image_tag}"
-            matlab:
-              display_name: "MATLAB (must provide your own license)"
-              kubespawner_override:
-                image: "${singleuser_image_repo}:${singleuser_image_tag}-matlab"
-      default: true
-      kubespawner_override:
-        image_pull_policy: Always
-        cpu_limit: 12
-        cpu_guarantee: 6
-        mem_limit: 32G
-        mem_guarantee: 16G
-        node_selector:
-          NodePool: cpu-on-demand
+    # - display_name: "MIT Workshop (tmp)"
+    #   description: "6 CPU / 16 GB up to 12C/32G. May take up to 15 mins to start."
+    #   profile_options:
+    #     image:
+    #       display_name: "Image"
+    #       choices:
+    #         standard:
+    #           display_name: "Standard"
+    #           default: true
+    #           kubespawner_override:
+    #             image: "${singleuser_image_repo}:${singleuser_image_tag}"
+    #         matlab:
+    #           display_name: "MATLAB (must provide your own license)"
+    #           kubespawner_override:
+    #             image: "${singleuser_image_repo}:${singleuser_image_tag}-matlab"
+    #   default: true
+    #   kubespawner_override:
+    #     image_pull_policy: Always
+    #     cpu_limit: 12
+    #     cpu_guarantee: 6
+    #     mem_limit: 32G
+    #     mem_guarantee: 16G
+    #     node_selector:
+    #       NodePool: cpu-on-demand
     - display_name: "Base"
       description: "6 CPU / 16 GB up to 12C/32G. May take up to 15 mins to start."
       profile_options:
