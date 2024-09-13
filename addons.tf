@@ -168,6 +168,22 @@ module "eks_blueprints_addons" {
         <<-EOT
           clusterName: ${module.eks.cluster_name}
           karpenterRole: ${split("/", module.eks_blueprints_addons.karpenter.node_iam_role_arn)[1]}
+          capacityTypes: ["spot"]
+        EOT
+      ]
+    }
+    karpenter-resources-cpu-on-demand = {
+      name        = "karpenter-resources-cpu-on-demand"
+      description = "A Helm chart for karpenter CPU based resources"
+      chart       = "${path.module}/helm/karpenter-resources"
+      values = [
+        <<-EOT
+          name: cpu-on-demand
+          clusterName: ${module.eks.cluster_name}
+          instanceSizes: ["xlarge", "2xlarge", "4xlarge", "8xlarge", "16xlarge", "24xlarge"]
+          instanceFamilies: ["c5", "m5", "r5"]
+          karpenterRole: ${split("/", module.eks_blueprints_addons.karpenter.node_iam_role_arn)[1]}
+          capacityTypes: ["on-demand"]
         EOT
       ]
     }

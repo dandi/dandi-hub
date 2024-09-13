@@ -38,7 +38,10 @@ spec:
           values: ["amd64"]
         - key: "karpenter.sh/capacity-type"
           operator: In
-          values: ["spot"]
+          {{- with .Values.capacityTypes }}
+          values:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
   disruption:
     consolidationPolicy: WhenEmpty
     consolidateAfter: 30s
