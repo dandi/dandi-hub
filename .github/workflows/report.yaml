@@ -39,11 +39,11 @@ jobs:
       - name: Sanity check
         run: |
           kubectl get pods -n jupyterhub
-          
+
       # Step 4: Deploy Hello World Pod from manifest
       - name: Deploy Hello World Pod
         run: |
-          kubectl apply -f manifests/hello-world-pod.yaml
+          kubectl apply -f .github/manifests/hello-world-pod.yaml
 
       # Step 5: Wait for Pod to Complete
       - name: Wait for Hello World Pod to complete
