@@ -32,9 +32,9 @@ jobs:
 
 
       - name: Configure kubectl with AWS EKS
-        # TODO param name, region
+        # TODO param name, region role-arn
         run: |
-          aws eks update-kubeconfig --name eks-dandihub --region us-east-2
+          aws eks update-kubeconfig --name eks-dandihub --region us-east-2 --role-arn arn:aws:iam::278212569472:role/JupyterhubProvisioningRole
 
       - name: Sanity check
         run: |
