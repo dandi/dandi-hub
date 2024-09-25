@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  generate_data_usage_report:
     runs-on: ubuntu-latest
 
     steps:
