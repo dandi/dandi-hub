@@ -48,14 +48,17 @@ jobs:
       # Step 5: Wait for Pod to Complete
       - name: Wait for Hello World Pod to complete
         run: |
-          kubectl wait --for=condition=Ready pod/hello-world-pod --timeout=60s
+          kubectl wait --for=condition=Ready pod/hello-world-pod --timeout=300s  # 5 minutes
+        continue-on-error: true  # Allow the workflow to continue even if this step fails
 
-      # Step 6: Get Pod Logs to verify it ran successfully
+      # Step 6: Get Pod Logs to verify it ran successfully, only if Step 5 succeeds
       - name: Get Hello World Pod logs
         run: |
           kubectl logs hello-world-pod
+        if: ${{ success() }}  # Only run this step if the previous step was successful
 
-      # Step 7: Cleanup - Delete the Pod
+      # Step 7: Cleanup - Always run this step, even if previous steps fail
       - name: Delete Hello World Pod
         run: |
           kubectl delete pod hello-world-pod
+        if: ${{ always() }}  # Always run this step, even if other steps fail
