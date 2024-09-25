@@ -21,6 +21,16 @@ jobs:
         # TODO param region
         aws-region: us-east-2
 
+     - name: Assume JupyterhubProvisioningRole
+       # TODO param ProvisioningRoleARN and name ^
+      run: |
+        ROLE_ARN="arn:aws:iam::278212569472:role/JupyterhubProvisioningRole"
+        CREDS=$(aws sts assume-role --role-arn $ROLE_ARN --role-session-name "GitHubActionsSession")
+        export AWS_ACCESS_KEY_ID=$(echo $CREDS | jq -r '.Credentials.AccessKeyId')
+        export AWS_SECRET_ACCESS_KEY=$(echo $CREDS | jq -r '.Credentials.SecretAccessKey')
+        export AWS_SESSION_TOKEN=$(echo $CREDS | jq -r '.Credentials.SessionToken')
+
+
     - name: Configure kubectl with AWS EKS
       # TODO param name, region
       run: |
