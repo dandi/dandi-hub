@@ -19,7 +19,7 @@ hub:
         - asmacdo
         - dandibot
         - satra
-        - aaron
+        - aaronkanzer
         - kabilar
     GitHubOAuthenticator:
       client_id: ${client_id}
