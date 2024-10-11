@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: disk-usage-report-job
+spec:
+  template:
+    metadata:
+      labels:
+        app: disk-usage-report
+    spec:
+      containers:
+        - name: disk-usage-report
+          image: IMAGE_PLACEHOLDER
+      restartPolicy: Never
+      nodeSelector:
+        NodeGroupType: default
+        NodePool: default
+        hub.jupyter.org/node-purpose: user
+      tolerations:
+        - key: "hub.jupyter.org/dedicated"
+          operator: "Equal"
+          value: "user"
+          effect: "NoSchedule"
