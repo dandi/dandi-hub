@@ -1,0 +1,26 @@
+Additional Notes:
+
+    Secrets Management:
+        Ensure you have the following secrets set in your GitHub repository:
+            DOCKERHUB_USERNAME
+            DOCKERHUB_TOKEN (a DockerHub Access Token)
+            AWS_ACCESS_KEY_ID
+            AWS_SECRET_ACCESS_KEY
+    Docker Image Tagging:
+        The Docker image is tagged with latest. For better version control, consider using commit SHA or version numbers.
+    Error Handling:
+        continue-on-error: true is set for the Job wait step to allow the workflow to proceed even if the Job fails.
+    Log Retrieval:
+        The logs from the pod are retrieved to help you verify the script's output.
+    Cleanup:
+        Deleting the Job ensures that no resources are left running after the workflow completes.
+
+By making these updates, your workflow will now:
+
+    Include your du.py script in a Docker image.
+    Build and push this image to DockerHub.
+    Deploy a Kubernetes Job to your EKS cluster that runs the script.
+    Wait for the Job to complete and retrieve logs.
+    Clean up resources after execution.
+
+Feel free to ask if you need further assistance or clarification on any of these steps!

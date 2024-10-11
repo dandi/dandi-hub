@@ -13,16 +13,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 1: Log in to DockerHub
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Step 2: Build and Push Docker Image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: images/Dockerfile.disk_usage_report
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/disk_usage_report:latest
+
+      # Step 3: Configure AWS Credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          # TODO param region
           aws-region: us-east-2
 
+      # Step 4: Assume Role for EKS Access
       - name: Assume JupyterhubProvisioningRole
-        # TODO param ProvisioningRoleARN and name ^
         run: |
           ROLE_ARN="arn:aws:iam::278212569472:role/JupyterhubProvisioningRole"
           CREDS=$(aws sts assume-role --role-arn $ROLE_ARN --role-session-name "GitHubActionsSession")
@@ -30,35 +46,40 @@ jobs:
           export AWS_SECRET_ACCESS_KEY=$(echo $CREDS | jq -r '.Credentials.SecretAccessKey')
           export AWS_SESSION_TOKEN=$(echo $CREDS | jq -r '.Credentials.SessionToken')
 
-
+      # Step 5: Configure kubectl with AWS EKS
       - name: Configure kubectl with AWS EKS
-        # TODO param name, region role-arn
         run: |
           aws eks update-kubeconfig --name eks-dandihub --region us-east-2 --role-arn arn:aws:iam::278212569472:role/JupyterhubProvisioningRole
 
+      # Step 6: Sanity Check
       - name: Sanity check
         run: |
           kubectl get pods -n jupyterhub
 
-      # Step 4: Deploy Hello World Pod from manifest
-      - name: Deploy Hello World Pod
+      # Step 7: Replace Image Placeholder in Manifest
+      - name: Replace image placeholder in manifest
         run: |
-          kubectl apply -f .github/manifests/hello-world-pod.yaml
+          sed -i 's|IMAGE_PLACEHOLDER|'"${{ secrets.DOCKERHUB_USERNAME }}/disk_usage_report:latest"'|' .github/manifests/disk-usage-report-job.yaml
 
-      # Step 5: Wait for Pod to Complete
-      - name: Wait for Hello World Pod to complete
+      # Step 8: Deploy Disk Usage Report Job
+      - name: Deploy Disk Usage Report Job
         run: |
-          kubectl wait --for=condition=Ready pod/hello-world-pod --timeout=300s  # 5 minutes
-        continue-on-error: true  # Allow the workflow to continue even if this step fails
+          kubectl apply -f .github/manifests/disk-usage-report-job.yaml
 
-      # Step 6: Get Pod Logs to verify it ran successfully, only if Step 5 succeeds
-      - name: Get Hello World Pod logs
+      # Step 9: Wait for Job Completion
+      - name: Wait for Disk Usage Report Job to complete
         run: |
-          kubectl logs hello-world-pod
-        if: ${{ success() }}  # Only run this step if the previous step was successful
+          kubectl wait --for=condition=complete job/disk-usage-report-job --timeout=300s
+        continue-on-error: true
 
-      # Step 7: Cleanup - Always run this step, even if previous steps fail
-      - name: Delete Hello World Pod
+      # Step 10: Retrieve Pod Logs
+      - name: Get Disk Usage Report Pod logs
         run: |
-          kubectl delete pod hello-world-pod
-        if: ${{ always() }}  # Always run this step, even if other steps fail
+          POD_NAME=$(kubectl get pods --selector=job-name=disk-usage-report-job -o jsonpath='{.items[0].metadata.name}')
+          kubectl logs $POD_NAME
+
+      # Step 11: Cleanup
+      - name: Delete Disk Usage Report Job
+        run: |
+          kubectl delete job disk-usage-report-job
+
