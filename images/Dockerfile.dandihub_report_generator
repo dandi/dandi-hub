@@ -1,0 +1,15 @@
+FROM python:3.9-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the du.py script into the container
+COPY .github/scripts/du.py /app/du.py
+
+# Install required packages
+RUN apt-get update \
+    && apt-get install -y coreutils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the entrypoint to the script
+ENTRYPOINT ["python3", "/app/du.py"]
