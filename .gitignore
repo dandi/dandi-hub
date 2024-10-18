@@ -9,3 +9,5 @@ scripts/__pycache__/
 
 # Env secrets
 *.env
+
+.DS_Store
