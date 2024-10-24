@@ -186,12 +186,11 @@ singleuser:
         command:
           - sh
           - -c
-          - 'gitpuller https://github.com/dandi/example-notebooks master dandi-notebooks;
-            chown -R jovyan:users dandi-notebooks; datalad install https://github.com/dandi/dandisets;
-            /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen
+          - '/opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen
             --display-name "Python (Allen SDK)"; /opt/conda/bin/pip install --upgrade
-            dandi; git config --global user.email "$${GITHUB_EMAIL}"; git config --global
-            user.name "$${GITHUB_USER}"
+            dandi; /opt/conda/bin/pip install --upgrade lincbrain-cli; git config
+            --global user.email "$${GITHUB_EMAIL}"; git config --global user.name
+            "$${GITHUB_USER}"
 
             '
   memory:
