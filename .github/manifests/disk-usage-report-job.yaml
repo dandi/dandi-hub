@@ -1,32 +1,27 @@
-apiVersion: batch/v1
-kind: Job
+apiVersion: v1
+kind: Pod
 metadata:
   name: disk-usage-report-job
 spec:
-  template:
-    metadata:
-      labels:
-        app: disk-usage-report
-    spec:
-      containers:
-        - name: disk-usage-report
-          image: IMAGE_PLACEHOLDER
-          args:
-            - "/home/asmacdo"
-          volumeMounts:
-            - name: persistent-storage
-              mountPath: "/home/"
-      restartPolicy: Never
-      nodeSelector:
-        NodeGroupType: default
-        NodePool: default
-        hub.jupyter.org/node-purpose: user
-      tolerations:
-        - key: "hub.jupyter.org/dedicated"
-          operator: "Equal"
-          value: "user"
-          effect: "NoSchedule"
-      volumes:
+  containers:
+    - name: disk-usage-report
+      image: IMAGE_PLACEHOLDER
+      args:
+        - "/home/asmacdo"
+      volumeMounts:
         - name: persistent-storage
-          persistentVolumeClaim:
-            claimName: efs-persist
+          mountPath: "/home/"
+  restartPolicy: Never
+  nodeSelector:
+    NodeGroupType: default
+    NodePool: default
+    hub.jupyter.org/node-purpose: user
+  tolerations:
+    - key: "hub.jupyter.org/dedicated"
+      operator: "Equal"
+      value: "user"
+      effect: "NoSchedule"
+  volumes:
+    - name: persistent-storage
+      persistentVolumeClaim:
+        claimName: efs-persist
