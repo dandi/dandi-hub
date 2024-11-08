@@ -5,7 +5,7 @@ import subprocess
 import sys
 import json
 
-OUTPUT_FILE = "du_report.json"
+OUTPUT_FILE = "/output/du_report.json"
 SIZE_THRESHOLD_GB = 1
 SIZE_THRESHOLD_BYTES = SIZE_THRESHOLD_GB * 1024 * 1024 * 1024
 
@@ -44,7 +44,7 @@ def prepare_report(directory):
     with open(OUTPUT_FILE, 'w') as f:
         json.dump(report, f, indent=4)
 
-    print(f"Disk usage report generated at {OUTPUT_FILE}")
+    print(f"Disk usage report generated at {os.path.abspath(OUTPUT_FILE)}")
 
 
 if __name__ == "__main__":
