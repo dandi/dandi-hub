@@ -7,8 +7,9 @@ spec:
   containers:
     - name: disk-usage-report
       image: IMAGE_PLACEHOLDER
-      args:
-        - "/home/asmacdo"
+      command: ["/bin/sh", "-c", "sleep 300"]
+      # args:
+      #   - "/home/asmacdo"
       volumeMounts:
         - name: persistent-storage
           mountPath: "/home/"
