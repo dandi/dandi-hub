@@ -80,7 +80,7 @@ jobs:
       # TODO should timeout be longer?
       - name: Wait for Disk Usage Report Job to complete
         run: |
-          kubectl wait --for=condition=complete pod/disk-usage-report-job --timeout=30s -n jupyterhub
+          kubectl wait --for=condition=complete pod/disk-usage-report-job --timeout=60s -n jupyterhub
         continue-on-error: true
 
       - name: Retrieve generated report file
