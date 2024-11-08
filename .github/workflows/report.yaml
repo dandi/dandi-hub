@@ -71,7 +71,7 @@ jobs:
       #
       - name: Replace image placeholder in manifest
         run: |
-          sed -i 's|IMAGE_PLACEHOLDER|'"${{ secrets.DOCKERHUB_USERNAME }}/disk_usage_report:latest"'|' .github/manifests/disk-usage-report-job.yaml
+          sed -i 's|IMAGE_PLACEHOLDER|'"${{ secrets.DOCKERHUB_USERNAME }}/dandihub-report-generator:latest"'|' .github/manifests/disk-usage-report-job.yaml
 
       - name: Deploy Disk Usage Report Job Pod
         run: |
