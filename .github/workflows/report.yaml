@@ -27,69 +27,69 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/dandihub-report-generator:latest
 
-      # - name: Configure AWS credentials
-      #   uses: aws-actions/configure-aws-credentials@v3
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: us-east-2
-      #
-      # - name: Assume ProvisioningRole
-      #   run: |
-      #     CREDS=$(aws sts assume-role --role-arn ${{ secrets.AWS_PROVISIONING_ROLE_ARN }} --role-session-name "GitHubActionsSession")
-      #     export AWS_ACCESS_KEY_ID=$(echo $CREDS | jq -r '.Credentials.AccessKeyId')
-      #     export AWS_SECRET_ACCESS_KEY=$(echo $CREDS | jq -r '.Credentials.SecretAccessKey')
-      #     export AWS_SESSION_TOKEN=$(echo $CREDS | jq -r '.Credentials.SessionToken')
-      #
-      # - name: Configure kubectl with AWS EKS
-      #   run: |
-      #     aws eks update-kubeconfig --name eks-dandihub --region us-east-2 --role-arn ${{ secrets.AWS_PROVISIONING_ROLE_ARN }}
-      #
-      # # TODO remove
-      # - name: Sanity check
-      #   run: |
-      #     kubectl get pods -n jupyterhub
-      #
-      # - name: Replace image placeholder in manifest
-      #   run: |
-      #     sed -i 's|IMAGE_PLACEHOLDER|'"${{ secrets.DOCKERHUB_USERNAME }}/disk_usage_report:latest"'|' .github/manifests/disk-usage-report-job.yaml
-      #
-      # - name: Deploy Disk Usage Report Job
-      #   run: |
-      #     kubectl apply -f .github/manifests/disk-usage-report-job.yaml
-      #
-      # # TODO should timeout be longer?
-      # - name: Wait for Disk Usage Report Job to complete
-      #   run: |
-      #     kubectl wait --for=condition=complete job/disk-usage-report-job --timeout=300s
-      #   continue-on-error: true
-      #
-      # - name: Save Pod logs to file
-      #   run: |
-      #     POD_NAME=$(kubectl get pods --selector=job-name=disk-usage-report-job -o jsonpath='{.items[0].metadata.name}')
-      #     kubectl logs $POD_NAME > disk_usage_report.log
-      #   continue-on-error: true
-      #
-      # # continue-on-error for previous steps so we delete the job
-      # - name: Delete Disk Usage Report Job
-      #   run: |
-      #     kubectl delete job disk-usage-report-job
-      #
-      # - name: Clone dandi-hub-usage-reports repository
-      #   run: |
-      #     git clone https://github.com/dandi/dandi-hub-usage-reports.git
-      #     cd dandi-hub-usage-reports
-      #
-      # - name: Copy log file to repository
-      #   run: |
-      #     DATE=$(date +'%Y-%m-%d')
-      #     mv ../disk_usage_report.log $DATE_disk_usage_report.log
-      #
-      # # Step 13: Commit and push logs to the repository
-      # - name: Commit and push logs
-      #   run: |
-      #     git config --global user.name "GitHub Actions"
-      #     git config --global user.email "actions@github.com"
-      #     git add disk_usage_report.log
-      #     git commit -m "Add disk usage report log"
-      #     git push https://${{ secrets.GITHUB_TOKEN }}@github.com/dandi/dandi-hub-usage-reports.git
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+      - name: Assume ProvisioningRole
+        run: |
+          CREDS=$(aws sts assume-role --role-arn ${{ secrets.AWS_PROVISIONING_ROLE_ARN }} --role-session-name "GitHubActionsSession")
+          export AWS_ACCESS_KEY_ID=$(echo $CREDS | jq -r '.Credentials.AccessKeyId')
+          export AWS_SECRET_ACCESS_KEY=$(echo $CREDS | jq -r '.Credentials.SecretAccessKey')
+          export AWS_SESSION_TOKEN=$(echo $CREDS | jq -r '.Credentials.SessionToken')
+
+      - name: Configure kubectl with AWS EKS
+        run: |
+          aws eks update-kubeconfig --name eks-dandihub --region us-east-2 --role-arn ${{ secrets.AWS_PROVISIONING_ROLE_ARN }}
+
+      # TODO remove
+      - name: Sanity check
+        run: |
+          kubectl get pods -n jupyterhub
+
+      - name: Replace image placeholder in manifest
+        run: |
+          sed -i 's|IMAGE_PLACEHOLDER|'"${{ secrets.DOCKERHUB_USERNAME }}/disk_usage_report:latest"'|' .github/manifests/disk-usage-report-job.yaml
+
+      - name: Deploy Disk Usage Report Job
+        run: |
+          kubectl apply -f .github/manifests/disk-usage-report-job.yaml
+
+      # TODO should timeout be longer?
+      - name: Wait for Disk Usage Report Job to complete
+        run: |
+          kubectl wait --for=condition=complete job/disk-usage-report-job --timeout=300s
+        continue-on-error: true
+
+      - name: Save Pod logs to file
+        run: |
+          POD_NAME=$(kubectl get pods --selector=job-name=disk-usage-report-job -o jsonpath='{.items[0].metadata.name}')
+          kubectl logs $POD_NAME > disk_usage_report.log
+        continue-on-error: true
+
+      # continue-on-error for previous steps so we delete the job
+      - name: Delete Disk Usage Report Job
+        run: |
+          kubectl delete job disk-usage-report-job
+
+      - name: Clone dandi-hub-usage-reports repository
+        run: |
+          git clone https://github.com/dandi/dandi-hub-usage-reports.git
+          cd dandi-hub-usage-reports
+
+      - name: Copy log file to repository
+        run: |
+          DATE=$(date +'%Y-%m-%d')
+          mv ../disk_usage_report.log $DATE_disk_usage_report.log
+
+      # Step 13: Commit and push logs to the repository
+      - name: Commit and push logs
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add disk_usage_report.log
+          git commit -m "Add disk usage report log"
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/dandi/dandi-hub-usage-reports.git
