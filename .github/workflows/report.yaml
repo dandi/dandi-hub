@@ -64,10 +64,10 @@ jobs:
           kubectl wait --for=condition=complete job/disk-usage-report-job --timeout=300s
         continue-on-error: true
 
-      - name: Save Pod logs to file
+      - name: Retrieve generated report file
         run: |
           POD_NAME=$(kubectl get pods --selector=job-name=disk-usage-report-job -o jsonpath='{.items[0].metadata.name}')
-          kubectl logs $POD_NAME > disk_usage_report.log
+          kubectl cp $POD_NAME:/output/du_report.json du_report.json -n jupyterhub
         continue-on-error: true
 
       # continue-on-error for previous steps so we delete the job
@@ -80,16 +80,16 @@ jobs:
           git clone https://github.com/dandi/dandi-hub-usage-reports.git
           cd dandi-hub-usage-reports
 
-      - name: Copy log file to repository
+      - name: Copy report file to repository
         run: |
           DATE=$(date +'%Y-%m-%d')
-          mv ../disk_usage_report.log $DATE_disk_usage_report.log
+          mv ../du_report.json $DATE_du_report.json
 
-      # Step 13: Commit and push logs to the repository
-      - name: Commit and push logs
+      # Step 13: Commit and push report to the repository
+      - name: Commit and push report
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add disk_usage_report.log
-          git commit -m "Add disk usage report log"
+          git add $DATE_du_report.json
+          git commit -m "Add disk usage report for $DATE"
           git push https://${{ secrets.GITHUB_TOKEN }}@github.com/dandi/dandi-hub-usage-reports.git
