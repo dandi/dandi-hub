@@ -68,6 +68,7 @@ jobs:
         run: |
           POD_NAME=$(kubectl get pods --selector=job-name=disk-usage-report-job -o jsonpath='{.items[0].metadata.name}')
           kubectl cp $POD_NAME:/output/du_report.json du_report.json -n jupyterhub
+          cat du_report.json
         continue-on-error: true
 
       # continue-on-error for previous steps so we delete the job
@@ -75,17 +76,17 @@ jobs:
         run: |
           kubectl delete job disk-usage-report-job
 
-      - name: Clone dandi-hub-usage-reports repository
-        run: |
-          git clone https://github.com/dandi/dandi-hub-usage-reports.git
-
-      - name: Copy report file to repository, commit and push report
-        run: |
-          cd dandi-hub-usage-reports
-          DATE=$(date +'%Y-%m-%d')
-          mv ../du_report.json $DATE_du_report.json
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add $DATE_du_report.json
-          git commit -m "Add disk usage report for $DATE"
-          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/dandi/dandi-hub-usage-reports.git
+      # - name: Clone dandi-hub-usage-reports repository
+      #   run: |
+      #     git clone https://github.com/dandi/dandi-hub-usage-reports.git
+      #
+      # - name: Copy report file to repository, commit and push report
+      #   run: |
+      #     cd dandi-hub-usage-reports
+      #     DATE=$(date +'%Y-%m-%d')
+      #     mv ../du_report.json $DATE_du_report.json
+      #     git config --global user.name "GitHub Actions"
+      #     git config --global user.email "actions@github.com"
+      #     git add $DATE_du_report.json
+      #     git commit -m "Add disk usage report for $DATE"
+      #     git push https://${{ secrets.GITHUB_TOKEN }}@github.com/dandi/dandi-hub-usage-reports.git
