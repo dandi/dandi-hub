@@ -41,7 +41,7 @@ def prepare_report(directory):
     for user, data in report.items():
         data["disk_usage_human_readable"] = bytes_to_human_readable(data["disk_usage_bytes"])
 
-
+    os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
     with open(OUTPUT_FILE, 'w') as f:
         json.dump(report, f, indent=4)
 
@@ -55,6 +55,7 @@ if __name__ == "__main__":
         path = sys.argv[1]
         directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
 
+        os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
         with open(OUTPUT_FILE, 'w') as f:
             f.write("\n".join(directories))
         # prepare_report(directory)
