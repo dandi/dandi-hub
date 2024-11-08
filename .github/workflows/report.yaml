@@ -80,19 +80,19 @@ jobs:
       # TODO should timeout be longer?
       - name: Wait for Disk Usage Report Job to complete
         run: |
-          kubectl wait --for=condition=complete pod/disk-usage-report-job --timeout=300s
+          kubectl wait --for=condition=complete pod/disk-usage-report-job --timeout=30s -n jupyterhub
         continue-on-error: true
 
       - name: Retrieve generated report file
         run: |
-          kubectl cp disk-usage-report-job:/output/du_report.json du_report.json
+          kubectl cp disk-usage-report-job:/output/du_report.json du_report.json -n jupyterhub
           cat du_report.json
         continue-on-error: true
 
       # continue-on-error for previous steps so we delete the job
       - name: Delete Disk Usage Report Job
         run: |
-          kubectl delete pod disk-usage-report-job
+          kubectl delete pod disk-usage-report-job -n jupyterhub
 
       # - name: Clone dandi-hub-usage-reports repository
       #   run: |
