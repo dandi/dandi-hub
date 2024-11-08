@@ -12,7 +12,7 @@ spec:
         - name: disk-usage-report
           image: IMAGE_PLACEHOLDER
           args:
-            - "/home/"
+            - "/home/asmacdo"
           volumeMounts:
             - name: persistent-storage
               mountPath: "/home/"
