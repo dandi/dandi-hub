@@ -50,51 +50,50 @@ jobs:
         run: |
           kubectl get pods -n jupyterhub
 
-      - name: Deploy Hello World Pod
+      # - name: Deploy Hello World Pod
+      #   run: |
+      #     kubectl apply -f .github/manifests/hello-world-pod.yaml
+      #
+      # - name: Wait for Hello World Pod to complete
+      #   run: |
+      #     kubectl wait --for=condition=Ready pod/hello-world-pod --timeout=300s  # 5 minutes
+      #   continue-on-error: true  # Allow the workflow to continue even if this step fails
+      #
+      # - name: Get Hello World Pod logs
+      #   run: |
+      #     kubectl logs hello-world-pod
+      #   if: ${{ success() }}  # Only run this step if the previous step was successful
+      #
+      # - name: Delete Hello World Pod
+      #   run: |
+      #     kubectl delete pod hello-world-pod
+      #   if: ${{ always() }}  # Always run this step, even if other steps fail
+      #
+      - name: Replace image placeholder in manifest
         run: |
-          kubectl apply -f .github/manifests/hello-world-pod.yaml
+          sed -i 's|IMAGE_PLACEHOLDER|'"${{ secrets.DOCKERHUB_USERNAME }}/disk_usage_report:latest"'|' .github/manifests/disk-usage-report-job.yaml
 
-      - name: Wait for Hello World Pod to complete
+      - name: Deploy Disk Usage Report Job Pod
         run: |
-          kubectl wait --for=condition=Ready pod/hello-world-pod --timeout=300s  # 5 minutes
-        continue-on-error: true  # Allow the workflow to continue even if this step fails
+          kubectl apply -f .github/manifests/disk-usage-report-job.yaml
 
-      - name: Get Hello World Pod logs
+      # TODO should timeout be longer?
+      - name: Wait for Disk Usage Report Job to complete
         run: |
-          kubectl logs hello-world-pod
-        if: ${{ success() }}  # Only run this step if the previous step was successful
+          kubectl wait --for=condition=complete pod/disk-usage-report-job --timeout=300s
+        continue-on-error: true
 
-      - name: Delete Hello World Pod
+      - name: Retrieve generated report file
         run: |
-          kubectl delete pod hello-world-pod
-        if: ${{ always() }}  # Always run this step, even if other steps fail
-      #
-      # - name: Replace image placeholder in manifest
-      #   run: |
-      #     sed -i 's|IMAGE_PLACEHOLDER|'"${{ secrets.DOCKERHUB_USERNAME }}/disk_usage_report:latest"'|' .github/manifests/disk-usage-report-job.yaml
-      #
-      # - name: Deploy Disk Usage Report Job
-      #   run: |
-      #     kubectl apply -f .github/manifests/disk-usage-report-job.yaml
-      #
-      # # TODO should timeout be longer?
-      # - name: Wait for Disk Usage Report Job to complete
-      #   run: |
-      #     kubectl wait --for=condition=complete job/disk-usage-report-job --timeout=300s
-      #   continue-on-error: true
-      #
-      # - name: Retrieve generated report file
-      #   run: |
-      #     POD_NAME=$(kubectl get pods --selector=job-name=disk-usage-report-job -o jsonpath='{.items[0].metadata.name}')
-      #     kubectl cp $POD_NAME:/output/du_report.json du_report.json -n jupyterhub
-      #     cat du_report.json
-      #   continue-on-error: true
-      #
-      # # continue-on-error for previous steps so we delete the job
-      # - name: Delete Disk Usage Report Job
-      #   run: |
-      #     kubectl delete job disk-usage-report-job
-      #
+          kubectl cp disk-usage-report-job:/output/du_report.json du_report.json
+          cat du_report.json
+        continue-on-error: true
+
+      # continue-on-error for previous steps so we delete the job
+      - name: Delete Disk Usage Report Job
+        run: |
+          kubectl delete pod disk-usage-report-job
+
       # - name: Clone dandi-hub-usage-reports repository
       #   run: |
       #     git clone https://github.com/dandi/dandi-hub-usage-reports.git
