@@ -73,26 +73,27 @@ jobs:
         run: |
           sed -i 's|IMAGE_PLACEHOLDER|'"${{ secrets.DOCKERHUB_USERNAME }}/dandihub-report-generator:latest"'|' .github/manifests/disk-usage-report-job.yaml
 
-      - name: Deploy Disk Usage Report Job Pod
+      - name: Deploy Disk Usage Report Job
         run: |
           kubectl apply -f .github/manifests/disk-usage-report-job.yaml
 
       # TODO should timeout be longer?
       - name: Wait for Disk Usage Report Job to complete
         run: |
-          kubectl wait --for=condition=complete pod/disk-usage-report-job --timeout=360s -n jupyterhub
+          kubectl wait --for=condition=complete job/disk-usage-report-job --timeout=360s -n jupyterhub
         continue-on-error: true
 
       - name: Retrieve generated report file
         run: |
-          kubectl cp disk-usage-report-job:/output/du_report.json du_report.json -n jupyterhub
+          POD_NAME=$(kubectl get pods --selector=job-name=disk-usage-report-job -o jsonpath='{.items[0].metadata.name}')
+          kubectl cp $POD_NAME:/output/du_report.json du_report.json -n jupyterhub
           cat du_report.json
         continue-on-error: true
 
       # continue-on-error for previous steps so we delete the job
       - name: Delete Disk Usage Report Job
         run: |
-          kubectl delete pod disk-usage-report-job -n jupyterhub
+          kubectl delete job disk-usage-report-job -n jupyterhub
 
       # - name: Clone dandi-hub-usage-reports repository
       #   run: |
