@@ -42,12 +42,11 @@ def prepare_report(directory):
     for user, data in report.items():
         data["disk_usage_human_readable"] = bytes_to_human_readable(data["disk_usage_bytes"])
 
-    # os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
-    # output_file =
-    # with open(OUTPUT_FILE, 'w') as f:
-    #     json.dump(report, f, indent=4)
-    #
-    # print(f"Disk usage report generated at {os.path.abspath(OUTPUT_FILE)}")
+    os.makedirs(os.path.dirname(OUTPUT_DIR), exist_ok=True)
+    current_date = date.today().strftime('%Y-%m-%d')
+    with open(f"{OUTPUT_DIR}/{current_date}.json", "w") as f:
+        json.dump(report, f, indent=4)
+    print(f"Disk usage report generated at {os.path.abspath(OUTPUT_FILE)}")
 
 
 if __name__ == "__main__":
@@ -55,10 +54,4 @@ if __name__ == "__main__":
         print("Usage: du.py <directory_to_check>")
     else:
         path = sys.argv[1]
-        directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
-
-        os.makedirs(os.path.dirname(OUTPUT_DIR), exist_ok=True)
-        current_date = date.today().strftime('%Y-%m-%d')
-        with open(f"{OUTPUT_DIR}/{current_date}.json", "w") as f:
-            f.write("\n".join(directories))
-        # prepare_report(directory)
+        prepare_report(path)
