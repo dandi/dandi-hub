@@ -83,13 +83,6 @@ jobs:
           kubectl wait --for=condition=complete job/disk-usage-report-job --timeout=360s -n jupyterhub
         continue-on-error: true
 
-      - name: Retrieve generated report file
-        run: |
-          POD_NAME=$(kubectl get pods -n jupyterhub --selector=job-name=disk-usage-report-job -o jsonpath='{.items[0].metadata.name}')
-          kubectl cp $POD_NAME:/output/du_report.json du_report.json -n jupyterhub
-          cat du_report.json
-        continue-on-error: true
-
       # continue-on-error for previous steps so we delete the job
       - name: Delete Disk Usage Report Job
         run: |
