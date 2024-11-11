@@ -9,6 +9,7 @@ spec:
       labels:
         app: disk-usage-report
     spec:
+      backoffLimit: 0  # No retry on failure
       containers:
         - name: disk-usage-report
           image: IMAGE_PLACEHOLDER
