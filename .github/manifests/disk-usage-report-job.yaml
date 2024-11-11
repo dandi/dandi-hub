@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
         - name: disk-usage-report
-          image: IMAGE_PLACEHOLDER
+          image: dandiarchive/dandihub-report-generator:latest
           args:
             - "/home/"
           volumeMounts:
