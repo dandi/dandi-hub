@@ -59,6 +59,6 @@ if __name__ == "__main__":
 
         os.makedirs(os.path.dirname(OUTPUT_DIR), exist_ok=True)
         current_date = date.today().strftime('%Y-%m-%d')
-        with open(f"OUTPUT_DIR/{current_date}.json", "w") as f:
+        with open(f"{OUTPUT_DIR}/{current_date}.json", "w") as f:
             f.write("\n".join(directories))
         # prepare_report(directory)
