@@ -98,6 +98,10 @@ singleuser:
               display_name: "MATLAB (must provide your own license)"
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}-matlab"
+            openscope:
+              display_name: "OpenScope Databook"
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-openscope"
       default: true
       kubespawner_override:
         image_pull_policy: Always
@@ -123,6 +127,10 @@ singleuser:
               display_name: "MATLAB (must provide your own license)"
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}-matlab"
+            openscope:
+              display_name: "OpenScope Databook"
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-openscope"
       kubespawner_override:
         image_pull_policy: Always
         cpu_limit: 24
@@ -146,6 +154,10 @@ singleuser:
               display_name: "MATLAB (must provide your own license)"
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}-matlab"
+            openscope:
+              display_name: "OpenScope Databook"
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-openscope"
       kubespawner_override:
         image_pull_policy: Always
         cpu_limit: 48
