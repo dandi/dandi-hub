@@ -23,7 +23,7 @@ jobs:
         id: launch_ec2
         run: |
           INSTANCE_ID=$(aws ec2 run-instances \
-            --image-id ami-0c02fb55956c7d316 \
+            --image-id ami-088d38b423bff245f \
             --count 1 \
             --instance-type t3.micro \
             --key-name dandihub-gh-actions \
