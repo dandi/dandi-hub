@@ -57,6 +57,7 @@ jobs:
             echo "Running df command on EC2 instance..."
             df -h
             echo "Command completed."
+        continue-on-error: true  # Allow the workflow to continue even if this step fails
 
       - name: Terminate EC2 Instance
         run: |
