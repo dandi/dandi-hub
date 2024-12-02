@@ -38,14 +38,28 @@ jobs:
         run: |
           aws ec2 wait instance-status-ok --instance-ids ${{ env.INSTANCE_ID }}
 
-      - name: Retrieve EC2 Public IP
+      - name: Allocate Elastic IP
+        id: allocate_eip
+        run: |
+          ALLOC_ID=$(aws ec2 allocate-address --query 'AllocationId' --output text)
+          echo "ALLOC_ID=${ALLOC_ID}" >> $GITHUB_ENV
+
+      - name: Associate Elastic IP with EC2 Instance
+        id: associate_eip
+        run: |
+          EIP=$(aws ec2 associate-address \
+            --instance-id ${{ env.INSTANCE_ID }} \
+            --allocation-id ${{ env.ALLOC_ID }} \
+            --query 'AssociationId' --output text)
+          echo "EIP=${EIP}" >> $GITHUB_ENV
+
+      - name: Retrieve Elastic IP Address
         id: get_ip
         run: |
-          PUBLIC_IP=$(aws ec2 describe-instances \
-            --instance-ids ${{ env.INSTANCE_ID }} \
-            --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
-
-          echo "${PUBLIC_IP}"
+          PUBLIC_IP=$(aws ec2 describe-addresses \
+            --allocation-ids ${{ env.ALLOC_ID }} \
+            --query 'Addresses[0].PublicIp' --output text)
+          echo "PUBLIC_IP=${PUBLIC_IP}"
           echo "PUBLIC_IP=${PUBLIC_IP}" >> $GITHUB_ENV
 
       - name: Execute df Command on EC2
@@ -58,12 +72,19 @@ jobs:
             echo "Running df command on EC2 instance..."
             df -h
             echo "Command completed."
-        # continue-on-error: true  # Allow the workflow to continue even if this step fails
+        continue-on-error: true  # Allow the workflow to continue even if this step fails
+
 
       - name: Terminate EC2 Instance
         run: |
           aws ec2 terminate-instances --instance-ids ${{ env.INSTANCE_ID }}
           aws ec2 wait instance-terminated --instance-ids ${{ env.INSTANCE_ID }}
+        continue-on-error: true  # Allow the workflow to continue even if this step fails
+
+      - name: Release Elastic IP
+        run: |
+          aws ec2 release-address --allocation-id ${{ env.ALLOC_ID }}
+        continue-on-error: true  # Allow the workflow to continue even if this step fails
 
 # jobs:
 #   generate_data_usage_report:
