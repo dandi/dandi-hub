@@ -27,9 +27,9 @@ jobs:
             --count 1 \
             --instance-type t3.micro \
             --key-name dandihub-gh-actions \
-            --security-group-ids sg-xxxxxxxx \
-            --subnet-id subnet-xxxxxxxx \
-            --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=EC2dfTest}]" \
+            --security-group-ids sg-0bf2dc1c2ff9c122e \
+            --subnet-id subnet-0f544cca61ccd2804 \
+            --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=dandihub-gh-actions}]" \
             --query 'Instances[0].InstanceId' --output text)
 
           echo "INSTANCE_ID=${INSTANCE_ID}" >> $GITHUB_ENV
