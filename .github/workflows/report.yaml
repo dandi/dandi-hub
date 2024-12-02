@@ -45,6 +45,7 @@ jobs:
             --instance-ids ${{ env.INSTANCE_ID }} \
             --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
 
+          echo "${PUBLIC_IP}"
           echo "PUBLIC_IP=${PUBLIC_IP}" >> $GITHUB_ENV
 
       - name: Execute df Command on EC2
@@ -57,7 +58,7 @@ jobs:
             echo "Running df command on EC2 instance..."
             df -h
             echo "Command completed."
-        continue-on-error: true  # Allow the workflow to continue even if this step fails
+        # continue-on-error: true  # Allow the workflow to continue even if this step fails
 
       - name: Terminate EC2 Instance
         run: |
