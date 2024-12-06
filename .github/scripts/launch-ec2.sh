@@ -44,7 +44,17 @@ aws ec2 wait instance-status-ok --instance-ids $INSTANCE_ID
 
 # Allocate Elastic IP
 echo "Allocating Elastic IP..."
-export ALLOC_ID=$(aws ec2 allocate-address --query 'AllocationId' --output text)
+export ALLOC_ID=$(aws ec2 allocate-address \
+  --tag-specifications "ResourceType=elastic-ip,Tags=[{Key=Name,Value=dandihub-gh-actions-eip}]" \
+  --query 'AllocationId' \
+  --output text)
+
+if [ -z "$ALLOC_ID" ]; then
+  echo "Error: Failed to allocate Elastic IP."
+  exit 1
+fi
+
+echo "Elastic IP Allocation ID: $ALLOC_ID"
 
 # Associate Elastic IP with instance
 echo "Associating Elastic IP with instance..."
