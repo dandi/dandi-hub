@@ -92,3 +92,4 @@ scp -i $EC2_SSH_KEY -o "StrictHostKeyChecking=no" \
 # Output SSH command for convenience
 echo "To connect to your instance, use:"
 echo "ssh -i \$EC2_SSH_KEY ec2-user@$PUBLIC_IP"
+return 0
