@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Check for AWS CLI and credentials
 if ! command -v aws &>/dev/null; then
   echo "Error: AWS CLI is not installed. Please install it and configure your credentials."
