@@ -1,43 +1,72 @@
 #!/usr/bin/env bash
 
+# Check for AWS CLI and credentials
+if ! command -v aws &>/dev/null; then
+  echo "Error: AWS CLI is not installed. Please install it and configure your credentials."
+  exit 1
+fi
 
-# TODO Test for aws access
-# Set env vars 
-#   aws-region
-#   EC2_SSH_KEY
-#
+if ! aws sts get-caller-identity &>/dev/null; then
+  echo "Error: Unable to access AWS. Ensure your credentials are configured correctly."
+  exit 1
+fi
+
+# Set variables
+AWS_REGION="us-east-2" # Update to your AWS region if different
+KEY_NAME="dandihub-gh-actions"
+SECURITY_GROUP_ID="sg-0bf2dc1c2ff9c122e"
+SUBNET_ID="subnet-0f544cca61ccd2804"
+AMI_ID="ami-088d38b423bff245f"
+
+# Run EC2 instance
+echo "Launching EC2 instance..."
 export INSTANCE_ID=$(aws ec2 run-instances \
-  --image-id ami-088d38b423bff245f \
+  --image-id $AMI_ID \
   --count 1 \
   --instance-type t3.micro \
-  --key-name dandihub-gh-actions \
-  --security-group-ids sg-0bf2dc1c2ff9c122e \
-  --subnet-id subnet-0f544cca61ccd2804 \
+  --key-name $KEY_NAME \
+  --security-group-ids $SECURITY_GROUP_ID \
+  --subnet-id $SUBNET_ID \
   --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=dandihub-gh-actions}]" \
-  --query 'Instances[0].InstanceId' --output text)
+  --query 'Instances[0].InstanceId' \
+  --output text)
 
+if [ -z "$INSTANCE_ID" ]; then
+  echo "Error: Failed to launch EC2 instance."
+  exit 1
+fi
+
+echo "Instance ID: $INSTANCE_ID"
+
+# Wait for instance to initialize
+echo "Waiting for instance to reach status OK..."
 aws ec2 wait instance-status-ok --instance-ids $INSTANCE_ID
 
-# allocate elastic (static) IP
+# Allocate Elastic IP
+echo "Allocating Elastic IP..."
 export ALLOC_ID=$(aws ec2 allocate-address --query 'AllocationId' --output text)
 
-export EIP=$(aws ec2 associate-address \
+# Associate Elastic IP with instance
+echo "Associating Elastic IP with instance..."
+export EIP_ASSOC=$(aws ec2 associate-address \
   --instance-id $INSTANCE_ID \
   --allocation-id $ALLOC_ID \
-  --query 'AssociationId' --output text)
+  --query 'AssociationId' \
+  --output text)
 
+if [ -z "$EIP_ASSOC" ]; then
+  echo "Error: Failed to associate Elastic IP."
+  exit 1
+fi
+
+# Get Elastic IP address
 export PUBLIC_IP=$(aws ec2 describe-addresses \
   --allocation-ids $ALLOC_ID \
-  --query 'Addresses[0].PublicIp' --output text)
+  --query 'Addresses[0].PublicIp' \
+  --output text)
 
-# Test: execute df Command on EC2
-        # uses: appleboy/ssh-action@v0.1.6
-        # with:
-        #   host: ${{ env.PUBLIC_IP }}
-        #   username: ec2-user
-        #   key: ${{ secrets.EC2_SSH_KEY }}
-        #   script: |
-        #     echo "Running df command on EC2 instance..."
-        #     df -h
-        #     echo "Command completed."
-        # continue-on-error: true  # Allow the workflow to continue even if this step fails
+echo "Elastic IP Address: $PUBLIC_IP"
+
+# Output SSH command for convenience
+echo "To connect to your instance, use:"
+echo "ssh -i \$EC2_SSH_KEY ec2-user@$PUBLIC_IP"
