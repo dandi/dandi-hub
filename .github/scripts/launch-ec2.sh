@@ -13,12 +13,15 @@ if ! aws sts get-caller-identity &>/dev/null; then
   exit 1
 fi
 
+
 # Set variables
-AWS_REGION="us-east-2" # Update to your AWS region if different
+AWS_REGION="us-east-2"
 KEY_NAME="dandihub-gh-actions"
 SECURITY_GROUP_ID="sg-0bf2dc1c2ff9c122e"
 SUBNET_ID="subnet-0f544cca61ccd2804"
 AMI_ID="ami-088d38b423bff245f"
+LOCAL_SCRIPTS_DIR=".github/scripts"
+REMOTE_SCRIPTS_DIR="/home/ec2-user/scripts"
 
 # Run EC2 instance
 echo "Launching EC2 instance..."
@@ -78,6 +81,13 @@ export PUBLIC_IP=$(aws ec2 describe-addresses \
   --output text)
 
 echo "Elastic IP Address: $PUBLIC_IP"
+
+
+# Upload scripts to EC2 instance
+echo "Uploading scripts to EC2 instance..."
+scp -i $EC2_SSH_KEY -o "StrictHostKeyChecking=no" \
+  $LOCAL_SCRIPTS_DIR/produce-report.py $LOCAL_SCRIPTS_DIR/create-file-index.py \
+  ec2-user@$PUBLIC_IP:$REMOTE_SCRIPTS_DIR/
 
 # Output SSH command for convenience
 echo "To connect to your instance, use:"
