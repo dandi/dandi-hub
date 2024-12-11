@@ -45,4 +45,4 @@ jobs:
           file: ${{ matrix.dockerfile }}
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/dandihub:latest-${{ matrix.name }}
+            ${{ secrets.DOCKER_USERNAME }}/dandihub:latest-${{ matrix.image.name }}
