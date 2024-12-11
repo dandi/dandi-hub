@@ -91,7 +91,7 @@ echo "export PUBLIC_IP=$PUBLIC_IP" >> $ENV_FILE
 
 # Upload scripts to EC2 instance
 echo "Uploading scripts to EC2 instance..."
-scp -i $EC2_SSH_KEY -o "StrictHostKeyChecking=no" \
+scp -t -i $EC2_SSH_KEY -o "StrictHostKeyChecking=no" \
   $LOCAL_SCRIPTS_DIR/produce-report.py $LOCAL_SCRIPTS_DIR/create-file-index.py \
   ec2-user@$PUBLIC_IP:$REMOTE_SCRIPTS_DIR/
 
