@@ -35,7 +35,7 @@ fi
 
 # Terminate EC2 instance
 echo "Terminating EC2 instance with ID: $INSTANCE_ID..."
-if aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"; then
+if aws ec2 terminate-instances --instance-ids "$INSTANCE_ID" --no-cli-pager; then
   echo "Instance termination initiated. Waiting for the instance to terminate..."
   if aws ec2 wait instance-terminated --instance-ids "$INSTANCE_ID"; then
     echo "Instance $INSTANCE_ID has been successfully terminated."
