@@ -42,7 +42,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: images
-          file: images/${{ matrix.dockerfile }}
+          file: ${{ matrix.dockerfile }}
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/dandihub:latest-${{ matrix.name }}
