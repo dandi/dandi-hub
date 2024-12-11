@@ -41,8 +41,8 @@ jobs:
       - name: Build and push Docker Image
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: ./images/${{ matrix.dockerfile }}
+          context: images
+          file: images/${{ matrix.dockerfile }}
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/dandihub:latest-${{ matrix.name }}
