@@ -19,9 +19,9 @@ jobs:
           - name: matlab
             dockerfile: ./images/Dockerfile.matlab
           - name: gpu
-            dockerfile: ./images/Dockerfile
+            dockerfile: ./images/Dockerfile.gpu
           - name: gpu-matlab
-            dockerfile: ./images/Dockerfile
+            dockerfile: ./images/Dockerfile.gpu.matlab
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
