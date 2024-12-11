@@ -19,8 +19,10 @@ KEY_NAME="dandihub-gh-actions"
 SECURITY_GROUP_ID="sg-0bf2dc1c2ff9c122e"
 SUBNET_ID="subnet-0f544cca61ccd2804"
 AMI_ID="ami-088d38b423bff245f"
+EFS_ID="fs-02aac16c4c6c2dc27"
 LOCAL_SCRIPTS_DIR=".github/scripts"
 REMOTE_SCRIPTS_DIR="/home/ec2-user/scripts"
+MOUNT_POINT="/mnt/efs"
 ENV_FILE=".ec2-session.env"
 
 # Ensure the environment file is writable
@@ -99,6 +101,16 @@ else
   echo "Error: Failed to upload scripts to the instance."
   exit 1
 fi
+
+# Mount EFS on the EC2 instance
+echo "Mounting EFS on the EC2 instance..."
+ssh -i $EC2_SSH_KEY -o "StrictHostKeyChecking=no" ec2-user@$PUBLIC_IP <<EOF
+  sudo yum install -y amazon-efs-utils
+  sudo mkdir -p $MOUNT_POINT
+  sudo mount -t efs $EFS_ID:/ $MOUNT_POINT
+  echo "$EFS_ID:/ $MOUNT_POINT efs defaults,_netdev 0 0" | sudo tee -a /etc/fstab
+  echo "EFS mounted at $MOUNT_POINT"
+EOF
 
 # Output SSH command for convenience
 echo "To connect to your instance, use:"
