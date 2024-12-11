@@ -15,8 +15,12 @@ fi
 
 # Set variables
 AWS_REGION="us-east-2"
+# TODO document that this key needs to be created
 KEY_NAME="dandihub-gh-actions"
+# TODO create if DNE
+# allow gh-actions to ssh into ec2 job instance from anywhere
 SECURITY_GROUP_ID="sg-0bf2dc1c2ff9c122e"
+# TODO retrieve subnet id (public, created by dandi-hub eks-dandihub-public-us-east-2a)
 SUBNET_ID="subnet-0f544cca61ccd2804"
 AMI_ID="ami-088d38b423bff245f"
 EFS_ID="fs-02aac16c4c6c2dc27"
@@ -101,6 +105,16 @@ else
   echo "Error: Failed to upload scripts to the instance."
   exit 1
 fi
+
+# TODO automate
+# eks-dandihub-efs sg is created by dandi-hub install
+# this sg needs to accept incoming 2049 from the sg created for this ec2
+# sg-061d875722e569724 - eks-dandihub-efs
+# aws ec2 authorize-security-group-ingress \
+#   --group-id sg-061d875722e569724 \
+#   --protocol tcp \
+#   --port 2049 \
+#   --source-group $SECURITY_GROUP_ID
 
 # Mount EFS on the EC2 instance
 echo "Mounting EFS on the EC2 instance..."
