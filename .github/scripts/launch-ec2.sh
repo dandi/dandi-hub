@@ -91,7 +91,7 @@ echo "export PUBLIC_IP=$PUBLIC_IP" >> $ENV_FILE
 
 # Upload scripts to EC2 instance
 echo "Uploading scripts to EC2 instance..."
-scp -t -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" \
+scp -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" \
   $LOCAL_SCRIPTS_DIR/produce-report.py $LOCAL_SCRIPTS_DIR/create-file-index.py \
   ec2-user@"$PUBLIC_IP":"$REMOTE_SCRIPTS_DIR/"
 
@@ -104,7 +104,7 @@ fi
 
 # Mount EFS on the EC2 instance
 echo "Mounting EFS on the EC2 instance..."
-ssh -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" ec2-user@$PUBLIC_IP <<EOF
+ssh -t -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" ec2-user@$PUBLIC_IP <<EOF
   sudo yum install -y amazon-efs-utils
   sudo mkdir -p $MOUNT_POINT
   sudo mount -t efs $EFS_ID:/ $MOUNT_POINT
