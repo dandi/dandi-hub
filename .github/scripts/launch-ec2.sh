@@ -51,7 +51,7 @@ echo "export INSTANCE_ID=$INSTANCE_ID" >> $ENV_FILE
 
 # Wait for instance to initialize
 echo "Waiting for instance to reach status OK..."
-aws ec2 wait instance-status-ok --instance-ids $INSTANCE_ID
+aws ec2 wait instance-status-ok --instance-ids "$INSTANCE_ID"
 
 # Allocate Elastic IP
 echo "Allocating Elastic IP..."
@@ -70,8 +70,8 @@ echo "export ALLOC_ID=$ALLOC_ID" >> $ENV_FILE
 # Associate Elastic IP with instance
 echo "Associating Elastic IP with instance..."
 export EIP_ASSOC=$(aws ec2 associate-address \
-  --instance-id $INSTANCE_ID \
-  --allocation-id $ALLOC_ID \
+  --instance-id "$INSTANCE_ID" \
+  --allocation-id "$ALLOC_ID" \
   --query 'AssociationId' \
   --output text)
 
@@ -82,7 +82,7 @@ fi
 
 # Get Elastic IP address
 export PUBLIC_IP=$(aws ec2 describe-addresses \
-  --allocation-ids $ALLOC_ID \
+  --allocation-ids "$ALLOC_ID" \
   --query 'Addresses[0].PublicIp' \
   --output text)
 
@@ -91,9 +91,9 @@ echo "export PUBLIC_IP=$PUBLIC_IP" >> $ENV_FILE
 
 # Upload scripts to EC2 instance
 echo "Uploading scripts to EC2 instance..."
-scp -t -i $EC2_SSH_KEY -o "StrictHostKeyChecking=no" \
+scp -t -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" \
   $LOCAL_SCRIPTS_DIR/produce-report.py $LOCAL_SCRIPTS_DIR/create-file-index.py \
-  ec2-user@$PUBLIC_IP:$REMOTE_SCRIPTS_DIR/
+  ec2-user@"$PUBLIC_IP":"$REMOTE_SCRIPTS_DIR/"
 
 if [ $? -eq 0 ]; then
   echo "Scripts uploaded successfully to $REMOTE_SCRIPTS_DIR on the instance."
@@ -104,7 +104,7 @@ fi
 
 # Mount EFS on the EC2 instance
 echo "Mounting EFS on the EC2 instance..."
-ssh -i $EC2_SSH_KEY -o "StrictHostKeyChecking=no" ec2-user@$PUBLIC_IP <<EOF
+ssh -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" ec2-user@$PUBLIC_IP <<EOF
   sudo yum install -y amazon-efs-utils
   sudo mkdir -p $MOUNT_POINT
   sudo mount -t efs $EFS_ID:/ $MOUNT_POINT
