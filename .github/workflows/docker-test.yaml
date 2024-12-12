@@ -22,6 +22,7 @@ jobs:
           - tag: latest-gpu-matlab
             dockerfile: Dockerfile.gpu.matlab
 
+    steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
