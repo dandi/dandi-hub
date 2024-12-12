@@ -22,13 +22,12 @@ KEY_NAME="dandihub-gh-actions"
 SECURITY_GROUP_ID="sg-0bf2dc1c2ff9c122e"
 # TODO retrieve subnet id (public, created by dandi-hub eks-dandihub-public-us-east-2a)
 SUBNET_ID="subnet-0f544cca61ccd2804"
-AMI_ID="ami-036841078a4b68e14"
+AMI_ID="ami-0c80e2b6ccb9ad6d1"
 EFS_ID="fs-02aac16c4c6c2dc27"
 LOCAL_SCRIPTS_DIR=".github/scripts"
 REMOTE_SCRIPTS_DIR="/home/ec2-user/scripts"
 MOUNT_POINT="/mnt/efs"
 ENV_FILE=".ec2-session.env"
-EC2_USER="ubuntu"
 
 # Ensure the environment file is writable
 echo "# Environment variables for EC2 session" > $ENV_FILE
@@ -98,7 +97,7 @@ echo "export PUBLIC_IP=$PUBLIC_IP" >> $ENV_FILE
 echo "Uploading scripts to EC2 instance..."
 scp -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" \
   $LOCAL_SCRIPTS_DIR/produce-report.py $LOCAL_SCRIPTS_DIR/create-file-index.py \
-  $EC2_USER@"$PUBLIC_IP":"$REMOTE_SCRIPTS_DIR/"
+  ec2-user@"$PUBLIC_IP":"$REMOTE_SCRIPTS_DIR/"
 
 if [ $? -eq 0 ]; then
   echo "Scripts uploaded successfully to $REMOTE_SCRIPTS_DIR on the instance."
@@ -119,7 +118,7 @@ fi
 
 # Mount EFS on the EC2 instance
 echo "Mounting EFS on the EC2 instance..."
-ssh -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" $EC2_USER@"$PUBLIC_IP" \
+ssh -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" ec2-user@"$PUBLIC_IP" \
   "sudo yum install -y amazon-efs-utils && \
    sudo mkdir -p $MOUNT_POINT && \
    sudo mount -t efs $EFS_ID:/ $MOUNT_POINT && \
