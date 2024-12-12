@@ -12,16 +12,15 @@ jobs:
 
     strategy:
       matrix:
-        file:
-          - Dockerfile
-          - Dockerfile.matlab
-          - Dockerfile.gpu
-          - Dockerfile.gpu.matlab
-        tag:
-          - latest
-          - latest-matlab
-          - latest-gpu
-          - latest-gpu-matlab
+        include:
+          - tag: latest
+            dockerfile: Dockerfile
+          - tag: latest-matlab
+            dockerfile: Dockerfile.matlab
+          - tag: latest-gpu
+            dockerfile: Dockerfile.gpu
+          - tag: latest-gpu-matlab
+            dockerfile: Dockerfile.gpu.matlab
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -36,7 +35,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./images
-          file: ./images/${{ matrix.file }}
+          file: ./images/${{ matrix.dockerfile }}
           push: false
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_DANDIHUB_USERNAME }}/dandihub:${{ matrix.tag }}
           cache-to: type=inline
