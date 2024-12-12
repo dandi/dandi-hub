@@ -44,18 +44,10 @@ USER $NB_USER
 
 RUN pip install --no-cache-dir jupyter-remote-desktop-proxy
 
-# Install Allen SDK
-RUN mamba create --yes -n allen -c conda-forge python=3.11 pip ipykernel 'h5py>=3.4=mpi*' \
-  && /opt/conda/envs/allen/bin/pip install --no-cache-dir allensdk \
-  && conda clean --all -f -y && rm -rf /tmp/*
-
 RUN mamba install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc eccodes websockify \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.8/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && conda clean --all -f -y && rm -rf /tmp/*
-
-RUN /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen \
-    --display-name="Allen SDK"
 
 RUN pip install --no-cache-dir -U plotly jupyter_bokeh jupytext nbgitpuller datalad_container \
     datalad-osf dandi nibabel nilearn pybids spikeinterface neo itkwidgets \
