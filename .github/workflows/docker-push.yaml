@@ -45,3 +45,5 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/dandihub:latest-${{ matrix.image.name }}
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/dandihub:latest-${{ matrix.image.name }}
+          cache-to: type=inline
