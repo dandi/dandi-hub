@@ -4,7 +4,6 @@ import os
 import time
 import json
 import sys
-import gzip
 from datetime import datetime
 
 def list_files_with_metadata(directory, output_file):
@@ -43,24 +42,23 @@ def list_files_with_metadata(directory, output_file):
         "files": files_metadata
     }
 
-    # Compress and write the output data to a .json.gz file
-    with gzip.open(output_file, "wt", encoding="utf-8") as gz_file:
-        json.dump(output_data, gz_file, indent=4)
+    # Write the output data to a .json file
+    with open(output_file, "w", encoding="utf-8") as json_file:
+        json.dump(output_data, json_file, indent=4)
 
     print(f"Indexing completed. Compressed results written to {output_file}")
 
 # Ensure the script is called with the required arguments
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: python script.py <directory_to_index> <output_json_gz_file>")
+        print("Usage: python script.py <directory_to_index> <output_json_file>")
         sys.exit(1)
 
     directory_to_index = sys.argv[1]
-    output_json_gz_file = sys.argv[2]
+    output_json_file = sys.argv[2]
 
-    # Ensure the output filename ends with .json.gz for clarity
-    if not output_json_gz_file.endswith(".json.gz"):
-        output_json_gz_file += ".json.gz"
+    # Ensure the output filename ends with .json for clarity
+    if not output_json_file.endswith(".json"):
+        output_json_file += ".json"
 
-    list_files_with_metadata(directory_to_index, output_json_gz_file)
-
+    list_files_with_metadata(directory_to_index, output_json_file)
