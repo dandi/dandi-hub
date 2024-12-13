@@ -58,6 +58,35 @@ def main():
     for directory, stat in stats.items():
         print(f"{directory}: {stat['file_count']}")
 
-if __name__ == "__main__":
-    main()
 
+class TestDirectoryStatistics(unittest.TestCase):
+    def test_propagate_dir(self):
+        stats = defaultdict(lambda: {"total_size": 0, "file_count": 0})
+        stats["a/b/c"] = {"total_size": 0, "file_count": 3}
+        stats["a/b"] = {"total_size": 0, "file_count": 0}
+        stats["a"] = {"total_size": 0, "file_count": 0}
+
+        propagate_dir(stats, "a", "a/b/c")
+        self.assertEqual(stats["a"]["file_count"], 3)
+        self.assertEqual(stats["a/b"]["file_count"], 3)
+
+    def test_generate_directory_statistics(self):
+        sample_data = {
+            "files": [
+                {"path": "a/b/file3.txt"},
+                {"path": "a/b/c/file1.txt"},
+                {"path": "a/b/c/file2.txt"},
+                {"path": "a/b/c/d/file4.txt"}
+            ]
+        }
+        stats = generate_directory_statistics(sample_data)
+        self.assertEqual(stats["a/b/c/d"]["file_count"], 1)
+        self.assertEqual(stats["a/b/c"]["file_count"], 3)
+        self.assertEqual(stats["a/b"]["file_count"], 4)
+        self.assertEqual(stats["a"]["file_count"], 4)
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
+        unittest.main(argv=sys.argv[:1])  # Run tests if "test" is provided as an argument
+    else:
+        main()
