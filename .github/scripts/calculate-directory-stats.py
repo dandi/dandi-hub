@@ -10,6 +10,7 @@ from collections import defaultdict
 def propagate_dir(stats, current_parent, previous_parent):
     highest_common = os.path.commonpath([current_parent, previous_parent])
     path_to_propagate = os.path.relpath(previous_parent, highest_common)
+    # leaves off last to avoid propagating to the path we are propagating from
     nested_dir_list = path_to_propagate.split(os.sep)[:-1]
     # Add each dir count to all ancestors up to highest common dir
     while nested_dir_list:
