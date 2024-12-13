@@ -15,8 +15,12 @@ jobs:
         include:
           - tag: latest
             dockerfile: Dockerfile
+          - tag: latest
+            dockerfile: Dockerfile.allensdk
           - tag: latest-gpu
             dockerfile: Dockerfile.gpu
+          - tag: latest-gpu-allensdk
+            dockerfile: Dockerfile.gpu.allensdk
 
     steps:
       - name: Checkout repository
