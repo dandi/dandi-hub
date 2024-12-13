@@ -58,13 +58,11 @@ RUN /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen \
     --display-name="Allen SDK"
 
 RUN pip install --no-cache-dir -U plotly jupyter_bokeh jupytext nbgitpuller datalad_container \
-    datalad-osf dandi nibabel nilearn pybids spikeinterface neo itkwidgets \
+    datalad-osf dandi pybids spikeinterface neo itkwidgets \
     'pydra>=0.17' 'pynwb>=2.3.1' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]"  \
-    aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
+    aicsimageio kerchunk cloud-volume ipywidgets ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
     tensorstore anndata
 
 RUN pip install --no-cache-dir multiscale_spatial_image jupyterlab-git \
         datalad-fuse
-
-RUN pip install --no-cache-dir brainrender napari
