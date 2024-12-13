@@ -18,11 +18,9 @@ def list_files_with_metadata(directory, output_file):
     for root, dirs, files in os.walk(directory):
         for name in files:
             filepath = os.path.join(root, name)
-            relative_path = os.path.relpath(filepath, directory)
-
             try:
                 metadata = {
-                    "path": relative_path,
+                    "path": filepath,
                     "size": os.path.getsize(filepath),
                     "modified": time.ctime(os.path.getmtime(filepath)),
                     "created": time.ctime(os.path.getctime(filepath))
