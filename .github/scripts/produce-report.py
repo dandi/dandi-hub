@@ -12,8 +12,8 @@ USER_QUOTA = 8_000_000_000
 
 def generate_statistics(input_file):
     # Load the JSON data from the compressed file
-    with gzip.open(input_file, 'rt', encoding='utf-8') as gz_file:
-        data = json.load(gz_file)
+    with open(input_file, 'r', encoding='utf-8') as json_file:
+        data = json.load(json_file)
 
     # Dictionary to hold statistics per leading directory
     stats = {
@@ -44,12 +44,12 @@ def bytes_to_human_readable(size_in_bytes):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python script.py <input_json_gz_file>")
+        print("Usage: python script.py <input_json_file>")
         sys.exit(1)
 
-    input_json_gz_file = sys.argv[1]
-    username = input_json_gz_file.split(".")[0]
-    stats = generate_statistics(input_json_gz_file)
+    input_json_file = sys.argv[1]
+    username = input_json_file.split(".")[0]
+    stats = generate_statistics(input_json_file)
     human_readable_total = bytes_to_human_readable(stats["total"]["total_size"])
 
     if stats["total"]["total_size"] < USER_QUOTA:
