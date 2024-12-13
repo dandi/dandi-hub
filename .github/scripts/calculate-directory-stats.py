@@ -25,7 +25,6 @@ def generate_directory_statistics(data):
     stats = defaultdict(lambda: {"total_size": 0, "file_count": 0})
     previous_parent = ""
     for file_metadata in data["files"]:
-        print(f"Calculating {file_metadata['path']}")
         this_parent = os.path.dirname(file_metadata["path"])
         stats[this_parent]["file_count"] += 1
 
@@ -70,20 +69,29 @@ class TestDirectoryStatistics(unittest.TestCase):
         self.assertEqual(stats["a"]["file_count"], 3)
         self.assertEqual(stats["a/b"]["file_count"], 3)
 
+
     def test_generate_directory_statistics(self):
         sample_data = {
             "files": [
                 {"path": "a/b/file3.txt"},
                 {"path": "a/b/c/file1.txt"},
                 {"path": "a/b/c/file2.txt"},
-                {"path": "a/b/c/d/file4.txt"}
+                {"path": "a/b/c/d/file4.txt"},
+                {"path": "a/e/file3.txt"},
+                {"path": "a/e/f/file1.txt"},
+                {"path": "a/e/f/file2.txt"},
+                {"path": "a/e/f/g/file4.txt"}
             ]
         }
         stats = generate_directory_statistics(sample_data)
         self.assertEqual(stats["a/b/c/d"]["file_count"], 1)
         self.assertEqual(stats["a/b/c"]["file_count"], 3)
         self.assertEqual(stats["a/b"]["file_count"], 4)
-        self.assertEqual(stats["a"]["file_count"], 4)
+        self.assertEqual(stats["a/e/f/g"]["file_count"], 1)
+        self.assertEqual(stats["a/e/f"]["file_count"], 3)
+        self.assertEqual(stats["a/e"]["file_count"], 4)
+        self.assertEqual(stats["a"]["file_count"], 8)
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "test":
