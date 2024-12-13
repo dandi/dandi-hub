@@ -17,8 +17,12 @@ jobs:
         include:
           - tag: latest
             dockerfile: Dockerfile
+          - tag: latest-matlab
+            dockerfile: Dockerfile.matlab
           - tag: latest-gpu
             dockerfile: Dockerfile.gpu
+          - tag: latest-gpu-matlab
+            dockerfile: Dockerfile.gpu.matlab
 
     steps:
       - name: Checkout repository
