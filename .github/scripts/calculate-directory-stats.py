@@ -4,31 +4,25 @@ import os
 import gzip
 import json
 import sys
+import unittest
 from collections import defaultdict
 
-USER_QUOTA = 8_000_000_000
+def propagate_dir(stats, current_parent, previous_parent):
+    highest_common = os.path.commonpath([current_parent, previous_parent])
+    path_to_propagate = os.path.relpath(previous_parent, highest_common)
+    nested_dir_list = path_to_propagate.split(os.sep)[:-1]
+    # Add each dir count to all ancestors up to highest common dir
+    while nested_dir_list:
+        working_dir = os.path.join(highest_common, *nested_dir_list)
+        stats[working_dir]['file_count'] += stats[previous_parent]['file_count']
+        nested_dir_list.pop()
+        previous_parent = working_dir
+    stats[highest_common]['file_count'] += stats[previous_parent]['file_count']
 
-# TODO trash files
-
-
-def propagate_dir(stats, highest_common, dir_list, prev_dir):
-    while dir_list:
-        working_dir = os.path.join(highest_common, *dir_list)
-        stats[working_dir]['file_count'] += stats[prev_dir]['file_count']
-        dir_list.pop()
-        prev_dir = working_dir
-    stats[highest_common]['file_count'] += stats[prev_dir]['file_count']
-
-def generate_statistics(input_file):
-    # Load the JSON data from the compressed file
-    with open(input_file, 'r', encoding='utf-8') as json_file:
-        data = json.load(json_file)
-
-    # Dictionary to hold statistics per leading directory
-    stats = defaultdict(lambda: {"total_size": 0, "file_count": 0})
-
-
+def generate_directory_statistics(data):
     # Assumes dirs are listed depth first (files are listed prior to directories)
+
+    stats = defaultdict(lambda: {"total_size": 0, "file_count": 0})
     previous_parent = ""
     for file_metadata in data["files"]:
         print(f"Calculating {file_metadata['path']}")
@@ -38,47 +32,32 @@ def generate_statistics(input_file):
         if previous_parent == this_parent:
             continue
         # going deeper
-        # TODO account for going multiple levels deeper
         elif not previous_parent or previous_parent == os.path.dirname(this_parent):
             previous_parent = this_parent
             continue
-        else:
-            # previous dir done, possibly ancestors done too
-            highest_common_dir = os.path.commonpath([this_parent, previous_parent])
-
-            path_to_propagate = os.path.relpath(previous_parent, highest_common_dir)
-            dir_list_to_propagate = path_to_propagate.split(os.sep)[:-1]
-
-            print(f"{previous_parent} done, propegating to ancestors")
-            print(f"Highest common: {highest_common_dir}")
-            print(f"dir list to prop: {dir_list_to_propagate}")
-            propagate_dir(stats, highest_common_dir, dir_list_to_propagate, previous_parent)
+        else:  # previous dir done
+            propagate_dir(stats, this_parent, previous_parent)
             previous_parent = this_parent
 
+    # Run a final time with the root directory as this parent
     leading_dir = previous_parent.split(os.sep)[0]
-    highest_common_dir = os.path.commonpath([leading_dir, previous_parent])
-    path_to_propagate = os.path.relpath(previous_parent, highest_common_dir)
-    dir_list_to_propagate = path_to_propagate.split(os.sep)[:-1]
-    print(f"a is currently {stats['a']['file_count']}")
-    print(f"FINAL {previous_parent} done, propegating to ancestors")
-    print(f"Highest common: {highest_common_dir}")
-    print(f"dir list to prop: {dir_list_to_propagate}")
-    propagate_dir(stats, highest_common_dir, dir_list_to_propagate, previous_parent)
-    # propagate_dir(stats, highest_common_dir)
-    # for each in dir_list_to_propagate:
-    #     highest_common_dir = os.path.join(highest_common_dir, each)
-    #     propagate_dir(stats, highest_common_dir)
+    propagate_dir(stats, leading_dir, previous_parent)
     return stats
 
-
-if __name__ == "__main__":
+def main():
     if len(sys.argv) != 2:
         print("Usage: python script.py <input_json_file>")
         sys.exit(1)
 
     input_json_file = sys.argv[1]
     username = input_json_file.split(".")[0]
-    stats = generate_statistics(input_json_file)
+    with open(input_json_file, 'r', encoding='utf-8') as json_file:
+        data = json.load(json_file)
+
+    stats = generate_directory_statistics(data)
     for directory, stat in stats.items():
         print(f"{directory}: {stat['file_count']}")
+
+if __name__ == "__main__":
+    main()
 
