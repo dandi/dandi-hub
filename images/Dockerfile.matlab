@@ -1,5 +1,5 @@
 ARG MATLAB_RELEASE=r2023a
-FROM --platform=linux/amd64 ghcr.io/mathworks-ref-arch/matlab-integration-for-jupyter/jupyter-matlab-notebook:${MATLAB_RELEASE}
+FROM --platform=linux/amd64 ghcr.io/mathworks-ref-arch/matlab-integration-for-jupyter/jupyter-byoi-matlab-notebook:${MATLAB_RELEASE}
 
 USER root
 ARG VERSION="1.1.5"
