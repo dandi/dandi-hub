@@ -90,6 +90,17 @@ class TestDirectoryStatistics(unittest.TestCase):
         self.assertEqual(stats["/a"]["file_count"], 3)
         self.assertEqual(stats["/a/b"]["file_count"], 3)
 
+    def test_propagate_dir_files_in_all(self):
+        stats = defaultdict(lambda: {"total_size": 0, "file_count": 0})
+        stats["a/b/c"] = {"total_size": 0, "file_count": 3}
+        stats["a/b"] = {"total_size": 0, "file_count": 2}
+        stats["a"] = {"total_size": 0, "file_count": 1}
+
+        propagate_dir(stats, "a", "a/b/c")
+        self.assertEqual(stats["a"]["file_count"], 6)
+        self.assertEqual(stats["a/b"]["file_count"], 5)
+
+
     def test_generate_directory_statistics(self):
         sample_data = {
             "files": [
