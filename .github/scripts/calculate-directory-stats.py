@@ -8,7 +8,11 @@ import unittest
 from collections import defaultdict
 
 def propagate_dir(stats, current_parent, previous_parent):
+    assert os.path.isabs(current_parent) == os.path.isabs(previous_parent), \
+        "current_parent and previous_parent must both be abspath or both be relpath"
     highest_common = os.path.commonpath([current_parent, previous_parent])
+    assert highest_common, "highest_common must either be a target directory or /"
+
     path_to_propagate = os.path.relpath(previous_parent, highest_common)
     # leaves off last to avoid propagating to the path we are propagating from
     nested_dir_list = path_to_propagate.split(os.sep)[:-1]
@@ -40,7 +44,9 @@ def generate_directory_statistics(data):
             previous_parent = this_parent
 
     # Run a final time with the root directory as this parent
-    leading_dir = previous_parent.split(os.sep)[0]
+    # During final run, leading dir cannot be empty string, propagate_dir requires
+    # both to be abspath or both to be relpath
+    leading_dir = previous_parent.split(os.sep)[0] or "/"
     propagate_dir(stats, leading_dir, previous_parent)
     return stats
 
@@ -70,6 +76,15 @@ class TestDirectoryStatistics(unittest.TestCase):
         self.assertEqual(stats["a"]["file_count"], 3)
         self.assertEqual(stats["a/b"]["file_count"], 3)
 
+    def test_propagate_dir_abs_path(self):
+        stats = defaultdict(lambda: {"total_size": 0, "file_count": 0})
+        stats["/a/b/c"] = {"total_size": 0, "file_count": 3}
+        stats["/a/b"] = {"total_size": 0, "file_count": 0}
+        stats["/a"] = {"total_size": 0, "file_count": 0}
+
+        propagate_dir(stats, "/a", "/a/b/c")
+        self.assertEqual(stats["/a"]["file_count"], 3)
+        self.assertEqual(stats["/a/b"]["file_count"], 3)
 
     def test_generate_directory_statistics(self):
         sample_data = {
