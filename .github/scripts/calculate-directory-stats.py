@@ -7,9 +7,11 @@ import sys
 import unittest
 from collections import defaultdict
 
+
 def propagate_dir(stats, current_parent, previous_parent):
-    assert os.path.isabs(current_parent) == os.path.isabs(previous_parent), \
-        "current_parent and previous_parent must both be abspath or both be relpath"
+    assert os.path.isabs(current_parent) == os.path.isabs(
+        previous_parent
+    ), "current_parent and previous_parent must both be abspath or both be relpath"
     highest_common = os.path.commonpath([current_parent, previous_parent])
     assert highest_common, "highest_common must either be a target directory or /"
 
@@ -19,10 +21,11 @@ def propagate_dir(stats, current_parent, previous_parent):
     # Add each dir count to all ancestors up to highest common dir
     while nested_dir_list:
         working_dir = os.path.join(highest_common, *nested_dir_list)
-        stats[working_dir]['file_count'] += stats[previous_parent]['file_count']
+        stats[working_dir]["file_count"] += stats[previous_parent]["file_count"]
         nested_dir_list.pop()
         previous_parent = working_dir
-    stats[highest_common]['file_count'] += stats[previous_parent]['file_count']
+    stats[highest_common]["file_count"] += stats[previous_parent]["file_count"]
+
 
 def generate_directory_statistics(data):
     # Assumes dirs are listed depth first (files are listed prior to directories)
@@ -50,6 +53,7 @@ def generate_directory_statistics(data):
     propagate_dir(stats, leading_dir, previous_parent)
     return stats
 
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: python script.py <input_json_file>")
@@ -57,7 +61,7 @@ def main():
 
     input_json_file = sys.argv[1]
     username = input_json_file.split(".")[0]
-    with open(input_json_file, 'r', encoding='utf-8') as json_file:
+    with open(input_json_file, "r", encoding="utf-8") as json_file:
         data = json.load(json_file)
 
     stats = generate_directory_statistics(data)
@@ -96,7 +100,7 @@ class TestDirectoryStatistics(unittest.TestCase):
                 {"path": "a/e/file3.txt"},
                 {"path": "a/e/f/file1.txt"},
                 {"path": "a/e/f/file2.txt"},
-                {"path": "a/e/f/g/file4.txt"}
+                {"path": "a/e/f/g/file4.txt"},
             ]
         }
         stats = generate_directory_statistics(sample_data)
@@ -111,6 +115,8 @@ class TestDirectoryStatistics(unittest.TestCase):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "test":
-        unittest.main(argv=sys.argv[:1])  # Run tests if "test" is provided as an argument
+        unittest.main(
+            argv=sys.argv[:1]
+        )  # Run tests if "test" is provided as an argument
     else:
         main()
