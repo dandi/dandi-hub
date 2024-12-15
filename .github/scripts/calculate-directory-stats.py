@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 import os
-import gzip
+import csv
 import json
 import sys
 import unittest
 from collections import defaultdict
+from pathlib import Path
+from typing import Iterable
 
 
 def propagate_dir(stats, current_parent, previous_parent):
@@ -27,13 +29,14 @@ def propagate_dir(stats, current_parent, previous_parent):
     stats[highest_common]["file_count"] += stats[previous_parent]["file_count"]
 
 
-def generate_directory_statistics(data):
+def generate_directory_statistics(data: Iterable[str]):
     # Assumes dirs are listed depth first (files are listed prior to directories)
 
     stats = defaultdict(lambda: {"total_size": 0, "file_count": 0})
     previous_parent = ""
-    for file_metadata in data["files"]:
-        this_parent = os.path.dirname(file_metadata["path"])
+    for filepath, size, modified, created, error in data:
+        # TODO if error is not None:
+        this_parent = os.path.dirname(filepath)
         stats[this_parent]["file_count"] += 1
 
         if previous_parent == this_parent:
@@ -54,16 +57,29 @@ def generate_directory_statistics(data):
     return stats
 
 
+def iter_file_metadata(file_path):
+    """
+    Reads a tsv and returns an iterable that yields one row of file metadata at
+    a time, excluding comments.
+    """
+    file_path = Path(file_path)
+    with file_path.open(mode="r", newline="", encoding="utf-8") as file:
+        reader = csv.reader(file, delimiter="\t")
+        for row in reader:
+            # Skip empty lines or lines starting with '#'
+            if not row or row[0].startswith("#"):
+                continue
+            yield row
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: python script.py <input_json_file>")
         sys.exit(1)
 
-    input_json_file = sys.argv[1]
-    username = input_json_file.split(".")[0]
-    with open(input_json_file, "r", encoding="utf-8") as json_file:
-        data = json.load(json_file)
+    input_tsv_file = sys.argv[1]
+    username = input_tsv_file.split(".")[0]
 
+    data = iter_file_metadata(input_tsv_file)
     stats = generate_directory_statistics(data)
     for directory, stat in stats.items():
         print(f"{directory}: {stat['file_count']}")
@@ -99,7 +115,6 @@ class TestDirectoryStatistics(unittest.TestCase):
         propagate_dir(stats, "a", "a/b/c")
         self.assertEqual(stats["a"]["file_count"], 6)
         self.assertEqual(stats["a/b"]["file_count"], 5)
-
 
     def test_generate_directory_statistics(self):
         sample_data = {
