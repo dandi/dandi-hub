@@ -33,9 +33,9 @@ class MetadataWriter:
         if not self.writer:
             raise RuntimeError("Writer not initialized.")
         if error is not None:
-            self.writer.writerow([file_name, error])
+            self.writer.writerow([file_name, "-", "-", "-", error])
         else:
-            self.writer.writerow([file_name, file_size, created, modified])
+            self.writer.writerow([file_name, file_size, created, modified, "OK"])
 
         self.meta["total_files"] += 1
 
