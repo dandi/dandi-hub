@@ -119,7 +119,7 @@ fi
 # Mount EFS on the EC2 instance
 echo "Mounting EFS on the EC2 instance..."
 ssh -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" ec2-user@"$PUBLIC_IP" \
-  "sudo yum install -y amazon-efs-utils pip && \
+  "sudo yum install -y amazon-efs-utils pip parallel && \
    sudo mkdir -p $MOUNT_POINT && \
    sudo mount -t efs $EFS_ID:/ $MOUNT_POINT && \
    echo '$EFS_ID:/ $MOUNT_POINT efs defaults,_netdev 0 0' | sudo tee -a /etc/fstab && \
