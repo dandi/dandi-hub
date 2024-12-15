@@ -26,7 +26,7 @@ class MetadataWriter:
         self.start_time = time.time()
         self.file = self.output_path.open(mode="w", newline="", encoding="utf-8")
         self.writer = csv.writer(self.file, delimiter="\t")
-        self.writer.writerow(["file_name", "file_size", "file_type", "custom_metadata"])
+        self.writer.writerow(["#file_name", "file_size", "file_type", "custom_metadata"])
 
     def write_row(self, file_name, file_size, created, modified, error):
         """Write data for a file."""
