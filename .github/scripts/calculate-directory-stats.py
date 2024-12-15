@@ -117,18 +117,16 @@ class TestDirectoryStatistics(unittest.TestCase):
         self.assertEqual(stats["a/b"]["file_count"], 5)
 
     def test_generate_directory_statistics(self):
-        sample_data = {
-            "files": [
-                {"path": "a/b/file3.txt"},
-                {"path": "a/b/c/file1.txt"},
-                {"path": "a/b/c/file2.txt"},
-                {"path": "a/b/c/d/file4.txt"},
-                {"path": "a/e/file3.txt"},
-                {"path": "a/e/f/file1.txt"},
-                {"path": "a/e/f/file2.txt"},
-                {"path": "a/e/f/g/file4.txt"},
-            ]
-        }
+        sample_data = [
+            ("a/b/file3.txt", 3456, "2024-12-01", "2024-12-02", "OK"),
+            ("a/b/c/file1.txt", 1234, "2024-12-01", "2024-12-02", "OK"),
+            ("a/b/c/file2.txt", 2345, "2024-12-01", "2024-12-02", "OK"),
+            ("a/b/c/d/file4.txt", 4567, "2024-12-01", "2024-12-02", "OK"),
+            ("a/e/file3.txt", 5678, "2024-12-01", "2024-12-02", "OK"),
+            ("a/e/f/file1.txt", 6789, "2024-12-01", "2024-12-02", "OK"),
+            ("a/e/f/file2.txt", 7890, "2024-12-01", "2024-12-02", "OK"),
+            ("a/e/f/g/file4.txt", 8901, "2024-12-01", "2024-12-02", "OK"),
+        ]
         stats = generate_directory_statistics(sample_data)
         self.assertEqual(stats["a/b/c/d"]["file_count"], 1)
         self.assertEqual(stats["a/b/c"]["file_count"], 3)
