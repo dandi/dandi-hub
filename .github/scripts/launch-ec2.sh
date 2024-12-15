@@ -116,11 +116,15 @@ fi
 #   --port 2049 \
 #   --source-group $SECURITY_GROUP_ID
 
+echo "Installing dependencies ..."
+ssh -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" ec2-user@"$PUBLIC_IP" \
+  "sudo yum install -y amazon-efs-utils pip parallel && \
+  pip install con-duct"
+
 # Mount EFS on the EC2 instance
 echo "Mounting EFS on the EC2 instance..."
 ssh -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" ec2-user@"$PUBLIC_IP" \
-  "sudo yum install -y amazon-efs-utils pip parallel && \
-   sudo mkdir -p $MOUNT_POINT && \
+   "sudo mkdir -p $MOUNT_POINT && \
    sudo mount -t efs $EFS_ID:/ $MOUNT_POINT && \
    echo '$EFS_ID:/ $MOUNT_POINT efs defaults,_netdev 0 0' | sudo tee -a /etc/fstab && \
    echo 'EFS mounted at $MOUNT_POINT'"
