@@ -7,6 +7,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+OUTPUT_DIR = "/tmp/hub-user-indexes"
 
 class MetadataWriter:
     def __init__(self, output_path):
@@ -75,16 +76,16 @@ def directory_index(directory):
 
 # Ensure the script is called with the required arguments
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python script.py <directory_to_index> <output_tsv_file>")
+    if len(sys.argv) != 2:
+        print("Usage: python script.py <directory_to_index>")
         sys.exit(1)
 
     directory = sys.argv[1]
-    output_file = sys.argv[2]
 
     # Ensure the output filename ends with .tsv for clarity
-    if not output_file.endswith(".tsv"):
-        output_file += ".tsv"
+
+    os.makedirs(OUTPUT_DIR)
+    output_file = f"{OUTPUT_DIR}/{directory}-index.tsv"
     file_index = MetadataWriter(output_file)
     file_index.start()
     for filename, size, created, modified, error in directory_index(directory):
