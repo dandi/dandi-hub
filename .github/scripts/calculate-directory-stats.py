@@ -24,9 +24,11 @@ def propagate_dir(stats, current_parent, previous_parent):
     while nested_dir_list:
         working_dir = os.path.join(highest_common, *nested_dir_list)
         stats[working_dir]["file_count"] += stats[previous_parent]["file_count"]
+        stats[working_dir]["total_size"] += stats[previous_parent]["total_size"]
         nested_dir_list.pop()
         previous_parent = working_dir
     stats[highest_common]["file_count"] += stats[previous_parent]["file_count"]
+    stats[highest_common]["total_size"] += stats[previous_parent]["total_size"]
 
 
 def generate_directory_statistics(data: Iterable[str]):
@@ -38,6 +40,7 @@ def generate_directory_statistics(data: Iterable[str]):
         # TODO if error is not None:
         this_parent = os.path.dirname(filepath)
         stats[this_parent]["file_count"] += 1
+        stats[this_parent]["total_size"] += int(size)
 
         if previous_parent == this_parent:
             continue
@@ -82,19 +85,28 @@ def main():
     data = iter_file_metadata(input_tsv_file)
     stats = generate_directory_statistics(data)
     for directory, stat in stats.items():
-        print(f"{directory}: {stat['file_count']}")
+        if stat['total_size'] > 10000000:
+            print(f"{directory}: File count: {stat['file_count']}, Total Size: {stat['total_size']}")
+    data2 = iter_file_metadata(input_tsv_file)
+    sanity_size = 0
+    for filepath, size, modified, created, error in data2:
+        sanity_size += int(size)
+    print(f"SANITY SIZE {sanity_size}")
+
+
 
 
 class TestDirectoryStatistics(unittest.TestCase):
     def test_propagate_dir(self):
         stats = defaultdict(lambda: {"total_size": 0, "file_count": 0})
-        stats["a/b/c"] = {"total_size": 0, "file_count": 3}
-        stats["a/b"] = {"total_size": 0, "file_count": 0}
-        stats["a"] = {"total_size": 0, "file_count": 0}
+        stats["a/b/c"] = {"total_size": 100, "file_count": 3}
+        stats["a/b"] = {"total_size": 10, "file_count": 0}
+        stats["a"] = {"total_size": 1, "file_count": 0}
 
         propagate_dir(stats, "a", "a/b/c")
         self.assertEqual(stats["a"]["file_count"], 3)
         self.assertEqual(stats["a/b"]["file_count"], 3)
+        self.assertEqual(stats["a"]["total_size"], 111)
 
     def test_propagate_dir_abs_path(self):
         stats = defaultdict(lambda: {"total_size": 0, "file_count": 0})
