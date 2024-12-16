@@ -7,6 +7,7 @@ import sys
 import unittest
 from collections import defaultdict
 from pathlib import Path
+from pprint import pprint
 from typing import Iterable
 
 
@@ -74,26 +75,47 @@ def iter_file_metadata(file_path):
                 continue
             yield row
 
+def update_stats(stats, directory, stat):
+    stats["total_size"] += stat["total_size"]
+    stats["file_count"] += stat["file_count"]
+
+    # Caches track directories, but not report as a whole
+    if stats.get("directories") is not None:
+        stats["directories"].append(directory)
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: python script.py <input_json_file>")
         sys.exit(1)
 
     input_tsv_file = sys.argv[1]
-    username = input_tsv_file.split(".")[0]
+    username = input_tsv_file.split("-index.tsv")[0]
 
     data = iter_file_metadata(input_tsv_file)
     stats = generate_directory_statistics(data)
+    cache_types = ["pycache", "user_cache", "yarn_cache", "pip_cache", "nwb_cache"]
+    report_stats = {
+        "total_size": 0,
+        "file_count": 0,
+        "caches": {
+            cache_type: {"total_size": 0, "file_count": 0, "directories": []}
+            for cache_type in cache_types
+        }
+    }
+    # print(f"{directory}: File count: {stat['file_count']}, Total Size: {stat['total_size']}")
     for directory, stat in stats.items():
-        if stat['total_size'] > 10000000:
-            print(f"{directory}: File count: {stat['file_count']}, Total Size: {stat['total_size']}")
-    data2 = iter_file_metadata(input_tsv_file)
-    sanity_size = 0
-    for filepath, size, modified, created, error in data2:
-        sanity_size += int(size)
-    print(f"SANITY SIZE {sanity_size}")
+        if directory.endswith("__pycache__"):
+            update_stats(report_stats["caches"]["pycache"], directory, stat)
+        elif directory.endswith(f"{username}/.cache"):
+            update_stats(report_stats["caches"]["user_cache"], directory, stat)
+        elif directory.endswith(".cache/yarn"):
+            update_stats(report_stats["caches"]["yarn_cache"], directory, stat)
+        elif directory.endswith(".cache/pip"):
+            update_stats(report_stats["caches"]["pip_cache"], directory, stat)
+        elif directory == username:
+            update_stats(report_stats, username, stat)
 
-
+    pprint(report_stats)
 
 
 class TestDirectoryStatistics(unittest.TestCase):
