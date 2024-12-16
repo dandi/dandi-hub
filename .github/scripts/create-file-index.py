@@ -54,6 +54,7 @@ class MetadataWriter:
             self.file.write(f"# {key}: {value}\n")
 
         self.file.close()
+        print(f"Directory {self.output_path} complete, Duration: {self.meta['duration']:.2f}, Total Files: {self.meta['total_files']}, Total Size: {self.meta['total_size']}")
 
     def get_meta(self):
         """Return the meta-metadata dictionary."""
