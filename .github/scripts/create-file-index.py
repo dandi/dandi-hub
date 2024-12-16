@@ -18,6 +18,7 @@ class MetadataWriter:
             "index_timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "duration": None,
             "total_files": 0,
+            "total_size": 0,
         }
         self.file = None
         self.writer = None
@@ -39,6 +40,7 @@ class MetadataWriter:
             self.writer.writerow([file_name, file_size, created, modified, "OK"])
 
         self.meta["total_files"] += 1
+        self.meta["total_size"] += file_size
 
     def finish(self):
         """Finalize metadata, write it to the file, and close the file."""
