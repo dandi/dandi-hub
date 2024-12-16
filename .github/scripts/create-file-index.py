@@ -85,12 +85,13 @@ if __name__ == "__main__":
 
     directory = sys.argv[1]
 
-    # Ensure the output filename ends with .tsv for clarity
-
-    os.makedirs(OUTPUT_DIR)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
     output_file = f"{OUTPUT_DIR}/{directory}-index.tsv"
+
     file_index = MetadataWriter(output_file)
     file_index.start()
+
     for filename, size, created, modified, error in directory_index(directory):
         file_index.write_row(filename, size, created, modified, error)
+
     file_index.finish()
