@@ -50,7 +50,7 @@ singleuser:
               display_name: "Standard"
               default: true
               kubespawner_override:
-                image: "${singleuser_image_repo}:${singleuser_image_tag}-base"
+                image: "${singleuser_image_repo}:${singleuser_image_tag}"
       kubespawner_override:
         image_pull_policy: Always
         cpu_limit: 2
@@ -69,7 +69,7 @@ singleuser:
               display_name: "Standard"
               default: true
               kubespawner_override:
-                image: "${singleuser_image_repo}:${singleuser_image_tag}-base"
+                image: "${singleuser_image_repo}:${singleuser_image_tag}"
             matlab:
               display_name: "MATLAB (must provide your own license)"
               kubespawner_override:
@@ -93,7 +93,7 @@ singleuser:
               display_name: "Standard"
               default: true
               kubespawner_override:
-                image: "${singleuser_image_repo}:${singleuser_image_tag}-base"
+                image: "${singleuser_image_repo}:${singleuser_image_tag}"
             matlab:
               display_name: "MATLAB (must provide your own license)"
               kubespawner_override:
@@ -118,7 +118,7 @@ singleuser:
               display_name: "Standard"
               default: true
               kubespawner_override:
-                image: "${singleuser_image_repo}:${singleuser_image_tag}-base"
+                image: "${singleuser_image_repo}:${singleuser_image_tag}"
             matlab:
               display_name: "MATLAB (must provide your own license)"
               kubespawner_override:
@@ -141,7 +141,7 @@ singleuser:
               display_name: "Standard"
               default: true
               kubespawner_override:
-                image: "${singleuser_image_repo}:${singleuser_image_tag}-base"
+                image: "${singleuser_image_repo}:${singleuser_image_tag}"
             matlab:
               display_name: "MATLAB (must provide your own license)"
               kubespawner_override:
