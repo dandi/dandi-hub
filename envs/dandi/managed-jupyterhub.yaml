@@ -218,6 +218,30 @@ singleuser:
           display_name: Image
     - default: true
       description: 6 CPU / 16 GB up to 12C/32G. May take up to 15 mins to start.
+      display_name: MIT Workshop (tmp)
+      kubespawner_override:
+        cpu_guarantee: 6
+        cpu_limit: 12
+        image_pull_policy: Always
+        mem_guarantee: 16G
+        mem_limit: 32G
+        node_selector:
+          NodePool: cpu-on-demand
+      profile_options:
+        image:
+          choices:
+            matlab:
+              display_name: MATLAB (must provide your own license)
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-matlab
+            standard:
+              default: true
+              display_name: Standard
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}
+          display_name: Image
+    - default: true
+      description: 6 CPU / 16 GB up to 12C/32G. May take up to 15 mins to start.
       display_name: Base
       kubespawner_override:
         cpu_guarantee: 6
