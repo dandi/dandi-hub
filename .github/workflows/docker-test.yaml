@@ -3,7 +3,7 @@ name: Build Docker Images
 on:
   pull_request:
     paths:
-      - 'Dockerfile*'
+      - 'images/Dockerfile*'
   workflow_dispatch:
 
 jobs:
