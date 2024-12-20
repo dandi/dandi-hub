@@ -1,13 +1,13 @@
 :matlab_byoi: https://github.com/mathworks-ref-arch/matlab-integration-for-jupyter/tree/main/matlab
 
-= Dandi Docker Images
+# Dandi Docker Images
 
 This folder contains Dockerfiles to build various Docker images for Dandi:
 
 * `Dockerfile` and `Dockerfile.gpu` provide Jupyter(R) notebooks for datascience. The `Dockerfile.gpu` enables the use of GPU.
 * `Dockerfile.matlab` provides a jupyter environment with MATLAB(R) installed. This image requires you to bring your own licence.
 
-== MATLAB Docker Image
+## MATLAB Docker Image
 
 The MATLAB Docker image relies on the {matlab_byoi}[MATLAB Integration for Jupyter in a Docker Container] BYOI (Build Your Own Image).
 It is shipped with https://github.com/mathworks/matlab-proxy[MATLAB-proxy] which enables communication with MATLAB from a web-browser, and with https://github.com/mathworks/jupyter-matlab-proxy[MATLAB-proxy-jupyter] which adds MATLAB integration for Jupyter.
@@ -17,7 +17,7 @@ This Dockerfile includes the following add-ons:
 * matnwb v2.6.0.0
 * Brain-Observatory-Toolbox v0.9.2
 
-=== How to Build
+### How to Build
 
 Building the MATLAB Docker image is straight forward.
 The following lines consider that you already cloned the repository and that you are positioned in the `docker` folder in the cloned repository on your file system.
@@ -29,7 +29,7 @@ docker build -t dandi-matlab - < Dockerfile.matlab
 
 This will build the image tagging it as `dandi-matlab`.
 
-=== How to Run
+### How to Run
 
 Running a container for the built image requires that a port is passed to the command line to tell the container which internal port needs to be exposed and on which port to map it in the host system.
 
@@ -57,7 +57,7 @@ To open locally the Jupyter, copy/paste the `127.0.0.1:8888/xxxxx` address in yo
 
 CAUTION: If you changed the port on which will be mapped the internal container port, do not forget to change it also in the address you copy/paste from the logs.
 
-=== Closing your Session
+### Closing your Session
 
 Be careful while closing your session.
 If you don't close the session properly prior to stop your container, _i.e_: closing the MATLAB session and disconnecting yourself, there is chances that the MATLAB licencing system sees yourself as still connected and you'll have to wait the timeout of the session to be able to log/connect again after restarting the container.
@@ -65,7 +65,7 @@ If you don't close the session properly prior to stop your container, _i.e_: clo
 To properly close your session, click on the `MATLAB Jupyter Setting` button which appears above the MATLAB top bar.
 From there, if you really want to close your session, clic on "Stop MATLAB Session", and if you really want to stop your Jupyter session, clic on "Sign Out".
 
-=== Add new Add-Ons
+### Add new Add-Ons
 
 By default, the `Dockerfile.matlab` image is shipped with two addons already installed and accessible from MATLAB.
 You can easily add/remove addons by changing some lines in the Dockerfile: the addons links to download/install are defined by the `ARG ADDONS` variable.
@@ -95,7 +95,7 @@ generateCore();  % Generate the most recent nwb-schema \n\
 clear" >> /opt/conda/lib/python3.10/site-packages/matlab_proxy/matlab/startup.m
 ----
 
-=== Customize your Container
+### Customize your Container
 
 You can customize some parameter of your container changing some variables in the `Dockerfile.matlab`.
 
