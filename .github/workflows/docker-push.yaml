@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'Dockerfile*'
+      - 'images/Dockerfile*'
   workflow_dispatch:
 
 jobs:
