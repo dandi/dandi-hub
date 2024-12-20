@@ -102,6 +102,7 @@ def main():
             for cache_type in cache_types
         }
     }
+
     # print(f"{directory}: File count: {stat['file_count']}, Total Size: {stat['total_size']}")
     for directory, stat in stats.items():
         if directory.endswith("__pycache__"):
@@ -115,7 +116,14 @@ def main():
         elif directory == username:
             update_stats(report_stats, username, stat)
 
-    pprint(report_stats)
+    OUTPUT_DIR = "/home/austin/hub-user-reports/"
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    with open(f"{OUTPUT_DIR}{username}-report.json", "w") as out:
+        json.dump(report_stats, out)
+
+
+    sorted_dirs = sorted(stats.items(), key=lambda x: x[1]['total_size'], reverse=True)
+    print(f"Finished {username} with Total {report_stats["total_size"]}")
 
 
 class TestDirectoryStatistics(unittest.TestCase):
@@ -177,4 +185,9 @@ if __name__ == "__main__":
             argv=sys.argv[:1]
         )  # Run tests if "test" is provided as an argument
     else:
-        main()
+        try:
+            main()
+        except Exception as e:
+            # print(f"FAILED ------------------------------ {sys.argv[1]}")
+            # raise(e)
+            pass
