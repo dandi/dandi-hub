@@ -108,8 +108,11 @@ module "eks_blueprints_addons" {
     repository_username = data.aws_ecrpublic_authorization_token.token.user_name
     repository_password = data.aws_ecrpublic_authorization_token.token.password
     values = [<<EOT
-        controller:
-          image: public.ecr.aws/karpenter/controller:0.35.0@sha256:48d1246f6b2066404e300cbf3e26d0bcdc57a76531dcb634d571f4f0e050cb57
+      controller:
+        image:
+          repository: public.ecr.aws/karpenter/controller
+          tag: "0.35.0"
+          digest: "sha256:48d1246f6b2066404e300cbf3e26d0bcdc57a76531dcb634d571f4f0e050cb57"
     EOT
     ]
   }
