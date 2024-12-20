@@ -51,6 +51,11 @@ singleuser:
               default: true
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}"
+            allensdk:
+              display_name: "AllenSDK"
+              default: true
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-allensdk"
       kubespawner_override:
         image_pull_policy: Always
         cpu_limit: 2
@@ -70,6 +75,11 @@ singleuser:
     #           default: true
     #           kubespawner_override:
     #             image: "${singleuser_image_repo}:${singleuser_image_tag}"
+    #         allensdk:
+    #           display_name: "AllenSDK"
+    #           default: true
+    #           kubespawner_override:
+    #             image: "${singleuser_image_repo}:${singleuser_image_tag}-allensdk"
     #         matlab:
     #           display_name: "MATLAB (must provide your own license)"
     #           kubespawner_override:
@@ -94,6 +104,11 @@ singleuser:
               default: true
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}"
+            allensdk:
+              display_name: "AllenSDK"
+              default: true
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-allensdk"
             matlab:
               display_name: "MATLAB (must provide your own license)"
               kubespawner_override:
@@ -119,6 +134,11 @@ singleuser:
               default: true
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}"
+            allensdk:
+              display_name: "AllenSDK"
+              default: true
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-allensdk"
             matlab:
               display_name: "MATLAB (must provide your own license)"
               kubespawner_override:
@@ -142,6 +162,11 @@ singleuser:
               default: true
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}"
+            allensdk:
+              display_name: "AllenSDK"
+              default: true
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-allensdk"
             matlab:
               display_name: "MATLAB (must provide your own license)"
               kubespawner_override:
@@ -165,6 +190,11 @@ singleuser:
               default: true
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}-gpu"
+            allensdk:
+              display_name: "AllenSDK GPU"
+              default: true
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-gpu-allensdk"
             matlab:
               display_name: "MATLAB GPU (must provide your own license)"
               kubespawner_override:
