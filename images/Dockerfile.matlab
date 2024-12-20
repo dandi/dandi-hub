@@ -55,7 +55,7 @@ USER $NB_USER
 
 RUN pip install --no-cache-dir jupyter-remote-desktop-proxy jupyterlab_nvdashboard
 
-
+ENV MAMBA_NO_LOW_SPEED_LIMIT=1
 
 RUN mamba install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes websockify \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.7/git-annex-remote-rclone \

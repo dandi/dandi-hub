@@ -55,6 +55,8 @@ USER $NB_USER
 
 RUN pip install --no-cache-dir jupyter-remote-desktop-proxy jupyterlab_nvdashboard
 
+ENV MAMBA_NO_LOW_SPEED_LIMIT=1
+
 # Install CUDA toolkit and extension for GPU usage display
 RUN CONDA_OVERRIDE_CUDA="12.3" mamba install --yes -c "nvidia/label/cuda-12.3.0" cuda-toolkit cudnn \
   && conda clean --all -f -y && rm -rf /tmp/*

@@ -44,6 +44,8 @@ USER $NB_USER
 
 RUN pip install --no-cache-dir jupyter-remote-desktop-proxy
 
+ENV MAMBA_NO_LOW_SPEED_LIMIT=1
+
 # Install Allen SDK
 RUN mamba create --yes -n allen -c conda-forge python=3.8 pip ipykernel 'h5py>=3.4=mpi*' \
   && /opt/conda/envs/allen/bin/pip install --no-cache-dir allensdk \
