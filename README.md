@@ -1,6 +1,8 @@
 # Dandihub
 
-This Terraform blueprint creates a Kubernetes environment (EKS) and installs JupyterHub. Based on [AWS Data on EKS JupyterHub](https://github.com/awslabs/data-on-eks/tree/main/ai-ml/jupyterhub).
+This Terraform blueprint creates a Kubernetes environment (EKS) and installs JupyterHub.
+Based on [AWS Data on EKS JupyterHub](https://github.com/awslabs/data-on-eks/tree/main/ai-ml/jupyterhub).
+For more information, see our [Architecture documentation](doc/architecture.md).
 
 ## Table of Contents
 
