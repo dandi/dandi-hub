@@ -3,7 +3,7 @@ name: Build Docker Images
 on:
   pull_request:
     paths:
-      - 'Dockerfile*'
+      - 'images/Dockerfile*'
   workflow_dispatch:
 
 jobs:
@@ -12,15 +12,16 @@ jobs:
 
     strategy:
       matrix:
-        image:
-          - name: base
+        include:
+          - tag: latest
             dockerfile: Dockerfile
-          - name: matlab
-            dockerfile: Dockerfile.matlab
-          - name: gpu
+          - tag: latest-allensdk
+            dockerfile: Dockerfile.allensdk
+          - tag: latest-gpu
             dockerfile: Dockerfile.gpu
-          - name: gpu-matlab
-            dockerfile: Dockerfile.gpu.matlab
+          - tag: latest-gpu-allensdk
+            dockerfile: Dockerfile.gpu.allensdk
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -34,8 +35,8 @@ jobs:
       - name: Build Docker Image
         uses: docker/build-push-action@v6
         with:
-          context: images
-          file: ${{ matrix.dockerfile }}
+          context: ./images
+          file: ./images/${{ matrix.dockerfile }}
           push: false
-          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_DANDIHUB_USERNAME }}/dandihub:latest-${{ matrix.image.name }}
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_DANDIHUB_USERNAME }}/dandihub:${{ matrix.tag }}
           cache-to: type=inline

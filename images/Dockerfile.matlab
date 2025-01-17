@@ -62,8 +62,7 @@ saveProfile(cluster); \n\
 % Copy the live-example folder \n\
 homedirExamples = strcat(getenv('HOME'), '/example-live-scripts') \n\
 if not(isfolder(homedirExamples)) \n\
-    % repo = gitclone('https://github.com/MATLAB-Community-Toolboxes-at-INCF/example-live-scripts', homedirExamples, Depth=1); \n\
-    repo = gitclone('https://github.com/aranega/example-live-scripts', homedirExamples, Depth=1); \n\
+    repo = gitclone('https://github.com/MATLAB-Community-Toolboxes-at-INCF/example-live-scripts', homedirExamples, Depth=1); \n\
 end \n\
 % Add the example library to the path \n\
 addpath(homedirExamples); \n\
