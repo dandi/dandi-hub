@@ -10,6 +10,8 @@ from pathlib import Path
 from pprint import pprint
 from typing import Iterable
 
+TOTALS_OUTPUT_FILE = "all_users_total.tsv"
+OUTPUT_DIR = "asmacdo-sandbox"
 
 def propagate_dir(stats, current_parent, previous_parent):
     assert os.path.isabs(current_parent) == os.path.isabs(
@@ -83,7 +85,7 @@ def update_stats(stats, directory, stat):
     if stats.get("directories") is not None:
         stats["directories"].append(directory)
 
-def process_user(user_tsv_file, output_dir, totals_writer):
+def process_user(user_tsv_file, totals_writer):
 
     username = user_tsv_file.split("-index.tsv")[0]
     data = iter_file_metadata(user_tsv_file)
@@ -111,15 +113,14 @@ def process_user(user_tsv_file, output_dir, totals_writer):
         elif directory == username:
             update_stats(report_stats, username, stat)
 
-    os.makedirs(output_dir, exist_ok=True)
-    user_output_path = Path(output_dir, f"{username}-report.json")
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    user_output_path = Path(OUTPUT_DIR, f"{username}-report.json")
     with user_output_path.open(mode="w") as out:
         json.dump(report_stats, out)
 
     # TODO return top dirs? the nesting makes this dumb as is
     # sorted_dirs = sorted(stats.items(), key=lambda x: x[1]['total_size'], reverse=True)
     totals_writer.writerow([f"{username}", f"{report_stats['total_size']}"])
-
 
 
 # def get_user_indexes(root):
@@ -131,13 +132,11 @@ def jig_get_user_indexes(file_path):
 
 
 def main():
-    totals_output_file = "all_users_total.tsv"
-    output_dir = "asmacdo-sandbox"
-    file_path = Path(totals_output_file)
+    file_path = Path(TOTALS_OUTPUT_FILE)
     with file_path.open(mode="w", newline="", encoding="utf-8") as totals_file:
         totals_writer = csv.writer(totals_file, delimiter="\t")
         for user_index_path in jig_get_user_indexes("asmacdo-index.tsv"):
-            process_user(user_index_path, output_dir, totals_writer)
+            process_user(user_index_path, totals_writer)
 
 
 class TestDirectoryStatistics(unittest.TestCase):
