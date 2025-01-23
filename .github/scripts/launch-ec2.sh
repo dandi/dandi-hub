@@ -121,7 +121,6 @@ ssh -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" ec2-user@"$PUBLIC_IP" \
   "sudo yum install -y amazon-efs-utils pip parallel && \
   pip install con-duct"
 
-# Mount EFS on the EC2 instance
 echo "Mounting EFS on the EC2 instance..."
 ssh -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" ec2-user@"$PUBLIC_IP" \
    "sudo mkdir -p $MOUNT_POINT && \
