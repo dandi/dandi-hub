@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import glob
 import os
 import csv
 import json
@@ -11,7 +12,13 @@ from pprint import pprint
 from typing import Iterable
 
 TOTALS_OUTPUT_FILE = "all_users_total.tsv"
+TOTALS_ERROR_FILE = "all_users_errors.tsv"
 OUTPUT_DIR = "asmacdo-sandbox"
+INPUT_DIR = "/home/austin/hub-user-indexes"
+
+
+csv.field_size_limit(sys.maxsize)
+
 
 def propagate_dir(stats, current_parent, previous_parent):
     assert os.path.isabs(current_parent) == os.path.isabs(
@@ -39,8 +46,7 @@ def generate_directory_statistics(data: Iterable[str]):
 
     stats = defaultdict(lambda: {"total_size": 0, "file_count": 0})
     previous_parent = ""
-    for filepath, size, modified, created, error in data:
-        # TODO if error is not None:
+    for filepath, size, modified, created in data:
         this_parent = os.path.dirname(filepath)
         stats[this_parent]["file_count"] += 1
         stats[this_parent]["total_size"] += int(size)
@@ -77,6 +83,7 @@ def iter_file_metadata(file_path):
                 continue
             yield row
 
+
 def update_stats(stats, directory, stat):
     stats["total_size"] += stat["total_size"]
     stats["file_count"] += stat["file_count"]
@@ -85,9 +92,10 @@ def update_stats(stats, directory, stat):
     if stats.get("directories") is not None:
         stats["directories"].append(directory)
 
-def process_user(user_tsv_file, totals_writer):
 
-    username = user_tsv_file.split("-index.tsv")[0]
+def process_user(user_tsv_file, totals_writer):
+    filename = os.path.basename(user_tsv_file)
+    username = filename.removesuffix("-index.tsv")
     data = iter_file_metadata(user_tsv_file)
     stats = generate_directory_statistics(data)
     cache_types = ["pycache", "user_cache", "yarn_cache", "pip_cache", "nwb_cache"]
@@ -121,21 +129,15 @@ def process_user(user_tsv_file, totals_writer):
     # TODO return top dirs? the nesting makes this dumb as is
     # sorted_dirs = sorted(stats.items(), key=lambda x: x[1]['total_size'], reverse=True)
     totals_writer.writerow([f"{username}", f"{report_stats['total_size']}"])
-
-
-# def get_user_indexes(root):
-def jig_get_user_indexes(file_path):
-    # glob for <username>-index.tsv files in root
-    # yield
-    # raise Exception("NOT IMPLEMENTED YET")
-    yield file_path
+    print(f"done with {username}: {report_stats['total_size']}")
 
 
 def main():
+    pattern = f"{INPUT_DIR}/*-index.tsv"  # Ensure pattern includes the directory
     file_path = Path(TOTALS_OUTPUT_FILE)
     with file_path.open(mode="w", newline="", encoding="utf-8") as totals_file:
         totals_writer = csv.writer(totals_file, delimiter="\t")
-        for user_index_path in jig_get_user_indexes("asmacdo-index.tsv"):
+        for user_index_path in glob.iglob(pattern):
             process_user(user_index_path, totals_writer)
 
 
