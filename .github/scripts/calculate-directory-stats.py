@@ -83,15 +83,10 @@ def update_stats(stats, directory, stat):
     if stats.get("directories") is not None:
         stats["directories"].append(directory)
 
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: python script.py <input_json_file>")
-        sys.exit(1)
+def process_user(user_tsv_file, output_dir, totals_writer):
 
-    input_tsv_file = sys.argv[1]
-    username = input_tsv_file.split("-index.tsv")[0]
-
-    data = iter_file_metadata(input_tsv_file)
+    username = user_tsv_file.split("-index.tsv")[0]
+    data = iter_file_metadata(user_tsv_file)
     stats = generate_directory_statistics(data)
     cache_types = ["pycache", "user_cache", "yarn_cache", "pip_cache", "nwb_cache"]
     report_stats = {
@@ -116,14 +111,33 @@ def main():
         elif directory == username:
             update_stats(report_stats, username, stat)
 
-    OUTPUT_DIR = "/home/austin/hub-user-reports/"
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    with open(f"{OUTPUT_DIR}{username}-report.json", "w") as out:
+    os.makedirs(output_dir, exist_ok=True)
+    user_output_path = Path(output_dir, f"{username}-report.json")
+    with user_output_path.open(mode="w") as out:
         json.dump(report_stats, out)
 
+    # TODO return top dirs? the nesting makes this dumb as is
+    # sorted_dirs = sorted(stats.items(), key=lambda x: x[1]['total_size'], reverse=True)
+    totals_writer.writerow([f"{username}", f"{report_stats['total_size']}"])
 
-    sorted_dirs = sorted(stats.items(), key=lambda x: x[1]['total_size'], reverse=True)
-    print(f"Finished {username} with Total {report_stats["total_size"]}")
+
+
+# def get_user_indexes(root):
+def jig_get_user_indexes(file_path):
+    # glob for <username>-index.tsv files in root
+    # yield
+    # raise Exception("NOT IMPLEMENTED YET")
+    yield file_path
+
+
+def main():
+    totals_output_file = "all_users_total.tsv"
+    output_dir = "asmacdo-sandbox"
+    file_path = Path(totals_output_file)
+    with file_path.open(mode="w", newline="", encoding="utf-8") as totals_file:
+        totals_writer = csv.writer(totals_file, delimiter="\t")
+        for user_index_path in jig_get_user_indexes("asmacdo-index.tsv"):
+            process_user(user_index_path, output_dir, totals_writer)
 
 
 class TestDirectoryStatistics(unittest.TestCase):
@@ -185,9 +199,4 @@ if __name__ == "__main__":
             argv=sys.argv[:1]
         )  # Run tests if "test" is provided as an argument
     else:
-        try:
-            main()
-        except Exception as e:
-            # print(f"FAILED ------------------------------ {sys.argv[1]}")
-            # raise(e)
-            pass
+        main()
