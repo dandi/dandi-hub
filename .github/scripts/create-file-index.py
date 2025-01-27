@@ -13,7 +13,7 @@ OUTPUT_DIR = "/tmp/hub-user-indexes"
 class MetadataWriter:
     def __init__(self, output_path, error_path):
         self.output_path = Path(output_path)
-        self.error_path = Path(output_path)
+        self.error_path = Path(error_path)
         self.start_time = None
         self.end_time = None
         self.meta = {

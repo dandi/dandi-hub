@@ -14,7 +14,7 @@ from typing import Iterable
 TOTALS_OUTPUT_FILE = "all_users_total.tsv"
 TOTALS_ERROR_FILE = "all_users_errors.tsv"
 OUTPUT_DIR = "asmacdo-sandbox"
-INPUT_DIR = "/home/austin/hub-user-indexes"
+INPUT_DIR = "/tmp/hub-user-indexes"
 
 
 csv.field_size_limit(sys.maxsize)
@@ -109,27 +109,27 @@ def process_user(user_tsv_file, totals_writer):
     }
 
     # print(f"{directory}: File count: {stat['file_count']}, Total Size: {stat['total_size']}")
-    for directory, stat in stats.items():
-        if directory.endswith("__pycache__"):
-            update_stats(report_stats["caches"]["pycache"], directory, stat)
-        elif directory.endswith(f"{username}/.cache"):
-            update_stats(report_stats["caches"]["user_cache"], directory, stat)
-        elif directory.endswith(".cache/yarn"):
-            update_stats(report_stats["caches"]["yarn_cache"], directory, stat)
-        elif directory.endswith(".cache/pip"):
-            update_stats(report_stats["caches"]["pip_cache"], directory, stat)
-        elif directory == username:
-            update_stats(report_stats, username, stat)
+    # for directory, stat in stats.items():
+        # if directory.endswith("__pycache__"):
+        #     update_stats(report_stats["caches"]["pycache"], directory, stat)
+        # elif directory.endswith(f"{username}/.cache"):
+        #     update_stats(report_stats["caches"]["user_cache"], directory, stat)
+        # elif directory.endswith(".cache/yarn"):
+        #     update_stats(report_stats["caches"]["yarn_cache"], directory, stat)
+        # elif directory.endswith(".cache/pip"):
+        #     update_stats(report_stats["caches"]["pip_cache"], directory, stat)
+        # elif directory == username:
+        # update_stats(report_stats, username, stat)
 
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    user_output_path = Path(OUTPUT_DIR, f"{username}-report.json")
-    with user_output_path.open(mode="w") as out:
-        json.dump(report_stats, out)
-
+    # os.makedirs(OUTPUT_DIR, exist_ok=True)
+    # user_output_path = Path(OUTPUT_DIR, f"{username}-report.json")
+    # with user_output_path.open(mode="w") as out:
+    #     json.dump(report_stats, out)
+    #
     # TODO return top dirs? the nesting makes this dumb as is
     # sorted_dirs = sorted(stats.items(), key=lambda x: x[1]['total_size'], reverse=True)
-    totals_writer.writerow([f"{username}", f"{report_stats['total_size']}"])
-    print(f"done with {username}: {report_stats['total_size']}")
+    totals_writer.writerow([f"{username}", f"{stats[username]['total_size']}"])
+    # print(f"done with {username}: {report_stats['total_size']}")
 
 
 def main():
