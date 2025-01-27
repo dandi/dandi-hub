@@ -12,8 +12,7 @@ from pprint import pprint
 from typing import Iterable
 
 TOTALS_OUTPUT_FILE = "all_users_total.tsv"
-TOTALS_ERROR_FILE = "all_users_errors.tsv"
-OUTPUT_DIR = "asmacdo-sandbox"
+OUTPUT_DIR = "/tmp/hub-user-reports/"
 INPUT_DIR = "/tmp/hub-user-indexes"
 
 
@@ -134,7 +133,7 @@ def process_user(user_tsv_file, totals_writer):
 
 def main():
     pattern = f"{INPUT_DIR}/*-index.tsv"  # Ensure pattern includes the directory
-    file_path = Path(TOTALS_OUTPUT_FILE)
+    file_path = Path(OUTPUT_DIR, TOTALS_OUTPUT_FILE)
     with file_path.open(mode="w", newline="", encoding="utf-8") as totals_file:
         totals_writer = csv.writer(totals_file, delimiter="\t")
         for user_index_path in glob.iglob(pattern):
@@ -175,14 +174,14 @@ class TestDirectoryStatistics(unittest.TestCase):
 
     def test_generate_directory_statistics(self):
         sample_data = [
-            ("a/b/file3.txt", 3456, "2024-12-01", "2024-12-02", "OK"),
-            ("a/b/c/file1.txt", 1234, "2024-12-01", "2024-12-02", "OK"),
-            ("a/b/c/file2.txt", 2345, "2024-12-01", "2024-12-02", "OK"),
-            ("a/b/c/d/file4.txt", 4567, "2024-12-01", "2024-12-02", "OK"),
-            ("a/e/file3.txt", 5678, "2024-12-01", "2024-12-02", "OK"),
-            ("a/e/f/file1.txt", 6789, "2024-12-01", "2024-12-02", "OK"),
-            ("a/e/f/file2.txt", 7890, "2024-12-01", "2024-12-02", "OK"),
-            ("a/e/f/g/file4.txt", 8901, "2024-12-01", "2024-12-02", "OK"),
+            ("a/b/file3.txt", 3456, "2024-12-01", "2024-12-02"),
+            ("a/b/c/file1.txt", 1234, "2024-12-01", "2024-12-02"),
+            ("a/b/c/file2.txt", 2345, "2024-12-01", "2024-12-02"),
+            ("a/b/c/d/file4.txt", 4567, "2024-12-01", "2024-12-02"),
+            ("a/e/file3.txt", 5678, "2024-12-01", "2024-12-02"),
+            ("a/e/f/file1.txt", 6789, "2024-12-01", "2024-12-02"),
+            ("a/e/f/file2.txt", 7890, "2024-12-01", "2024-12-02"),
+            ("a/e/f/g/file4.txt", 8901, "2024-12-01", "2024-12-02"),
         ]
         stats = generate_directory_statistics(sample_data)
         self.assertEqual(stats["a/b/c/d"]["file_count"], 1)
