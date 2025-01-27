@@ -43,28 +43,28 @@ def propagate_dir(stats, current_parent, previous_parent):
 def generate_directory_statistics(data: Iterable[str]):
     # Assumes dirs are listed depth first (files are listed prior to directories)
 
-    stats = defaultdict(lambda: {"total_size": 0, "file_count": 0})
-    previous_parent = ""
+    stats = {"total_size": 0, "file_count": 0}
     for filepath, size, modified, created in data:
-        this_parent = os.path.dirname(filepath)
-        stats[this_parent]["file_count"] += 1
-        stats[this_parent]["total_size"] += int(size)
+        stats["file_count"] += 1
+        stats["total_size"] += int(size)
 
-        if previous_parent == this_parent:
-            continue
-        # going deeper
-        elif not previous_parent or previous_parent == os.path.dirname(this_parent):
-            previous_parent = this_parent
-            continue
-        else:  # previous dir done
-            propagate_dir(stats, this_parent, previous_parent)
-            previous_parent = this_parent
-
-    # Run a final time with the root directory as this parent
-    # During final run, leading dir cannot be empty string, propagate_dir requires
-    # both to be abspath or both to be relpath
-    leading_dir = previous_parent.split(os.sep)[0] or "/"
-    propagate_dir(stats, leading_dir, previous_parent)
+    # TODO this is used to calculate all directories
+    #      not necessary now, and seems to be inflating file size
+    #     if previous_parent == this_parent:
+    #         continue
+    #     # going deeper
+    #     elif not previous_parent or previous_parent == os.path.dirname(this_parent):
+    #         previous_parent = this_parent
+    #         continue
+    #     else:  # previous dir done
+    #         propagate_dir(stats, this_parent, previous_parent)
+    #         previous_parent = this_parent
+    #
+    # # Run a final time with the root directory as this parent
+    # # During final run, leading dir cannot be empty string, propagate_dir requires
+    # # both to be abspath or both to be relpath
+    # leading_dir = previous_parent.split(os.sep)[0] or "/"
+    # propagate_dir(stats, leading_dir, previous_parent)
     return stats
 
 
@@ -97,16 +97,18 @@ def process_user(user_tsv_file, totals_writer):
     username = filename.removesuffix("-index.tsv")
     data = iter_file_metadata(user_tsv_file)
     stats = generate_directory_statistics(data)
-    cache_types = ["pycache", "user_cache", "yarn_cache", "pip_cache", "nwb_cache"]
-    report_stats = {
-        "total_size": 0,
-        "file_count": 0,
-        "caches": {
-            cache_type: {"total_size": 0, "file_count": 0, "directories": []}
-            for cache_type in cache_types
-        }
-    }
+    # cache_types = ["pycache", "user_cache", "yarn_cache", "pip_cache", "nwb_cache"]
+    # report_stats = {
+    #     "total_size": 0,
+    #     "file_count": 0,
+    #     "caches": {
+    #         cache_type: {"total_size": 0, "file_count": 0, "directories": []}
+    #         for cache_type in cache_types
+    #     }
+    # }
 
+    # TODO This can produce extra data that might be useful, but
+    #      leaving out detailed report, not necessary for now.
     # print(f"{directory}: File count: {stat['file_count']}, Total Size: {stat['total_size']}")
     # for directory, stat in stats.items():
         # if directory.endswith("__pycache__"):
@@ -127,11 +129,11 @@ def process_user(user_tsv_file, totals_writer):
     #
     # TODO return top dirs? the nesting makes this dumb as is
     # sorted_dirs = sorted(stats.items(), key=lambda x: x[1]['total_size'], reverse=True)
-    totals_writer.writerow([f"{username}", f"{stats[username]['total_size']}"])
-    # print(f"done with {username}: {report_stats['total_size']}")
+    totals_writer.writerow([f"{username}", f"{stats['total_size']}"])
 
 
 def main():
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
     pattern = f"{INPUT_DIR}/*-index.tsv"  # Ensure pattern includes the directory
     file_path = Path(OUTPUT_DIR, TOTALS_OUTPUT_FILE)
     with file_path.open(mode="w", newline="", encoding="utf-8") as totals_file:
