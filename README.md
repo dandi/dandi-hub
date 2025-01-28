@@ -424,7 +424,7 @@ screen -S create-file-index
 
 The create-file-index.py script uses an output location in /tmp, which has max size of 500mb.
 
-`OUTPUT_DIR = "/home/ec2-usr/hub-user-indexes"`
+`OUTPUT_DIR = "/home/ec2-user/hub-user-indexes"`
 
 Next, navigate to the EFS home dir that contains each user homedir, and create a file index for each user.
 

@@ -42,29 +42,28 @@ def propagate_dir(stats, current_parent, previous_parent):
 
 def generate_directory_statistics(data: Iterable[str]):
     # Assumes dirs are listed depth first (files are listed prior to directories)
-
-    stats = {"total_size": 0, "file_count": 0}
+    stats = defaultdict(lambda: {"total_size": 0, "file_count": 0})
+    previous_parent = ""
     for filepath, size, modified, created in data:
-        stats["file_count"] += 1
-        stats["total_size"] += int(size)
+        this_parent = os.path.dirname(filepath)
+        stats[this_parent]["file_count"] += 1
+        stats[this_parent]["total_size"] += int(size)
 
-    # TODO this is used to calculate all directories
-    #      not necessary now, and seems to be inflating file size
-    #     if previous_parent == this_parent:
-    #         continue
-    #     # going deeper
-    #     elif not previous_parent or previous_parent == os.path.dirname(this_parent):
-    #         previous_parent = this_parent
-    #         continue
-    #     else:  # previous dir done
-    #         propagate_dir(stats, this_parent, previous_parent)
-    #         previous_parent = this_parent
-    #
-    # # Run a final time with the root directory as this parent
-    # # During final run, leading dir cannot be empty string, propagate_dir requires
-    # # both to be abspath or both to be relpath
-    # leading_dir = previous_parent.split(os.sep)[0] or "/"
-    # propagate_dir(stats, leading_dir, previous_parent)
+        if previous_parent == this_parent:
+            continue
+        # going deeper
+        elif not previous_parent or previous_parent == os.path.dirname(this_parent):
+            previous_parent = this_parent
+            continue
+        else:  # previous dir done
+            propagate_dir(stats, this_parent, previous_parent)
+            previous_parent = this_parent
+
+    # Run a final time with the root directory as this parent
+    # During final run, leading dir cannot be empty string, propagate_dir requires
+    # both to be abspath or both to be relpath
+    leading_dir = previous_parent.split(os.sep)[0] or "/"
+    propagate_dir(stats, leading_dir, previous_parent)
     return stats
 
 
@@ -79,6 +78,7 @@ def iter_file_metadata(file_path):
         for row in reader:
             # Skip empty lines or lines starting with '#'
             if not row or row[0].startswith("#"):
+                print(f"SANITY {row}")
                 continue
             yield row
 
@@ -87,49 +87,26 @@ def update_stats(stats, directory, stat):
     stats["total_size"] += stat["total_size"]
     stats["file_count"] += stat["file_count"]
 
-    # Caches track directories, but not report as a whole
-    if stats.get("directories") is not None:
-        stats["directories"].append(directory)
-
 
 def process_user(user_tsv_file, totals_writer):
     filename = os.path.basename(user_tsv_file)
     username = filename.removesuffix("-index.tsv")
     data = iter_file_metadata(user_tsv_file)
     stats = generate_directory_statistics(data)
-    # cache_types = ["pycache", "user_cache", "yarn_cache", "pip_cache", "nwb_cache"]
-    # report_stats = {
-    #     "total_size": 0,
-    #     "file_count": 0,
-    #     "caches": {
-    #         cache_type: {"total_size": 0, "file_count": 0, "directories": []}
-    #         for cache_type in cache_types
-    #     }
-    # }
+    output_stat_types = ["total", "user_cache", "nwb_cache"]  # TODO filter by file , "nwb_files", "bids_datasets", "zarr_files"]
+    output_stats = {key: {"total_size": 0, "file_count": 0} for key in output_stat_types}
 
-    # TODO This can produce extra data that might be useful, but
-    #      leaving out detailed report, not necessary for now.
-    # print(f"{directory}: File count: {stat['file_count']}, Total Size: {stat['total_size']}")
-    # for directory, stat in stats.items():
-        # if directory.endswith("__pycache__"):
-        #     update_stats(report_stats["caches"]["pycache"], directory, stat)
-        # elif directory.endswith(f"{username}/.cache"):
-        #     update_stats(report_stats["caches"]["user_cache"], directory, stat)
-        # elif directory.endswith(".cache/yarn"):
-        #     update_stats(report_stats["caches"]["yarn_cache"], directory, stat)
-        # elif directory.endswith(".cache/pip"):
-        #     update_stats(report_stats["caches"]["pip_cache"], directory, stat)
-        # elif directory == username:
-        # update_stats(report_stats, username, stat)
+    for directory, stat in stats.items():
+        print(f"D: {directory}")
+        if directory.endswith(f"{username}/.cache"):
+            update_stats(output_stats["user_cache"], directory, stat)
+        elif directory.endswith("nwb_cache"):  # TODO how do you identify nwb_cache?
+            update_stats(output_stats["nwb_cache"], directory, stat)
+        elif directory == username:
+            update_stats(output_stats["total"], directory, stat)
 
-    # os.makedirs(OUTPUT_DIR, exist_ok=True)
-    # user_output_path = Path(OUTPUT_DIR, f"{username}-report.json")
-    # with user_output_path.open(mode="w") as out:
-    #     json.dump(report_stats, out)
-    #
-    # TODO return top dirs? the nesting makes this dumb as is
-    # sorted_dirs = sorted(stats.items(), key=lambda x: x[1]['total_size'], reverse=True)
-    totals_writer.writerow([f"{username}", f"{stats['total_size']}"])
+    print([f"{username}", output_stats['total']])
+    totals_writer.writerow([f"{username}", output_stats['total']])
 
 
 def main():
