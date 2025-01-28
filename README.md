@@ -400,13 +400,6 @@ When Jupyterhub user pods are scheduled and sufficient Nodes are not available, 
 
 ## Monitoring Disk Usage
 
-TODO
-    - run file-index creation as designed
-        - output a failed-list
-    - run 1 data-scraper
-        - produce info file per user
-        - produce 1 metafile each user+totalused
-
 DANDI Hub provides persistent storage to each user, but over time the data stored can become expensive.
 
 To run a job to gather disk usage per user, start by setting the configuring the `aws` cli (make sure `AWS_PROFILE` env var is set).
