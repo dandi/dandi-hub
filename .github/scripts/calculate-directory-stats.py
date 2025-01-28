@@ -140,6 +140,7 @@ def main():
         totals_writer = csv.writer(totals_file, delimiter="\t")
         for user_index_path in glob.iglob(pattern):
             process_user(user_index_path, totals_writer)
+    print(f"Output file: {file_path} complete")
 
 
 class TestDirectoryStatistics(unittest.TestCase):
