@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -eu
 
 # Check for AWS CLI and credentials
 if ! command -v aws &>/dev/null; then
