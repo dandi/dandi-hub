@@ -160,6 +160,7 @@ def main():
     for user_index_path in glob.iglob(pattern):
         filename = os.path.basename(user_index_path)
         username = filename.removesuffix("-index.tsv")
+        print(f"Starting {username}")
         full_stats = DirectoryStats.from_index(username, user_index_path)
         output_stats[username] = full_stats.summary
 
