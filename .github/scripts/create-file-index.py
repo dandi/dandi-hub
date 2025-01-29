@@ -7,7 +7,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-OUTPUT_DIR = "/tmp/hub-user-indexes"
+OUTPUT_DIR = "/home/ec2-user/hub-user-indexes"
 
 
 class MetadataWriter:
@@ -98,7 +98,6 @@ if __name__ == "__main__":
     # We assume this directory is a user homedir
     path_to_index = sys.argv[1]
     username = path_to_index.split("/")[-1]
-    print(f"Starting {path_to_index}")
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     output_file = f"{OUTPUT_DIR}/{username}-index.tsv"
