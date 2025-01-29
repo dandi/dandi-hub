@@ -33,7 +33,9 @@ class MetadataWriter:
         self.outfile = self.output_path.open(mode="w", newline="", encoding="utf-8")
         self.errfile = self.error_path.open(mode="w", newline="", encoding="utf-8")
         self.outwriter = csv.writer(self.outfile, delimiter="\t")
-        self.outwriter.writerow(["#file_name", "file_size", "file_type", "custom_metadata"])
+        self.outwriter.writerow(
+            ["#file_name", "file_size", "file_type", "custom_metadata"]
+        )
         self.errwriter = csv.writer(self.errfile, delimiter="\t")
 
     def write_row(self, file_name, file_size, created, modified, error):
@@ -61,7 +63,9 @@ class MetadataWriter:
 
         self.outfile.close()
         self.errfile.close()
-        print(f"Directory {self.output_path} complete, Duration: {self.meta['duration']:.2f}, Total Files: {self.meta['total_files']}, Total Size: {self.meta['total_size']}")
+        print(
+            f"Directory {self.output_path} complete, Duration: {self.meta['duration']:.2f}, Total Files: {self.meta['total_files']}, Total Size: {self.meta['total_size']}"
+        )
 
     def get_meta(self):
         """Return the meta-metadata dictionary."""

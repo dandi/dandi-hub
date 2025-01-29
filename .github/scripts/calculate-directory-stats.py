@@ -20,7 +20,17 @@ csv.field_size_limit(sys.maxsize)
 
 
 class DirectoryStats(defaultdict):
-    COUNTED_FIELDS = ["total_size", "file_count", "nwb_files", "nwb_size", "bids_datasets", "zarr_files", "zarr_size", "user_cache_file_count", "user_cache_size"]
+    COUNTED_FIELDS = [
+        "total_size",
+        "file_count",
+        "nwb_files",
+        "nwb_size",
+        "bids_datasets",
+        "zarr_files",
+        "zarr_size",
+        "user_cache_file_count",
+        "user_cache_size",
+    ]
     root = str
 
     def __init__(self, root):
@@ -29,13 +39,16 @@ class DirectoryStats(defaultdict):
 
     def increment(self, path: str, field: str, amount: int = 1):
         if field not in self.COUNTED_FIELDS:
-            raise KeyError(f"Invalid field '{field}'. Allowed fields: {self.COUNTED_FIELDS}")
+            raise KeyError(
+                f"Invalid field '{field}'. Allowed fields: {self.COUNTED_FIELDS}"
+            )
         self[path][field] += amount
 
     def propagate_dir(self, current_parent: str, previous_parent: str):
         """Propagate counts up the directory tree."""
-        assert os.path.isabs(current_parent) == os.path.isabs(previous_parent), \
-            "Both must be absolute or both relative"
+        assert os.path.isabs(current_parent) == os.path.isabs(
+            previous_parent
+        ), "Both must be absolute or both relative"
 
         highest_common = os.path.commonpath([current_parent, previous_parent])
         assert highest_common, "highest_common must either be a target directory or /"
@@ -105,7 +118,7 @@ class DirectoryStats(defaultdict):
             elif not previous_parent or os.path.dirname(parent) == previous_parent:
                 previous_parent = parent
                 continue
-            else: # Done with this directory
+            else:  # Done with this directory
                 instance.inc_if_usercache(previous_parent)
                 instance.propagate_dir(parent, previous_parent)
                 previous_parent = parent
@@ -130,7 +143,6 @@ class DirectoryStats(defaultdict):
                 if not row or row[0].startswith("#"):
                     continue
                 yield row
-
 
     def __repr__(self):
         """Cleaner representation for debugging."""
@@ -189,9 +201,7 @@ class TestDirectoryStatistics(unittest.TestCase):
         self.assertEqual(stats["a/b"]["file_count"], 5)
 
     def test_generate_statistics_inc_bids_0(self):
-        sample_data = [
-            ("a/b/file3.txt", 3456, "2024-12-01", "2024-12-02")
-        ]
+        sample_data = [("a/b/file3.txt", 3456, "2024-12-01", "2024-12-02")]
         stats = DirectoryStats.from_data("a", sample_data)
         self.assertEqual(stats["a/b"]["bids_datasets"], 0)
         self.assertEqual(stats["a"]["bids_datasets"], 0)
@@ -201,7 +211,12 @@ class TestDirectoryStatistics(unittest.TestCase):
             ("a/b/c/subdir_of_bids", 3456, "2024-12-01", "2024-12-02"),
             ("a/b/dataset_description.json", 3456, "2024-12-01", "2024-12-02"),
             ("a/d/dataset_description.json", 3456, "2024-12-01", "2024-12-02"),
-            ("a/d/subdataset/dataset_description.json", 3456, "2024-12-01", "2024-12-02"),
+            (
+                "a/d/subdataset/dataset_description.json",
+                3456,
+                "2024-12-01",
+                "2024-12-02",
+            ),
         ]
         stats = DirectoryStats.from_data("a", sample_data)
         self.assertEqual(stats["a/b/c"]["bids_datasets"], 0)
@@ -218,12 +233,11 @@ class TestDirectoryStatistics(unittest.TestCase):
         ]
         stats = DirectoryStats.from_data("a", sample_data)
         self.assertEqual(stats["a"]["user_cache_file_count"], 2)
-        self.assertEqual(stats["a"]["user_cache_size"], 3456*2)
+        self.assertEqual(stats["a"]["user_cache_size"], 3456 * 2)
         self.assertEqual(stats["a/.cache"]["user_cache_file_count"], 2)
-        self.assertEqual(stats["a/.cache"]["user_cache_size"], 3456*2)
+        self.assertEqual(stats["a/.cache"]["user_cache_size"], 3456 * 2)
         self.assertEqual(stats["a/b"]["user_cache_file_count"], 0)
         self.assertEqual(stats["a/b"]["user_cache_size"], 0)
-
 
     def test_generate_statistics(self):
         sample_data = [
