@@ -109,7 +109,7 @@ def process_user(user_tsv_file, totals_writer):
     filename = os.path.basename(user_tsv_file)
     username = filename.removesuffix("-index.tsv")
     data = iter_file_metadata(user_tsv_file)
-    stats = generate_directory_statistics(data)
+    stats = generate_statistics(data)
     output_stat_types = ["total", "user_cache", "nwb_cache"] 
     output_stats = {key: {"total_size": 0, "file_count": 0} for key in output_stat_types}
 
@@ -169,7 +169,7 @@ class TestDirectoryStatistics(unittest.TestCase):
         self.assertEqual(stats["a"]["file_count"], 6)
         self.assertEqual(stats["a/b"]["file_count"], 5)
 
-    def test_generate_directory_statistics(self):
+    def test_generate_statistics(self):
         sample_data = [
             ("a/b/file3.txt", 3456, "2024-12-01", "2024-12-02"),
             ("a/b/c/file1.txt", 1234, "2024-12-01", "2024-12-02"),
@@ -180,7 +180,7 @@ class TestDirectoryStatistics(unittest.TestCase):
             ("a/e/f/file2.txt", 7890, "2024-12-01", "2024-12-02"),
             ("a/e/f/g/file4.txt", 8901, "2024-12-01", "2024-12-02"),
         ]
-        stats = generate_directory_statistics(sample_data)
+        stats = generate_statistics(sample_data)
         self.assertEqual(stats["a/b/c/d"]["file_count"], 1)
         self.assertEqual(stats["a/b/c"]["file_count"], 3)
         self.assertEqual(stats["a/b"]["file_count"], 4)
