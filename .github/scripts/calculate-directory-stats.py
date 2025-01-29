@@ -9,7 +9,7 @@ import unittest
 from collections import Counter, defaultdict
 from pathlib import Path
 from pprint import pprint
-from typing import Iterable
+from typing import Iterable, Tuple
 
 TOTALS_OUTPUT_FILE = "all_users_total.tsv"
 OUTPUT_DIR = "/tmp/hub-user-reports/"
@@ -19,80 +19,85 @@ INPUT_DIR = "/tmp/hub-user-indexes"
 csv.field_size_limit(sys.maxsize)
 
 
-def propagate_dir(stats, current_parent, previous_parent):
-    assert os.path.isabs(current_parent) == os.path.isabs(
-        previous_parent
-    ), "current_parent and previous_parent must both be abspath or both be relpath"
-    highest_common = os.path.commonpath([current_parent, previous_parent])
-    assert highest_common, "highest_common must either be a target directory or /"
-
-    path_to_propagate = os.path.relpath(previous_parent, highest_common)
-    # leaves off last to avoid propagating to the path we are propagating from
-    nested_dir_list = path_to_propagate.split(os.sep)[:-1]
-    # Add each dir count to all ancestors up to highest common dir
-    while nested_dir_list:
-        working_dir = os.path.join(highest_common, *nested_dir_list)
-        stats[working_dir]["file_count"] += stats[previous_parent]["file_count"]
-        stats[working_dir]["total_size"] += stats[previous_parent]["total_size"]
-        stats[working_dir]["bids_datasets"] += stats[previous_parent]["bids_datasets"]
-        # stats[working_dir]["nwb_files"] += stats[previous_parent]["nwb_files"]
-        # stats[working_dir]["zarr_files"] += stats[previous_parent]["zarr_files"]
-        nested_dir_list.pop()
-        previous_parent = working_dir
-    stats[highest_common]["file_count"] += stats[previous_parent]["file_count"]
-    stats[highest_common]["total_size"] += stats[previous_parent]["total_size"]
-    stats[highest_common]["bids_datasets"] += stats[previous_parent]["bids_datasets"]
-    # stats[highest_common]["nwb_files"] += stats[previous_parent]["nwb_files"]
-    # stats[highest_common]["zarr_files"] += stats[previous_parent]["zarr_files"]
-
-
-def inc_if_zarr(stats, this_parent, path):
-    raise NotImplementedError("TODO")
-
-def inc_if_nwb(stats, this_parent, path):
-    raise NotImplementedError("TODO")
-
-
-class DirectoryStats():
+class DirectoryStats(defaultdict):
     COUNTED_FIELDS = ["total_size", "file_count", "nwb_files", "bids_datasets", "zarr_files"]
 
     def __init__(self):
-        self._stats = defaultdict(lambda: Counter({key: 0 for key in self.COUNTED_FIELDS}))
+        super().__init__(lambda: Counter({key: 0 for key in self.COUNTED_FIELDS}))
 
-    def inc_if_bids(self, parent, path):
+    def increment(self, path: str, field: str, amount: int = 1):
+        if field not in self.COUNTED_FIELDS:
+            raise KeyError(f"Invalid field '{field}'. Allowed fields: {self.COUNTED_FIELDS}")
+        self[path][field] += amount
+
+    def propagate_dir(self, current_parent: str, previous_parent: str):
+        """Propagate counts up the directory tree."""
+
+        # if os.path.isabs(current_parent) != os.path.isabs(previous_parent):
+        #     import ipdb; ipdb.set_trace()
+        #     print("UHOH")
+        # assert os.path.isabs(current_parent) == os.path.isabs(previous_parent), \
+        #     "Both must be absolute or both relative"
+
+        highest_common = os.path.commonpath([current_parent, previous_parent])
+        assert highest_common, "highest_common must either be a target directory or /"
+
+        path_to_propagate = os.path.relpath(previous_parent, highest_common)
+        nested_dir_list = path_to_propagate.split(os.sep)[:-1]  # Exclude last directory
+
+        while nested_dir_list:
+            working_dir = os.path.join(highest_common, *nested_dir_list)
+            for field in self.COUNTED_FIELDS:
+                self[working_dir][field] += self[previous_parent][field]
+            nested_dir_list.pop()
+            previous_parent = working_dir
+
+        # Final propagation to the common root
+        for field in self.COUNTED_FIELDS:
+            self[highest_common][field] += self[previous_parent][field]
+
+    def inc_if_bids(self, parent: str, path: str):
+        """Check if a file indicates a BIDS dataset and increment the count."""
         if path.endswith("dataset_description.json"):
-            self._stats[parent]["bids_datasets"] += 1
+            self[parent]["bids_datasets"] += 1
 
     @classmethod
-    def from_data(cls, data: Iterable[str]):
-        # Assumes dirs are listed depth first (files are listed prior to directories)
-
-        # TODO filter by file , "nwb_files", "bids_datasets", "zarr_files"]
+    def from_data(cls, data: Iterable[Tuple[str, str, str, str]]):
+        """
+        Build DirectoryStats from an iterable of (filepath, size, modified, created).
+        Assumes depth-first listing.
+        """
+        instance = cls()
         previous_parent = ""
-        for filepath, size, modified, created in data:
-            parent = os.path.dirname(filepath)
-            self._stats[parent].file_count += 1
-            self._stats[parent]["total_size"] += int(size)
 
-            inc_if_bids(parent, filepath)
-            # inc_if_nwb(stats, parent, filepath)
-            # inc_ifzarr(stats, parent, filepath)
+        for filepath, size, _, _ in data:
+            parent = os.path.dirname(filepath)
+
+            instance.increment(parent, "file_count", 1)
+            instance.increment(parent, "total_size", int(size))
+
+            instance.inc_if_bids(parent, filepath)
+            # Future: instance.inc_if_nwb(parent, filepath)
+            # Future: instance.inc_if_zarr(parent, filepath)
 
             if previous_parent == parent:
                 continue
-            # going deeper
-            elif not previous_parent or previous_parent == os.path.dirname(parent):
+            elif not previous_parent or os.path.dirname(parent) == previous_parent:
                 previous_parent = parent
                 continue
-            else:  # previous dir done
-                propagate_dir(stats, parent, previous_parent)
+            else:
+                instance.propagate_dir(parent, previous_parent)
                 previous_parent = parent
 
-        # Run a final time with the root directory as this parent
-        # During final run, leading dir cannot be empty string, propagate_dir requires
-        # both to be abspath or both to be relpath
+        # Final propagation to ensure root directory gets counts
         leading_dir = previous_parent.split(os.sep)[0] or "/"
-        propagate_dir(stats, leading_dir, previous_parent)
+        instance.propagate_dir(leading_dir, previous_parent)
+
+        return instance
+
+    def __repr__(self):
+        """Cleaner representation for debugging."""
+        return "\n".join([f"{path}: {dict(counts)}" for path, counts in self.items()])
 
 
 def iter_file_metadata(file_path):
@@ -106,7 +111,6 @@ def iter_file_metadata(file_path):
         for row in reader:
             # Skip empty lines or lines starting with '#'
             if not row or row[0].startswith("#"):
-                print(f"SANITY {row}")
                 continue
             yield row
 
@@ -120,8 +124,8 @@ def process_user(user_tsv_file, totals_writer):
     filename = os.path.basename(user_tsv_file)
     username = filename.removesuffix("-index.tsv")
     data = iter_file_metadata(user_tsv_file)
-    stats = generate_statistics(data)
-    output_stat_types = ["total", "user_cache", "nwb_cache"] 
+    stats = DirectoryStats.from_data(data)
+    output_stat_types = ["total", "user_cache", "nwb_cache"]
     output_stats = {key: {"total_size": 0, "file_count": 0} for key in output_stat_types}
 
     for directory, stat in stats.items():
@@ -138,7 +142,6 @@ def process_user(user_tsv_file, totals_writer):
 
 
 def main():
-    import ipdb; ipdb.set_trace()
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     pattern = f"{INPUT_DIR}/*-index.tsv"  # Ensure pattern includes the directory
     file_path = Path(OUTPUT_DIR, TOTALS_OUTPUT_FILE)
