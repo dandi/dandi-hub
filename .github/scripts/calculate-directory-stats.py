@@ -219,6 +219,21 @@ class TestDirectoryStatistics(unittest.TestCase):
         self.assertEqual(stats["a/d"]["bids_datasets"], 2)
         self.assertEqual(stats["a"]["bids_datasets"], 3)
 
+    def test_generate_statistics_inc_usercache(self):
+        sample_data = [
+            ("a/.cache/x", 3456, "2024-12-01", "2024-12-02"),
+            ("a/.cache/y", 3456, "2024-12-01", "2024-12-02"),
+            ("a/b/notcache", 3456, "2024-12-01", "2024-12-02"),
+        ]
+        stats = DirectoryStats.from_data("a", sample_data)
+        self.assertEqual(stats["a"]["user_cache_file_count"], 2)
+        self.assertEqual(stats["a"]["user_cache_size"], 3456*2)
+        self.assertEqual(stats["a/.cache"]["user_cache_file_count"], 2)
+        self.assertEqual(stats["a/.cache"]["user_cache_size"], 3456*2)
+        self.assertEqual(stats["a/b"]["user_cache_file_count"], 0)
+        self.assertEqual(stats["a/b"]["user_cache_size"], 0)
+
+
     def test_generate_statistics(self):
         sample_data = [
             ("a/b/file3.txt", 3456, "2024-12-01", "2024-12-02"),
