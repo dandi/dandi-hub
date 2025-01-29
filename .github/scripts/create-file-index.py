@@ -112,4 +112,3 @@ if __name__ == "__main__":
         file_index.write_row(relative_filename, size, created, modified, error)
 
     file_index.finish()
-    print(f"Finished {path_to_index}")

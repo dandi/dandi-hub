@@ -12,8 +12,8 @@ from pprint import pprint
 from typing import Iterable, Tuple
 
 TOTALS_OUTPUT_FILE = "all_users_total.json"
-OUTPUT_DIR = "/tmp/hub-user-reports/"
-INPUT_DIR = "/tmp/hub-user-indexes"
+OUTPUT_DIR = "/home/ec2-user/hub-user-reports/"
+INPUT_DIR = "/home/ec2-user/hub-user-indexes"
 
 
 csv.field_size_limit(sys.maxsize)
