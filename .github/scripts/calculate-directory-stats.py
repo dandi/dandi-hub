@@ -72,10 +72,10 @@ class DirectoryStats(defaultdict):
         if path.endswith("dataset_description.json"):
             self[parent]["bids_datasets"] += 1
 
-    def inc_if_usercache(self, parent: str):
-        if parent.endswith(f"{self.root}/.cache"):
-            self.increment(parent, "user_cache_file_count", self[parent]["file_count"])
-            self.increment(parent, "user_cache_size", self[parent]["total_size"])
+    def inc_if_usercache(self, parent: str, filepath: str, size: int):
+        if filepath.startswith(f"{self.root}/.cache"):
+            self.increment(parent, "user_cache_file_count")
+            self.increment(parent, "user_cache_size", size)
 
     def inc_if_nwb(self, parent: str, path: str, size: int):
         if path.lower().endswith(".nwb"):
@@ -111,6 +111,7 @@ class DirectoryStats(defaultdict):
             instance.inc_if_bids(parent, filepath)
             instance.inc_if_nwb(parent, filepath, int(size))
             instance.inc_if_zarr(parent, filepath, int(size))
+            instance.inc_if_usercache(parent, filepath, int(size))
 
             if previous_parent == parent:
                 continue
@@ -119,13 +120,11 @@ class DirectoryStats(defaultdict):
                 previous_parent = parent
                 continue
             else:  # Done with this directory
-                instance.inc_if_usercache(previous_parent)
                 instance.propagate_dir(parent, previous_parent)
                 previous_parent = parent
 
         # Final propagation to ensure root directory gets counts
         leading_dir = previous_parent.split(os.sep)[0] or "/"
-        instance.inc_if_usercache(previous_parent)
         instance.propagate_dir(leading_dir, previous_parent)
 
         return instance
@@ -147,11 +146,6 @@ class DirectoryStats(defaultdict):
     def __repr__(self):
         """Cleaner representation for debugging."""
         return "\n".join([f"{path}: {dict(counts)}" for path, counts in self.items()])
-
-
-def update_stats(stats, directory, stat):
-    stats["total_size"] += stat["total_size"]
-    stats["file_count"] += stat["file_count"]
 
 
 def main():
@@ -229,13 +223,14 @@ class TestDirectoryStatistics(unittest.TestCase):
         sample_data = [
             ("a/.cache/x", 3456, "2024-12-01", "2024-12-02"),
             ("a/.cache/y", 3456, "2024-12-01", "2024-12-02"),
+            ("a/.cache/nested/y", 3456, "2024-12-01", "2024-12-02"),
             ("a/b/notcache", 3456, "2024-12-01", "2024-12-02"),
         ]
         stats = DirectoryStats.from_data("a", sample_data)
-        self.assertEqual(stats["a"]["user_cache_file_count"], 2)
-        self.assertEqual(stats["a"]["user_cache_size"], 3456 * 2)
-        self.assertEqual(stats["a/.cache"]["user_cache_file_count"], 2)
-        self.assertEqual(stats["a/.cache"]["user_cache_size"], 3456 * 2)
+        self.assertEqual(stats["a"]["user_cache_file_count"], 3)
+        self.assertEqual(stats["a"]["user_cache_size"], 3456 * 3)
+        self.assertEqual(stats["a/.cache"]["user_cache_file_count"], 3)
+        self.assertEqual(stats["a/.cache"]["user_cache_size"], 3456 * 3)
         self.assertEqual(stats["a/b"]["user_cache_file_count"], 0)
         self.assertEqual(stats["a/b"]["user_cache_size"], 0)
 
