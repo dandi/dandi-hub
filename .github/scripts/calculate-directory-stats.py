@@ -169,33 +169,31 @@ def main():
 
 class TestDirectoryStatistics(unittest.TestCase):
     def test_propagate_dir(self):
-        stats = defaultdict(lambda: {"total_size": 0, "file_count": 0, "bids_datasets": 0})
-        stats["a/b/c"] = {"total_size": 100, "file_count": 3, "bids_datasets": 0}
-        stats["a/b"] = {"total_size": 10, "file_count": 0, "bids_datasets": 0}
-        stats["a"] = {"total_size": 1, "file_count": 0, "bids_datasets": 0}
+        stats = DirectoryStats(root="a")
+        stats["a/b/c"].update({"total_size": 100, "file_count": 3})
+        stats["a/b"].update({"total_size": 10, "file_count": 0})
+        stats["a"].update({"total_size": 1, "file_count": 0})
 
-        propagate_dir(stats, "a", "a/b/c")
+        stats.propagate_dir("a", "a/b/c")
         self.assertEqual(stats["a"]["file_count"], 3)
         self.assertEqual(stats["a/b"]["file_count"], 3)
         self.assertEqual(stats["a"]["total_size"], 111)
 
     def test_propagate_dir_abs_path(self):
-        stats = defaultdict(lambda: {"total_size": 0, "file_count": 0, "bids_datasets": 0})
-        stats["/a/b/c"] = {"total_size": 0, "file_count": 3, "bids_datasets": 0}
-        stats["/a/b"] = {"total_size": 0, "file_count": 0, "bids_datasets": 0}
-        stats["/a"] = {"total_size": 0, "file_count": 0, "bids_datasets": 0}
+        stats = DirectoryStats(root="/a")
+        stats["/a/b/c"].update({"file_count": 3})
 
-        propagate_dir(stats, "/a", "/a/b/c")
+        stats.propagate_dir("/a", "/a/b/c")
         self.assertEqual(stats["/a"]["file_count"], 3)
         self.assertEqual(stats["/a/b"]["file_count"], 3)
 
     def test_propagate_dir_files_in_all(self):
-        stats = defaultdict(lambda: {"total_size": 0, "file_count": 0, "bids_datasets": 0})
-        stats["a/b/c"] = {"total_size": 0, "file_count": 3, "bids_datasets": 0}
-        stats["a/b"] = {"total_size": 0, "file_count": 2, "bids_datasets": 0}
-        stats["a"] = {"total_size": 0, "file_count": 1, "bids_datasets": 0}
+        stats = DirectoryStats(root="a")
+        stats["a/b/c"].update({"file_count": 3})
+        stats["a/b"].update({"file_count": 2})
+        stats["a"].update({"file_count": 1})
 
-        propagate_dir(stats, "a", "a/b/c")
+        stats.propagate_dir("a", "a/b/c")
         self.assertEqual(stats["a"]["file_count"], 6)
         self.assertEqual(stats["a/b"]["file_count"], 5)
 
@@ -203,7 +201,7 @@ class TestDirectoryStatistics(unittest.TestCase):
         sample_data = [
             ("a/b/file3.txt", 3456, "2024-12-01", "2024-12-02")
         ]
-        stats = generate_statistics(sample_data)
+        stats = DirectoryStats.from_data("a", sample_data)
         self.assertEqual(stats["a/b"]["bids_datasets"], 0)
         self.assertEqual(stats["a"]["bids_datasets"], 0)
 
@@ -214,7 +212,7 @@ class TestDirectoryStatistics(unittest.TestCase):
             ("a/d/dataset_description.json", 3456, "2024-12-01", "2024-12-02"),
             ("a/d/subdataset/dataset_description.json", 3456, "2024-12-01", "2024-12-02"),
         ]
-        stats = generate_statistics(sample_data)
+        stats = DirectoryStats.from_data("a", sample_data)
         self.assertEqual(stats["a/b/c"]["bids_datasets"], 0)
         self.assertEqual(stats["a/b"]["bids_datasets"], 1)
         self.assertEqual(stats["a/d/subdataset"]["bids_datasets"], 1)
@@ -232,7 +230,7 @@ class TestDirectoryStatistics(unittest.TestCase):
             ("a/e/f/file2.txt", 7890, "2024-12-01", "2024-12-02"),
             ("a/e/f/g/file4.txt", 8901, "2024-12-01", "2024-12-02"),
         ]
-        stats = generate_statistics(sample_data)
+        stats = DirectoryStats.from_data("a", sample_data)
         self.assertEqual(stats["a/b/c/d"]["file_count"], 1)
         self.assertEqual(stats["a/b/c"]["file_count"], 3)
         self.assertEqual(stats["a/b"]["file_count"], 4)
