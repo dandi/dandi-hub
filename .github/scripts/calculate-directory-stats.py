@@ -123,8 +123,9 @@ class DirectoryStats(defaultdict):
                 previous_parent = parent
 
         # Final propagation to ensure root directory gets counts
-        leading_dir = previous_parent.split(os.sep)[0] or "/"
-        instance.propagate_dir(leading_dir, previous_parent)
+        if previous_parent:  # No previous_parent means no data
+            leading_dir = previous_parent.split(os.sep)[0] or "/"
+            instance.propagate_dir(leading_dir, previous_parent)
 
         return instance
 
@@ -197,6 +198,11 @@ class TestDirectoryStatistics(unittest.TestCase):
         stats.propagate_dir("a", "a/b/c")
         self.assertEqual(stats["a"]["file_count"], 6)
         self.assertEqual(stats["a/b"]["file_count"], 5)
+
+    def test_from_data_empty(self):
+        sample_data = []
+        stats = DirectoryStats.from_data("a", sample_data)
+        self.assertEqual(stats["a"]["file_count"], 0)
 
     def test_generate_statistics_inc_bids_0(self):
         sample_data = [("a/b/file3.txt", 3456, "2024-12-01", "2024-12-02")]
