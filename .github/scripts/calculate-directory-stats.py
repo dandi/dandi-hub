@@ -63,13 +63,11 @@ class DirectoryStats(defaultdict):
         if parent.endswith(f"{self.root}/.cache"):
             self.increment(parent, "user_cache_file_count", self[parent]["file_count"])
             self.increment(parent, "user_cache_size", self[parent]["total_size"])
-    #
-    #         update_stats(output_stats["user_cache"], directory, stat)
+
+    # def inc_if_nwb_cache
     #     elif directory.endswith("nwb_cache"):  # TODO how do you identify nwb_cache?
     #         update_stats(output_stats["nwb_cache"], directory, stat)
-    #     elif directory == username:
-    #         update_stats(output_stats["total"], directory, stat)
-    #
+    # def inc_if_zarr
 
 
     @classmethod
@@ -84,9 +82,9 @@ class DirectoryStats(defaultdict):
         for filepath, size, _, _ in data:
             parent = os.path.dirname(filepath)
 
+            # File related counting
             instance.increment(parent, "file_count", 1)
             instance.increment(parent, "total_size", int(size))
-
             instance.inc_if_bids(parent, filepath)
             # Future: instance.inc_if_nwb(parent, filepath)
             # Future: instance.inc_if_zarr(parent, filepath)
