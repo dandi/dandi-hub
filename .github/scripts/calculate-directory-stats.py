@@ -40,7 +40,7 @@ def propagate_dir(stats, current_parent, previous_parent):
     stats[highest_common]["total_size"] += stats[previous_parent]["total_size"]
 
 def inc_if_bids(stats, this_parent, path):
-    if path.endswith("dataset_description.json")
+    if path.endswith("dataset_description.json"):
         stats[this_parent]["bids_datasets"] += 1
 
 def inc_if_zarr(stats, this_parent, path):
@@ -62,9 +62,9 @@ def generate_statistics(data: Iterable[str]):
         stats[this_parent]["file_count"] += 1
         stats[this_parent]["total_size"] += int(size)
 
-        inc_if_bids(this_parent, filepath)
-        inc_if_nwb(this_parent, filepath)
-        inc_ifzarr(this_parent, filepath)
+        inc_if_bids(stats, this_parent, filepath)
+        # inc_if_nwb(stats, this_parent, filepath)
+        # inc_ifzarr(stats, this_parent, filepath)
 
         if previous_parent == this_parent:
             continue
