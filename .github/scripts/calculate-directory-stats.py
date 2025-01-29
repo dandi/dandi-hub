@@ -70,7 +70,7 @@ class DirectoryStats(defaultdict):
     def inc_if_bids(self, parent: str, path: str):
         """Check if a file indicates a BIDS dataset and increment the count."""
         if path.endswith("dataset_description.json"):
-            self[parent]["bids_datasets"] += 1
+            self.increment(parent, "bids_datasets")
 
     def inc_if_usercache(self, parent: str, filepath: str, size: int):
         if filepath.startswith(f"{self.root}/.cache"):
@@ -79,13 +79,13 @@ class DirectoryStats(defaultdict):
 
     def inc_if_nwb(self, parent: str, path: str, size: int):
         if path.lower().endswith(".nwb"):
-            self[parent]["nwb_files"] += 1
-            self[parent]["nwb_size"] += size
+            self.increment(parent, "nwb_files")
+            self.increment(parent, "nwb_size", size)
 
     def inc_if_zarr(self, parent: str, path: str, size: int):
         if path.lower().endswith(".zarr"):
-            self[parent]["zarr_files"] += 1
-            self[parent]["zarr_size"] += size
+            self.increment(parent, "zarr_files")
+            self.increment(parent, "zarr_size", size)
 
     @classmethod
     def from_index(cls, username, user_tsv_file):
@@ -105,8 +105,7 @@ class DirectoryStats(defaultdict):
         for filepath, size, _, _ in data:
             parent = os.path.dirname(filepath)
 
-            # File related counting
-            instance.increment(parent, "file_count", 1)
+            instance.increment(parent, "file_count")
             instance.increment(parent, "total_size", int(size))
             instance.inc_if_bids(parent, filepath)
             instance.inc_if_nwb(parent, filepath, int(size))
@@ -154,7 +153,7 @@ class DirectoryStats(defaultdict):
 
 def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    pattern = f"{INPUT_DIR}/*-index.tsv"  # Ensure pattern includes the directory
+    pattern = f"{INPUT_DIR}/*-index.tsv"
     outfile_path = Path(OUTPUT_DIR, TOTALS_OUTPUT_FILE)
     output_stats = {}
     for user_index_path in glob.iglob(pattern):
@@ -164,7 +163,7 @@ def main():
         output_stats[username] = full_stats.summary
 
     with outfile_path.open(mode="w", encoding="utf-8") as totals_file:
-        json.dump(output_stats, totals_file, indent=2)  # Pretty print with indentation
+        json.dump(output_stats, totals_file, indent=2)
 
     print(f"Success: report written to {outfile_path}")
 
