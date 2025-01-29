@@ -6,7 +6,7 @@ import csv
 import json
 import sys
 import unittest
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 from pprint import pprint
 from typing import Iterable
@@ -45,9 +45,6 @@ def propagate_dir(stats, current_parent, previous_parent):
     # stats[highest_common]["nwb_files"] += stats[previous_parent]["nwb_files"]
     # stats[highest_common]["zarr_files"] += stats[previous_parent]["zarr_files"]
 
-def inc_if_bids(stats, this_parent, path):
-    if path.endswith("dataset_description.json"):
-        stats[this_parent]["bids_datasets"] += 1
 
 def inc_if_zarr(stats, this_parent, path):
     raise NotImplementedError("TODO")
@@ -55,38 +52,47 @@ def inc_if_zarr(stats, this_parent, path):
 def inc_if_nwb(stats, this_parent, path):
     raise NotImplementedError("TODO")
 
-def generate_statistics(data: Iterable[str]):
-    # Assumes dirs are listed depth first (files are listed prior to directories)
 
-    # TODO filter by file , "nwb_files", "bids_datasets", "zarr_files"]
-    # TODO counter
-    stats = defaultdict(lambda: {"total_size": 0, "file_count": 0,"nwb_files": 0, "bids_datasets": 0, "zarr_files": 0})
-    previous_parent = ""
-    for filepath, size, modified, created in data:
-        this_parent = os.path.dirname(filepath)
-        stats[this_parent]["file_count"] += 1
-        stats[this_parent]["total_size"] += int(size)
+class DirectoryStats():
+    COUNTED_FIELDS = ["total_size", "file_count", "nwb_files", "bids_datasets", "zarr_files"]
 
-        inc_if_bids(stats, this_parent, filepath)
-        # inc_if_nwb(stats, this_parent, filepath)
-        # inc_ifzarr(stats, this_parent, filepath)
+    def __init__(self):
+        self._stats = defaultdict(lambda: Counter({key: 0 for key in self.COUNTED_FIELDS}))
 
-        if previous_parent == this_parent:
-            continue
-        # going deeper
-        elif not previous_parent or previous_parent == os.path.dirname(this_parent):
-            previous_parent = this_parent
-            continue
-        else:  # previous dir done
-            propagate_dir(stats, this_parent, previous_parent)
-            previous_parent = this_parent
+    def inc_if_bids(self, parent, path):
+        if path.endswith("dataset_description.json"):
+            self._stats[parent]["bids_datasets"] += 1
 
-    # Run a final time with the root directory as this parent
-    # During final run, leading dir cannot be empty string, propagate_dir requires
-    # both to be abspath or both to be relpath
-    leading_dir = previous_parent.split(os.sep)[0] or "/"
-    propagate_dir(stats, leading_dir, previous_parent)
-    return stats
+    @classmethod
+    def from_data(cls, data: Iterable[str]):
+        # Assumes dirs are listed depth first (files are listed prior to directories)
+
+        # TODO filter by file , "nwb_files", "bids_datasets", "zarr_files"]
+        previous_parent = ""
+        for filepath, size, modified, created in data:
+            parent = os.path.dirname(filepath)
+            self._stats[parent].file_count += 1
+            self._stats[parent]["total_size"] += int(size)
+
+            inc_if_bids(parent, filepath)
+            # inc_if_nwb(stats, parent, filepath)
+            # inc_ifzarr(stats, parent, filepath)
+
+            if previous_parent == parent:
+                continue
+            # going deeper
+            elif not previous_parent or previous_parent == os.path.dirname(parent):
+                previous_parent = parent
+                continue
+            else:  # previous dir done
+                propagate_dir(stats, parent, previous_parent)
+                previous_parent = parent
+
+        # Run a final time with the root directory as this parent
+        # During final run, leading dir cannot be empty string, propagate_dir requires
+        # both to be abspath or both to be relpath
+        leading_dir = previous_parent.split(os.sep)[0] or "/"
+        propagate_dir(stats, leading_dir, previous_parent)
 
 
 def iter_file_metadata(file_path):
@@ -132,6 +138,7 @@ def process_user(user_tsv_file, totals_writer):
 
 
 def main():
+    import ipdb; ipdb.set_trace()
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     pattern = f"{INPUT_DIR}/*-index.tsv"  # Ensure pattern includes the directory
     file_path = Path(OUTPUT_DIR, TOTALS_OUTPUT_FILE)
