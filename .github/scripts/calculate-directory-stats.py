@@ -39,15 +39,32 @@ def propagate_dir(stats, current_parent, previous_parent):
     stats[highest_common]["file_count"] += stats[previous_parent]["file_count"]
     stats[highest_common]["total_size"] += stats[previous_parent]["total_size"]
 
+def inc_if_bids(stats, this_parent, path):
+    if path.endswith("dataset_description.json")
+        stats[this_parent]["bids_datasets"] += 1
 
-def generate_directory_statistics(data: Iterable[str]):
+def inc_if_zarr(stats, this_parent, path):
+    raise NotImplementedError("TODO")
+
+def inc_if_nwb(stats, this_parent, path):
+    raise NotImplementedError("TODO")
+
+def generate_statistics(data: Iterable[str]):
     # Assumes dirs are listed depth first (files are listed prior to directories)
+
+    # TODO filter by file , "nwb_files", "bids_datasets", "zarr_files"]
+    # TODO counter
+    # stats = defaultdict(lambda: {"total_size": 0, "file_count": 0,"nwb_files": 0, "bids_datasets": 0 ", "zarr_files"})
     stats = defaultdict(lambda: {"total_size": 0, "file_count": 0})
     previous_parent = ""
     for filepath, size, modified, created in data:
         this_parent = os.path.dirname(filepath)
         stats[this_parent]["file_count"] += 1
         stats[this_parent]["total_size"] += int(size)
+
+        inc_if_bids(this_parent, filepath)
+        inc_if_nwb(this_parent, filepath)
+        inc_ifzarr(this_parent, filepath)
 
         if previous_parent == this_parent:
             continue
@@ -93,7 +110,7 @@ def process_user(user_tsv_file, totals_writer):
     username = filename.removesuffix("-index.tsv")
     data = iter_file_metadata(user_tsv_file)
     stats = generate_directory_statistics(data)
-    output_stat_types = ["total", "user_cache", "nwb_cache"]  # TODO filter by file , "nwb_files", "bids_datasets", "zarr_files"]
+    output_stat_types = ["total", "user_cache", "nwb_cache"] 
     output_stats = {key: {"total_size": 0, "file_count": 0} for key in output_stat_types}
 
     for directory, stat in stats.items():
