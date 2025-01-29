@@ -34,10 +34,16 @@ def propagate_dir(stats, current_parent, previous_parent):
         working_dir = os.path.join(highest_common, *nested_dir_list)
         stats[working_dir]["file_count"] += stats[previous_parent]["file_count"]
         stats[working_dir]["total_size"] += stats[previous_parent]["total_size"]
+        stats[working_dir]["bids_datasets"] += stats[previous_parent]["bids_datasets"]
+        # stats[working_dir]["nwb_files"] += stats[previous_parent]["nwb_files"]
+        # stats[working_dir]["zarr_files"] += stats[previous_parent]["zarr_files"]
         nested_dir_list.pop()
         previous_parent = working_dir
     stats[highest_common]["file_count"] += stats[previous_parent]["file_count"]
     stats[highest_common]["total_size"] += stats[previous_parent]["total_size"]
+    stats[highest_common]["bids_datasets"] += stats[previous_parent]["bids_datasets"]
+    stats[highest_common]["nwb_files"] += stats[previous_parent]["nwb_files"]
+    stats[highest_common]["zarr_files"] += stats[previous_parent]["zarr_files"]
 
 def inc_if_bids(stats, this_parent, path):
     if path.endswith("dataset_description.json"):
@@ -168,12 +174,24 @@ class TestDirectoryStatistics(unittest.TestCase):
         self.assertEqual(stats["a"]["file_count"], 6)
         self.assertEqual(stats["a/b"]["file_count"], 5)
 
-    def test_generate_statistics_inc_bids_1(self):
+    def test_generate_statistics_inc_bids_0(self):
         sample_data = [
             ("a/b/file3.txt", 3456, "2024-12-01", "2024-12-02")
         ]
         stats = generate_statistics(sample_data)
-        self.assertEqual(stats["a/b/"]["bids_datasets"], 1)
+        self.assertEqual(stats["a/b"]["bids_datasets"], 0)
+        self.assertEqual(stats["a"]["bids_datasets"], 0)
+
+    def test_generate_statistics_inc_bids_1(self):
+        sample_data = [
+            ("a/b/c/file3.txt", 3456, "2024-12-01", "2024-12-02"),
+            ("a/b/file2.txt", 3456, "2024-12-01", "2024-12-02"),
+            ("a/b/dataset_description.json", 3456, "2024-12-01", "2024-12-02"),
+        ]
+        stats = generate_statistics(sample_data)
+        self.assertEqual(stats["a/b/c"]["bids_datasets"], 0)
+        self.assertEqual(stats["a/b"]["bids_datasets"], 1)
+        self.assertEqual(stats["a"]["bids_datasets"], 1)
 
     def test_generate_statistics(self):
         sample_data = [
