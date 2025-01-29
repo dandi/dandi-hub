@@ -20,10 +20,12 @@ csv.field_size_limit(sys.maxsize)
 
 
 class DirectoryStats(defaultdict):
-    COUNTED_FIELDS = ["total_size", "file_count", "nwb_files", "bids_datasets", "zarr_files"]
+    COUNTED_FIELDS = ["total_size", "file_count", "nwb_files", "bids_datasets", "zarr_files", "user_cache_file_count", "user_cache_size"]
+    root = str
 
-    def __init__(self):
+    def __init__(self, root):
         super().__init__(lambda: Counter({key: 0 for key in self.COUNTED_FIELDS}))
+        self.root = root
 
     def increment(self, path: str, field: str, amount: int = 1):
         if field not in self.COUNTED_FIELDS:
@@ -32,12 +34,8 @@ class DirectoryStats(defaultdict):
 
     def propagate_dir(self, current_parent: str, previous_parent: str):
         """Propagate counts up the directory tree."""
-
-        # if os.path.isabs(current_parent) != os.path.isabs(previous_parent):
-        #     import ipdb; ipdb.set_trace()
-        #     print("UHOH")
-        # assert os.path.isabs(current_parent) == os.path.isabs(previous_parent), \
-        #     "Both must be absolute or both relative"
+        assert os.path.isabs(current_parent) == os.path.isabs(previous_parent), \
+            "Both must be absolute or both relative"
 
         highest_common = os.path.commonpath([current_parent, previous_parent])
         assert highest_common, "highest_common must either be a target directory or /"
@@ -61,13 +59,26 @@ class DirectoryStats(defaultdict):
         if path.endswith("dataset_description.json"):
             self[parent]["bids_datasets"] += 1
 
+    def inc_if_usercache(self, parent: str):
+        if parent.endswith(f"{self.root}/.cache"):
+            self.increment(parent, "user_cache_file_count", self[parent]["file_count"])
+            self.increment(parent, "user_cache_size", self[parent]["total_size"])
+    #
+    #         update_stats(output_stats["user_cache"], directory, stat)
+    #     elif directory.endswith("nwb_cache"):  # TODO how do you identify nwb_cache?
+    #         update_stats(output_stats["nwb_cache"], directory, stat)
+    #     elif directory == username:
+    #         update_stats(output_stats["total"], directory, stat)
+    #
+
+
     @classmethod
-    def from_data(cls, data: Iterable[Tuple[str, str, str, str]]):
+    def from_data(cls, root, data: Iterable[Tuple[str, str, str, str]]):
         """
         Build DirectoryStats from an iterable of (filepath, size, modified, created).
         Assumes depth-first listing.
         """
-        instance = cls()
+        instance = cls(root=root)
         previous_parent = ""
 
         for filepath, size, _, _ in data:
@@ -82,15 +93,18 @@ class DirectoryStats(defaultdict):
 
             if previous_parent == parent:
                 continue
+            # Going deeper
             elif not previous_parent or os.path.dirname(parent) == previous_parent:
                 previous_parent = parent
                 continue
-            else:
+            else: # Done with this directory
+                instance.inc_if_usercache(previous_parent)
                 instance.propagate_dir(parent, previous_parent)
                 previous_parent = parent
 
         # Final propagation to ensure root directory gets counts
         leading_dir = previous_parent.split(os.sep)[0] or "/"
+        instance.inc_if_usercache(previous_parent)
         instance.propagate_dir(leading_dir, previous_parent)
 
         return instance
@@ -124,21 +138,22 @@ def process_user(user_tsv_file, totals_writer):
     filename = os.path.basename(user_tsv_file)
     username = filename.removesuffix("-index.tsv")
     data = iter_file_metadata(user_tsv_file)
-    stats = DirectoryStats.from_data(data)
-    output_stat_types = ["total", "user_cache", "nwb_cache"]
-    output_stats = {key: {"total_size": 0, "file_count": 0} for key in output_stat_types}
-
-    for directory, stat in stats.items():
-        print(f"D: {directory}")
-        if directory.endswith(f"{username}/.cache"):
-            update_stats(output_stats["user_cache"], directory, stat)
-        elif directory.endswith("nwb_cache"):  # TODO how do you identify nwb_cache?
-            update_stats(output_stats["nwb_cache"], directory, stat)
-        elif directory == username:
-            update_stats(output_stats["total"], directory, stat)
-
-    print([f"{username}", output_stats['total']])
-    totals_writer.writerow([f"{username}", output_stats['total']])
+    stats = DirectoryStats.from_data(username, data)
+    print(json.dumps(stats))
+    # output_stat_types = ["total", "user_cache", "nwb_cache"]
+    # output_stats = {key: {"total_size": 0, "file_count": 0} for key in output_stat_types}
+    #
+    # for directory, stat in stats.items():
+    #     print(f"D: {directory}")
+    #     if directory.endswith(f"{username}/.cache"):
+    #         update_stats(output_stats["user_cache"], directory, stat)
+    #     elif directory.endswith("nwb_cache"):  # TODO how do you identify nwb_cache?
+    #         update_stats(output_stats["nwb_cache"], directory, stat)
+    #     elif directory == username:
+    #         update_stats(output_stats["total"], directory, stat)
+    #
+    # print([f"{username}", output_stats['total']])
+    # totals_writer.writerow([f"{username}", output_stats['total']])
 
 
 def main():
@@ -149,7 +164,7 @@ def main():
         totals_writer = csv.writer(totals_file, delimiter="\t")
         for user_index_path in glob.iglob(pattern):
             process_user(user_index_path, totals_writer)
-    print(f"Output file: {file_path} complete")
+    # print(f"Output file: {file_path} complete")
 
 
 class TestDirectoryStatistics(unittest.TestCase):
