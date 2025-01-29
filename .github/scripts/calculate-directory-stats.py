@@ -11,7 +11,7 @@ from pathlib import Path
 from pprint import pprint
 from typing import Iterable, Tuple
 
-TOTALS_OUTPUT_FILE = "all_users_total.tsv"
+TOTALS_OUTPUT_FILE = "all_users_total.json"
 OUTPUT_DIR = "/tmp/hub-user-reports/"
 INPUT_DIR = "/tmp/hub-user-indexes"
 
@@ -69,6 +69,11 @@ class DirectoryStats(defaultdict):
     #         update_stats(output_stats["nwb_cache"], directory, stat)
     # def inc_if_zarr
 
+    @classmethod
+    def from_index(cls, username, user_tsv_file):
+        """Separated from from_data for easier testing"""
+        data = cls._iter_file_metadata(user_tsv_file)
+        return cls.from_data(username, data)
 
     @classmethod
     def from_data(cls, root, data: Iterable[Tuple[str, str, str, str]]):
@@ -107,24 +112,24 @@ class DirectoryStats(defaultdict):
 
         return instance
 
+    def _iter_file_metadata(file_path):
+        """
+        Reads a tsv and returns an iterable that yields one row of file metadata at
+        a time, excluding comments.
+        """
+        file_path = Path(file_path)
+        with file_path.open(mode="r", newline="", encoding="utf-8") as file:
+            reader = csv.reader(file, delimiter="\t")
+            for row in reader:
+                # Skip empty lines or lines starting with '#'
+                if not row or row[0].startswith("#"):
+                    continue
+                yield row
+
+
     def __repr__(self):
         """Cleaner representation for debugging."""
         return "\n".join([f"{path}: {dict(counts)}" for path, counts in self.items()])
-
-
-def iter_file_metadata(file_path):
-    """
-    Reads a tsv and returns an iterable that yields one row of file metadata at
-    a time, excluding comments.
-    """
-    file_path = Path(file_path)
-    with file_path.open(mode="r", newline="", encoding="utf-8") as file:
-        reader = csv.reader(file, delimiter="\t")
-        for row in reader:
-            # Skip empty lines or lines starting with '#'
-            if not row or row[0].startswith("#"):
-                continue
-            yield row
 
 
 def update_stats(stats, directory, stat):
@@ -132,37 +137,20 @@ def update_stats(stats, directory, stat):
     stats["file_count"] += stat["file_count"]
 
 
-def process_user(user_tsv_file, totals_writer):
-    filename = os.path.basename(user_tsv_file)
-    username = filename.removesuffix("-index.tsv")
-    data = iter_file_metadata(user_tsv_file)
-    stats = DirectoryStats.from_data(username, data)
-    print(json.dumps(stats))
-    # output_stat_types = ["total", "user_cache", "nwb_cache"]
-    # output_stats = {key: {"total_size": 0, "file_count": 0} for key in output_stat_types}
-    #
-    # for directory, stat in stats.items():
-    #     print(f"D: {directory}")
-    #     if directory.endswith(f"{username}/.cache"):
-    #         update_stats(output_stats["user_cache"], directory, stat)
-    #     elif directory.endswith("nwb_cache"):  # TODO how do you identify nwb_cache?
-    #         update_stats(output_stats["nwb_cache"], directory, stat)
-    #     elif directory == username:
-    #         update_stats(output_stats["total"], directory, stat)
-    #
-    # print([f"{username}", output_stats['total']])
-    # totals_writer.writerow([f"{username}", output_stats['total']])
-
-
 def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     pattern = f"{INPUT_DIR}/*-index.tsv"  # Ensure pattern includes the directory
-    file_path = Path(OUTPUT_DIR, TOTALS_OUTPUT_FILE)
-    with file_path.open(mode="w", newline="", encoding="utf-8") as totals_file:
-        totals_writer = csv.writer(totals_file, delimiter="\t")
-        for user_index_path in glob.iglob(pattern):
-            process_user(user_index_path, totals_writer)
-    # print(f"Output file: {file_path} complete")
+    outfile_path = Path(OUTPUT_DIR, TOTALS_OUTPUT_FILE)
+    output_stats = {}
+    for user_index_path in glob.iglob(pattern):
+        filename = os.path.basename(user_index_path)
+        username = filename.removesuffix("-index.tsv")
+        output_stats[username] = DirectoryStats.from_index(username, user_index_path)
+
+    with outfile_path.open(mode="w", encoding="utf-8") as totals_file:
+        json.dump(output_stats, totals_file, indent=2)  # Pretty print with indentation
+
+    print(f"Success: report written to {outfile_path}")
 
 
 class TestDirectoryStatistics(unittest.TestCase):
