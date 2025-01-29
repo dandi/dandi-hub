@@ -143,6 +143,10 @@ class DirectoryStats(defaultdict):
                     continue
                 yield row
 
+    @property
+    def summary(self):
+        return self[self.root]
+
     def __repr__(self):
         """Cleaner representation for debugging."""
         return "\n".join([f"{path}: {dict(counts)}" for path, counts in self.items()])
@@ -156,7 +160,8 @@ def main():
     for user_index_path in glob.iglob(pattern):
         filename = os.path.basename(user_index_path)
         username = filename.removesuffix("-index.tsv")
-        output_stats[username] = DirectoryStats.from_index(username, user_index_path)
+        full_stats = DirectoryStats.from_index(username, user_index_path)
+        output_stats[username] = full_stats.summary
 
     with outfile_path.open(mode="w", encoding="utf-8") as totals_file:
         json.dump(output_stats, totals_file, indent=2)  # Pretty print with indentation
