@@ -96,7 +96,9 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # We assume this directory is a user homedir
-    username = sys.argv[1]
+    path_to_index = sys.argv[1]
+    username = path_to_index.split("/")[-1]
+    print(f"Starting {path_to_index}")
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     output_file = f"{OUTPUT_DIR}/{username}-index.tsv"
@@ -105,7 +107,9 @@ if __name__ == "__main__":
     file_index = MetadataWriter(output_file, error_file)
     file_index.start()
 
-    for filename, size, created, modified, error in directory_index(username):
-        file_index.write_row(filename, size, created, modified, error)
+    for filename, size, created, modified, error in directory_index(path_to_index):
+        relative_filename = f"{username}/{os.path.relpath(filename, path_to_index)}"
+        file_index.write_row(relative_filename, size, created, modified, error)
 
     file_index.finish()
+    print(f"Finished {path_to_index}")
