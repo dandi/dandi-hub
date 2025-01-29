@@ -20,7 +20,7 @@ csv.field_size_limit(sys.maxsize)
 
 
 class DirectoryStats(defaultdict):
-    COUNTED_FIELDS = ["total_size", "file_count", "nwb_files", "bids_datasets", "zarr_files", "user_cache_file_count", "user_cache_size"]
+    COUNTED_FIELDS = ["total_size", "file_count", "nwb_files", "nwb_size", "bids_datasets", "zarr_files", "zarr_size", "user_cache_file_count", "user_cache_size"]
     root = str
 
     def __init__(self, root):
@@ -64,10 +64,15 @@ class DirectoryStats(defaultdict):
             self.increment(parent, "user_cache_file_count", self[parent]["file_count"])
             self.increment(parent, "user_cache_size", self[parent]["total_size"])
 
-    # def inc_if_nwb_cache
-    #     elif directory.endswith("nwb_cache"):  # TODO how do you identify nwb_cache?
-    #         update_stats(output_stats["nwb_cache"], directory, stat)
-    # def inc_if_zarr
+    def inc_if_nwb(self, parent: str, path: str, size: int):
+        if path.lower().endswith(".nwb"):
+            self[parent]["nwb_files"] += 1
+            self[parent]["nwb_size"] += size
+
+    def inc_if_zarr(self, parent: str, path: str, size: int):
+        if path.lower().endswith(".zarr"):
+            self[parent]["zarr_files"] += 1
+            self[parent]["zarr_size"] += size
 
     @classmethod
     def from_index(cls, username, user_tsv_file):
@@ -91,8 +96,8 @@ class DirectoryStats(defaultdict):
             instance.increment(parent, "file_count", 1)
             instance.increment(parent, "total_size", int(size))
             instance.inc_if_bids(parent, filepath)
-            # Future: instance.inc_if_nwb(parent, filepath)
-            # Future: instance.inc_if_zarr(parent, filepath)
+            instance.inc_if_nwb(parent, filepath, int(size))
+            instance.inc_if_zarr(parent, filepath, int(size))
 
             if previous_parent == parent:
                 continue
