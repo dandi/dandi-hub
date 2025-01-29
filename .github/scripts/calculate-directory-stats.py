@@ -54,8 +54,7 @@ def generate_statistics(data: Iterable[str]):
 
     # TODO filter by file , "nwb_files", "bids_datasets", "zarr_files"]
     # TODO counter
-    # stats = defaultdict(lambda: {"total_size": 0, "file_count": 0,"nwb_files": 0, "bids_datasets": 0 ", "zarr_files"})
-    stats = defaultdict(lambda: {"total_size": 0, "file_count": 0})
+    stats = defaultdict(lambda: {"total_size": 0, "file_count": 0,"nwb_files": 0, "bids_datasets": 0, "zarr_files": 0})
     previous_parent = ""
     for filepath, size, modified, created in data:
         this_parent = os.path.dirname(filepath)
@@ -168,6 +167,13 @@ class TestDirectoryStatistics(unittest.TestCase):
         propagate_dir(stats, "a", "a/b/c")
         self.assertEqual(stats["a"]["file_count"], 6)
         self.assertEqual(stats["a/b"]["file_count"], 5)
+
+    def test_generate_statistics_inc_bids_1(self):
+        sample_data = [
+            ("a/b/file3.txt", 3456, "2024-12-01", "2024-12-02")
+        ]
+        stats = generate_statistics(sample_data)
+        self.assertEqual(stats["a/b/"]["bids_datasets"], 1)
 
     def test_generate_statistics(self):
         sample_data = [
