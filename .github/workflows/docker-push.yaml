@@ -23,6 +23,8 @@ jobs:
             dockerfile: Dockerfile.gpu
           - tag: latest-gpu-allensdk
             dockerfile: Dockerfile.gpu.allensdk
+          - tag: latest-matlab
+            dockerfile: Dockerfile.matlab
 
     steps:
       - name: Checkout repository
