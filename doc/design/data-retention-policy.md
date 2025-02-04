@@ -22,17 +22,6 @@ username.
 At an interval of every 7 days, calculate home directory disk usage.
 
 
-Notify user if:
-   - any of the above listed thresholds were reached
-   - total du exceeds some threshold (e.g. 100G)
-   - total outdated caches size exceeds some threshold (e.g. 1G)
-   - prior notification was sent more than a week ago
-
-Notification information:
-   - large file list
-   - summarized data retention policy
-   - Notice number
-   - request to cleanup
 
 ### Reset home directories after 45 days of inactivity 
 
