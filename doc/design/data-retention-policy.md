@@ -10,8 +10,6 @@ Each user has access to 2 locations: `/home/{user}` and `/shared/`.
 Within jupyterhub `/home/{user}` the user always sees `/home/jovyan`, but is stored in EFS as their GitHub
 username.
 
-
-
 ## Determining Last Access
 
 - Use the [JupyterHub REST API](https://jupyterhub.readthedocs.io/en/stable/reference/rest-api.html#operation/get-users) to check when user last logged in to the hub.
