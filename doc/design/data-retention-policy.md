@@ -21,8 +21,6 @@ username.
 
 At an interval of every 7 days, calculate home directory disk usage.
 
-
-
 ### Reset home directories after 45 days of inactivity 
 
 If a user has not logged in for 30 days, send a warning: 
