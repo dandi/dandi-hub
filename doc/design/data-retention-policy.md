@@ -2,6 +2,8 @@
 
 Dandihub data storage on AWS EFS is expensive, and we suppose that significant portions of the data
 currently stored are no longer used. Data migration is where the cost becomes extreme.
+Based on the policy outlined below, we will reset home directories after 45 days of inactivity to reduce Dandihub storage costs.
+Additionally, we will calculate home directory usage to assess the effectiveness of this policy.
 
 ## Persistent Data Locations
 
