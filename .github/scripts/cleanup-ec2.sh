@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -eu
 
 # Load environment variables from the file if they are not already set
 ENV_FILE=".ec2-session.env"
