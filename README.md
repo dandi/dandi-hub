@@ -397,3 +397,53 @@ Notable objects:
 When Jupyterhub user pods are scheduled and sufficient Nodes are not available, Karpenter creates a NodeClaim and then interacts with AWS to spin up machines.
 
 - `nodeclaims`: Create a node from one of the Karpenter Nodepools. (This is where spot/on-demand is configured for user-pods).
+
+## Monitoring Disk Usage
+
+DANDI Hub provides persistent storage to each user, but over time the data stored can become expensive.
+
+To run a job to gather disk usage per user, start by setting the configuring the `aws` cli (make sure `AWS_PROFILE` env var is set).
+You will also need to set `EC2_SSH_KEY` to the location of the PEM file for the dandihub-gh-actions keypair (see asmacdo).
+
+Launch an ec2 instance with the appropriate tools and access:
+
+```sh
+./.github/scripts/launch-ec2.sh
+```
+
+NOTE: If this does not succeed, the security group may have changed, and if so the extra rules necessary for this instance will need to be put back into place.
+      On the SG for `eks-dandihub-efs` add an inbound rule for NFS, pointing to the SG of the ec2 instance.
+
+When the script completes, it will provide instructions to ssh into the instance.
+
+Once logged into the instance, it is recommended to start a screen session.
+
+```sh
+screen -S create-file-index
+```
+
+Next, navigate to the EFS dir which contains each user homedir, and create a file index for each user.
+
+```sh
+cd /mnt/efs/home/
+parallel -j 8 ~/scripts/create-file-index.py ::: *
+```
+
+Once finished, navigate to the output location of the file index script and generate the totals.
+
+```sh
+cd /home/ec2-user/hub-user-indexes
+~/scripts/calculate-directory-stats.py
+```
+
+Logout of the ec2 instance, and pull the totals locally.
+
+```sh
+scp -i "$EC2_SSH_KEY" ec2-user@"$PUBLIC_IP":/home/ec2-user/hub-user-reports/all_users_total.json .
+```
+
+Finally, remove the ec2 instance.
+
+```sh
+./.github/scripts/cleanup-ec2.sh
+```
