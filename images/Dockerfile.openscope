@@ -67,7 +67,8 @@ RUN pip install --no-cache-dir brainrender napari
 USER root
 
 RUN apt-get install -y coreutils
-RUN apt-get install -y libgl1-mesa-glx
+RUN apt-get install -y libgl1
+RUN apt-get install -y libglx-mesa0
 RUN apt-get install -y libglib2.0-0
 RUN rm -rf /var/lib/apt/lists/*
 RUN rm -rf /tmp/*
