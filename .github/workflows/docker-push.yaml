@@ -17,6 +17,8 @@ jobs:
         include:
           - tag: latest
             dockerfile: Dockerfile
+          - tag: latest
+            dockerfile: Dockerfile.openscope
           - tag: latest-allensdk
             dockerfile: Dockerfile.allensdk
           - tag: latest-gpu
