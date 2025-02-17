@@ -26,6 +26,7 @@ This Terraform blueprint creates a Kubernetes environment (EKS) and installs Jup
 - [Adjusting Core Node](#adjusting-core-node)
 - [Upgrading Kubernetes](#upgrading-kubernetes)
 - [Kubernetes Layer Tour](#kubernetes-layer-tour)
+- [Additional Image options](#creating-images)
 
 ## Prerequisites
 
@@ -446,4 +447,12 @@ Finally, remove the ec2 instance.
 
 ```sh
 ./.github/scripts/cleanup-ec2.sh
+```
+
+## Creating Additional Images
+
+The following command will build and run a new image, which can be viewed locally in the browser at 127.0.0.1:8888/
+
+```sh
+make dev-image CONTAINERFILE=images/Dockerfile.openscope
 ```
