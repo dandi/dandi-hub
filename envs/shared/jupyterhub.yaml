@@ -56,6 +56,11 @@ singleuser:
               default: true
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}-allensdk"
+            openscope:
+              display_name: "OpenScope"
+              default: true
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-openscope"
       kubespawner_override:
         image_pull_policy: Always
         cpu_limit: 2
@@ -109,6 +114,11 @@ singleuser:
               default: true
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}-allensdk"
+            openscope:
+              display_name: "OpenScope"
+              default: true
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-openscope"
             matlab:
               display_name: "MATLAB (must provide your own license)"
               kubespawner_override:
@@ -143,6 +153,11 @@ singleuser:
               display_name: "MATLAB (must provide your own license)"
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}-matlab"
+            openscope:
+              display_name: "OpenScope"
+              default: true
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-openscope"
       kubespawner_override:
         image_pull_policy: Always
         cpu_limit: 24
@@ -167,6 +182,11 @@ singleuser:
               default: true
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}-allensdk"
+            openscope:
+              display_name: "OpenScope"
+              default: true
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-openscope"
             matlab:
               display_name: "MATLAB (must provide your own license)"
               kubespawner_override:
@@ -195,6 +215,11 @@ singleuser:
               default: true
               kubespawner_override:
                 image: "${singleuser_image_repo}:${singleuser_image_tag}-gpu-allensdk"
+            openscope:
+              display_name: "OpenScope"
+              default: true
+              kubespawner_override:
+                image: "${singleuser_image_repo}:${singleuser_image_tag}-openscope"
             matlab:
               display_name: "MATLAB GPU (must provide your own license)"
               kubespawner_override:
