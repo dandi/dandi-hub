@@ -26,7 +26,6 @@ This Terraform blueprint creates a Kubernetes environment (EKS) and installs Jup
 - [Adjusting Core Node](#adjusting-core-node)
 - [Upgrading Kubernetes](#upgrading-kubernetes)
 - [Kubernetes Layer Tour](#kubernetes-layer-tour)
-- [Additional Image options](#creating-images)
 
 ## Prerequisites
 
