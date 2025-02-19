@@ -66,12 +66,7 @@ RUN pip install --no-cache-dir brainrender napari
 # Leaving "standard" Dockerfile copy above as-is to simplify later switch to modular builds.
 USER root
 
-RUN apt-get install -y coreutils
-RUN apt-get install -y libgl1
-RUN apt-get install -y libglx-mesa0
-RUN apt-get install -y libglib2.0-0
-RUN rm -rf /var/lib/apt/lists/*
-RUN rm -rf /tmp/*
+RUN apt-get install -y coreutils libgl1 libglx-mesa0 libglib2.0-0 && rm -rf /var/lib/apt/lists/* /tmp/*
 
 USER $NB_USER
 
