@@ -35,24 +35,31 @@ hub:
                   auth_model["auth_state"]["scope"] = scopes
               auth_model = await self.update_auth_model(auth_model)
 
+              if not (api_credentials := environ.get('DANDI_API_CREDENTIALS')):
+                  api_credentials = "${dandi_api_credentials}"  # dict url -> token
+
+              # Now handle api_credentials
+              api_credentials_rec = json.loads(api_credentials)
+              # TODO: RF code below to work with multiple in above
+
               # Allowed if admin
               if await super().check_allowed(username, auth_model):
                   return True
 
               # Allowed if user is a registered DANDI user.
               req = HTTPRequest(
-                  f"${dandi_api_domain}/api/users/search/?username={username}",  # noqa
+                  f"{api_domain}/api/users/search/?username={username}",  # noqa
                   method="GET",
                   headers={
                       "Accept": "application/json",
                       "User-Agent": "JupyterHub",
-                      "Authorization": "token ${danditoken}",
+                      f"Authorization": "token {api_token}",
                   },
                   validate_cert=self.validate_server_cert,
               )
               try:
                   client = AsyncHTTPClient()
-                  print(f"Attempting to validate {username} with ${dandi_api_domain}")  # noqa
+                  print(f"Attempting to validate {username} with {api_domain}")  # noqa
                   resp = await client.fetch(req)
               except HTTPClientError as e:
                   print(
@@ -78,9 +85,16 @@ hub:
               spawner.environment["GITHUB_TOKEN"] = auth_state["access_token"]
               spawner.environment["GITHUB_USER"] = auth_state["github_user"]["login"]
               spawner.environment["GITHUB_EMAIL"] = auth_state["github_user"]["email"]
-      c.KubeSpawner.modify_pod_hook = modify_pod_hook  # noqa
-      c.JupyterHub.authenticator_class = IsDandiUserAuthenticator  # noqa
-      c.GitHubOAuthenticator.enable_auth_state = True  # noqa
+      if __name__ == '__main__':
+          # TODO: start async loop and then
+          # Test "live" as creating the IsDandiUserAuthenticator
+          # and running against some specific account(s) while relying on the env
+          # var  DANDI_API_CREDENTIALS  to contain json.
+          # This will ensure that it works at all
+      else:
+          c.KubeSpawner.modify_pod_hook = modify_pod_hook  # noqa
+          c.JupyterHub.authenticator_class = IsDandiUserAuthenticator  # noqa
+          c.GitHubOAuthenticator.enable_auth_state = True  # noqa
 
 singleuser:
   lifecycleHooks:
