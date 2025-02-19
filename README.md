@@ -448,12 +448,3 @@ Finally, remove the ec2 instance.
 ```sh
 ./.github/scripts/cleanup-ec2.sh
 ```
-
-## Creating Additional Images
-
-The following command will build and run a new image, which can be viewed locally in the browser at 127.0.0.1:8888/
-
-```sh
-docker build -f $(CONTAINERFILE) -t dandihub-dev:latest .
-docker run --rm -p 8888:8888 --name dev_jupyterlab dandihub-dev:latest start-notebook.sh --NotebookApp.token=""
-```
