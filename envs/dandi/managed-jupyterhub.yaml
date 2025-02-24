@@ -210,6 +210,16 @@ singleuser:
       profile_options:
         image:
           choices:
+            allensdk:
+              default: true
+              display_name: AllenSDK
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-allensdk
+            openscope:
+              default: true
+              display_name: OpenScope
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-openscope
             standard:
               default: true
               display_name: Standard
@@ -230,10 +240,20 @@ singleuser:
       profile_options:
         image:
           choices:
+            allensdk:
+              default: true
+              display_name: AllenSDK
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-allensdk
             matlab:
               display_name: MATLAB (must provide your own license)
               kubespawner_override:
                 image: ${singleuser_image_repo}:${singleuser_image_tag}-matlab
+            openscope:
+              default: true
+              display_name: OpenScope
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-openscope
             standard:
               default: true
               display_name: Standard
@@ -253,10 +273,20 @@ singleuser:
       profile_options:
         image:
           choices:
+            allensdk:
+              default: true
+              display_name: AllenSDK
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-allensdk
             matlab:
               display_name: MATLAB (must provide your own license)
               kubespawner_override:
                 image: ${singleuser_image_repo}:${singleuser_image_tag}-matlab
+            openscope:
+              default: true
+              display_name: OpenScope
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-openscope
             standard:
               default: true
               display_name: Standard
@@ -276,10 +306,20 @@ singleuser:
       profile_options:
         image:
           choices:
+            allensdk:
+              default: true
+              display_name: AllenSDK
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-allensdk
             matlab:
               display_name: MATLAB (must provide your own license)
               kubespawner_override:
                 image: ${singleuser_image_repo}:${singleuser_image_tag}-matlab
+            openscope:
+              default: true
+              display_name: OpenScope
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-openscope
             standard:
               default: true
               display_name: Standard
@@ -310,10 +350,20 @@ singleuser:
       profile_options:
         image:
           choices:
+            allensdk:
+              default: true
+              display_name: AllenSDK GPU
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-gpu-allensdk
             matlab:
               display_name: MATLAB GPU (must provide your own license)
               kubespawner_override:
                 image: ${singleuser_image_repo}:${singleuser_image_tag}-gpu-matlab
+            openscope:
+              default: true
+              display_name: OpenScope
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-openscope
             standard:
               default: true
               display_name: Standard GPU
