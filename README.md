@@ -190,7 +190,11 @@ Environment variables store secrets and hub deployment name:
   - `TF_VAR_github_client_id`: See Github OAuth Step.
   - `TF_VAR_github_client_secret`: See Github OAuth Step.
   - `TF_VAR_aws_certificate_arn`: See Create Cert Step.
-  - `TF_VAR_danditoken`: API token for the DANDI instance used for user auth.
+  - `TF_VAR_dandi_api_credentials` JSON: keys are the domain that hosts a DANDI API, values are tokens to match the DANDI API.
+
+Example of dandi_api_credentials:
+
+`'{"https://api.dandiarchive.org": "my_dandi_token", "https://api-dandi.emberarchive.org":"my_ember_token"}'`
 
 ## Variables File
 
@@ -200,7 +204,6 @@ The variables are set in a `terraform.tfvars` for each `env`, ie `envs/dandi/ter
 - `singleuser_image_repo`: Dockerhub repository containing custom jupyterhub image
 - `singleuser_image_tag`: tag
 - `jupyterhub_domain`: The domain to host the jupyterhub landing page: (ie "hub.dandiarchive.org")
-- `dandi_api_domain`: The domain that hosts the DANDI API with list of registered users
 - `region`: Cloud vendor region (ie us-west-1)
 
 WARNING: If changing `region` it must be changed both in the tfvars and in the `backend.tf`.

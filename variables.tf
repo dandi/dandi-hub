@@ -86,18 +86,13 @@ variable "dandi_authenticator" {
   default = ""
 }
 
-variable "danditoken" {
-  type = string
-  description = "DANDI API token"
-}
-
 variable "aws_certificate_arn" {
   type = string
   description = "AWS certificate for the domain."
   default = ""
 }
 
-variable "dandi_api_domain" {
-  description = "Domain of DANDI API used to check user registration"
+variable "dandi_api_credentials" {
+  description = "JSON string containing Dandi API keys, and token domains"
   type = string
 }

@@ -327,8 +327,7 @@ module "eks_data_addons" {
       region                      = var.region
       singleuser_image_repo       = var.singleuser_image_repo
       singleuser_image_tag        = var.singleuser_image_tag
-      danditoken                  = var.danditoken
-      dandi_api_domain            = var.dandi_api_domain
+      dandi_api_credentials       = var.dandi_api_credentials
     })]
     version                     = "3.3.5"
   }

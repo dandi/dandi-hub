@@ -10,11 +10,15 @@ hub:
     myConfig: |
       # Python executed by jupyterhub at startup
       import json
+      import logging
       import os
       import warnings
       from kubernetes_asyncio import client
       from oauthenticator.github import GitHubOAuthenticator
       from tornado.httpclient import AsyncHTTPClient, HTTPClientError, HTTPRequest
+
+      logging.basicConfig(level=logging.INFO)
+      lgr = logging.getLogger("Custom Z2JH config")
 
       def modify_pod_hook(spawner, pod):  # noqa
           pod.spec.containers[0].security_context = client.V1SecurityContext(privileged=True)
@@ -28,6 +32,8 @@ hub:
               """
               Query DANDI API to ensure user is registered.
               """
+              lgr.debug(f"Attempting to validate {username}")
+
               if auth_model["auth_state"].get("scope", []):
                   scopes = []
                   for val in auth_model["auth_state"]["scope"]:
@@ -37,25 +43,35 @@ hub:
 
               # Allowed if admin
               if await super().check_allowed(username, auth_model):
+                  lgr.info(f"User {username} is admin, automatically allowed")
                   return True
 
+              dandi_api_credentials = json.loads('${dandi_api_credentials}')
+              for api_domain, token in dandi_api_credentials.items():
+                  if await self.verify_is_user(api_domain, token, username):
+                      return True
+
+              return False
+
+
+          async def verify_is_user(self, api_domain, token, username):
               # Allowed if user is a registered DANDI user.
               req = HTTPRequest(
-                  f"${dandi_api_domain}/api/users/search/?username={username}",  # noqa
+                  f"{api_domain}/api/users/search/?username={username}",  # noqa
                   method="GET",
                   headers={
                       "Accept": "application/json",
                       "User-Agent": "JupyterHub",
-                      "Authorization": "token ${danditoken}",
+                      "Authorization": f"token {token}",
                   },
                   validate_cert=self.validate_server_cert,
               )
               try:
                   client = AsyncHTTPClient()
-                  print(f"Attempting to validate {username} with ${dandi_api_domain}")  # noqa
+                  lgr.debug(f"Attempting to validate {username} with {api_domain}")
                   resp = await client.fetch(req)
               except HTTPClientError as e:
-                  print(
+                  lgr.info(
                       f"Dandi API request to validate {username} returned HTTPClientError: {e}"
                   )
                   return False
@@ -64,6 +80,7 @@ hub:
                       resp_json = json.loads(resp.body.decode("utf8", "replace"))
                       for val in resp_json:
                           if val["username"].lower() == username.lower():
+                              lgr.info(f"User {username} is authorized by {api_domain}")
                               return True
 
               # If not explicitly allowed, not allowed.
