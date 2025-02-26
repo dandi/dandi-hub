@@ -93,6 +93,6 @@ variable "aws_certificate_arn" {
 }
 
 variable "dandi_api_credentials" {
-  description = "JSON string containing Dandi API keys, and token domains"
+  description = "JSON string containing a dict of Dandi API domains paired with tokens"
   type = string
 }
