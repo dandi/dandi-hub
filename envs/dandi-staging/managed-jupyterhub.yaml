@@ -36,11 +36,15 @@ hub:
     myConfig: |
       # Python executed by jupyterhub at startup
       import json
+      import logging
       import os
       import warnings
       from kubernetes_asyncio import client
       from oauthenticator.github import GitHubOAuthenticator
       from tornado.httpclient import AsyncHTTPClient, HTTPClientError, HTTPRequest
+
+      logging.basicConfig(level=logging.INFO)
+      lgr = logging.getLogger("Custom Z2JH config")
 
       def modify_pod_hook(spawner, pod):  # noqa
           pod.spec.containers[0].security_context = client.V1SecurityContext(privileged=True)
@@ -54,6 +58,8 @@ hub:
               """
               Query DANDI API to ensure user is registered.
               """
+              lgr.debug(f"Attempting to validate {username}")
+
               if auth_model["auth_state"].get("scope", []):
                   scopes = []
                   for val in auth_model["auth_state"]["scope"]:
@@ -63,25 +69,35 @@ hub:
 
               # Allowed if admin
               if await super().check_allowed(username, auth_model):
+                  lgr.info(f"User {username} is admin, automatically allowed")
                   return True
 
+              dandi_api_credentials = json.loads('${dandi_api_credentials}')
+              for api_domain, token in dandi_api_credentials.items():
+                  if await self.verify_is_user(api_domain, token, username):
+                      return True
+
+              return False
+
+
+          async def verify_is_user(self, api_domain, token, username):
               # Allowed if user is a registered DANDI user.
               req = HTTPRequest(
-                  f"${dandi_api_domain}/api/users/search/?username={username}",  # noqa
+                  f"{api_domain}/api/users/search/?username={username}",  # noqa
                   method="GET",
                   headers={
                       "Accept": "application/json",
                       "User-Agent": "JupyterHub",
-                      "Authorization": "token ${danditoken}",
+                      "Authorization": f"token {token}",
                   },
                   validate_cert=self.validate_server_cert,
               )
               try:
                   client = AsyncHTTPClient()
-                  print(f"Attempting to validate {username} with ${dandi_api_domain}")  # noqa
+                  lgr.debug(f"Attempting to validate {username} with {api_domain}")
                   resp = await client.fetch(req)
               except HTTPClientError as e:
-                  print(
+                  lgr.info(
                       f"Dandi API request to validate {username} returned HTTPClientError: {e}"
                   )
                   return False
@@ -90,6 +106,7 @@ hub:
                       resp_json = json.loads(resp.body.decode("utf8", "replace"))
                       for val in resp_json:
                           if val["username"].lower() == username.lower():
+                              lgr.info(f"User {username} is authorized by {api_domain}")
                               return True
 
               # If not explicitly allowed, not allowed.
@@ -210,30 +227,16 @@ singleuser:
       profile_options:
         image:
           choices:
-            standard:
+            allensdk:
               default: true
-              display_name: Standard
+              display_name: AllenSDK
               kubespawner_override:
-                image: ${singleuser_image_repo}:${singleuser_image_tag}
-          display_name: Image
-    - default: true
-      description: 6 CPU / 16 GB up to 12C/32G. May take up to 15 mins to start.
-      display_name: MIT Workshop (tmp)
-      kubespawner_override:
-        cpu_guarantee: 6
-        cpu_limit: 12
-        image_pull_policy: Always
-        mem_guarantee: 16G
-        mem_limit: 32G
-        node_selector:
-          NodePool: cpu-on-demand
-      profile_options:
-        image:
-          choices:
-            matlab:
-              display_name: MATLAB (must provide your own license)
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-allensdk
+            openscope:
+              default: true
+              display_name: OpenScope
               kubespawner_override:
-                image: ${singleuser_image_repo}:${singleuser_image_tag}-matlab
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-openscope
             standard:
               default: true
               display_name: Standard
@@ -254,10 +257,20 @@ singleuser:
       profile_options:
         image:
           choices:
+            allensdk:
+              default: true
+              display_name: AllenSDK
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-allensdk
             matlab:
               display_name: MATLAB (must provide your own license)
               kubespawner_override:
                 image: ${singleuser_image_repo}:${singleuser_image_tag}-matlab
+            openscope:
+              default: true
+              display_name: OpenScope
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-openscope
             standard:
               default: true
               display_name: Standard
@@ -277,10 +290,20 @@ singleuser:
       profile_options:
         image:
           choices:
+            allensdk:
+              default: true
+              display_name: AllenSDK
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-allensdk
             matlab:
               display_name: MATLAB (must provide your own license)
               kubespawner_override:
                 image: ${singleuser_image_repo}:${singleuser_image_tag}-matlab
+            openscope:
+              default: true
+              display_name: OpenScope
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-openscope
             standard:
               default: true
               display_name: Standard
@@ -300,10 +323,20 @@ singleuser:
       profile_options:
         image:
           choices:
+            allensdk:
+              default: true
+              display_name: AllenSDK
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-allensdk
             matlab:
               display_name: MATLAB (must provide your own license)
               kubespawner_override:
                 image: ${singleuser_image_repo}:${singleuser_image_tag}-matlab
+            openscope:
+              default: true
+              display_name: OpenScope
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-openscope
             standard:
               default: true
               display_name: Standard
@@ -334,10 +367,20 @@ singleuser:
       profile_options:
         image:
           choices:
+            allensdk:
+              default: true
+              display_name: AllenSDK GPU
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-gpu-allensdk
             matlab:
               display_name: MATLAB GPU (must provide your own license)
               kubespawner_override:
                 image: ${singleuser_image_repo}:${singleuser_image_tag}-gpu-matlab
+            openscope:
+              default: true
+              display_name: OpenScope
+              kubespawner_override:
+                image: ${singleuser_image_repo}:${singleuser_image_tag}-openscope
             standard:
               default: true
               display_name: Standard GPU
