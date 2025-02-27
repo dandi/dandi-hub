@@ -60,14 +60,14 @@ RUN /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen \
     --display-name="Allen SDK"
 
 RUN pip install --no-cache-dir -U plotly jupyter_bokeh jupytext nbgitpuller datalad_container \
-    datalad-osf dandi pybids spikeinterface neo itkwidgets \
+    datalad-osf dandi pybids neo itkwidgets \
     'pydra>=0.25' 'pynwb>=2.8.3' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]"  \
-    aicsimageio kerchunk cloud-volume ipywidgets ome-zarr \
-    webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
-    tensorstore anndata && rm -rf /tmp/*
+    kerchunk cloud-volume ipywidgets \
+    webio_jupyter_extension \
+    anndata && rm -rf /tmp/*
 
 RUN mamba install --yes -c "nvidia/label/cuda-11.8.0" cuda-toolkit cudnn \
   && conda clean --all -f -y && rm -rf /tmp/*
 
-RUN pip install --no-cache-dir multiscale_spatial_image jupyterlab-git \
+RUN pip install --no-cache-dir jupyterlab-git \
         datalad-fuse jupyterlab_nvdashboard
