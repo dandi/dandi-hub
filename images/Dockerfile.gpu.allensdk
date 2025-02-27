@@ -59,14 +59,10 @@ RUN mamba install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc ecco
 RUN /opt/conda/envs/allen/bin/python -m ipykernel install --user --name allen \
     --display-name="Allen SDK"
 
-RUN pip install --no-cache-dir -U plotly jupyter_bokeh jupytext nbgitpuller datalad_container \
-    datalad-osf dandi pybids itkwidgets \
+RUN pip install --no-cache-dir -U plotly jupyter_bokeh nbgitpuller \
+    dandi pybids itkwidgets jupyterlab-git \
     'pynwb>=2.8.3' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf   \
-    kerchunk ipywidgets \
-    webio_jupyter_extension && rm -rf /tmp/*
+    ipywidgets && rm -rf /tmp/*
 
 RUN mamba install --yes -c "nvidia/label/cuda-11.8.0" cuda-toolkit cudnn \
   && conda clean --all -f -y && rm -rf /tmp/*
-
-RUN pip install --no-cache-dir jupyterlab-git \
-        datalad-fuse jupyterlab_nvdashboard
