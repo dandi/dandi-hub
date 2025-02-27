@@ -77,7 +77,7 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
     'pydra>=0.25' 'pynwb>=2.8.3' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]"  \
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
-    tensorstore anndata "tensorflow[and-cuda]==2.14"
+    tensorstore anndata jupyterlab_h5web "tensorflow[and-cuda]==2.14"
 
 # Ensure OpenSSL is up-to-date
 RUN pip install -U pyopenssl
