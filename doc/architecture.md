@@ -26,7 +26,7 @@ Below we see the actions that occur when a user stops using their server.
 ![scale-down](static/scale-down.png)
 
 1. The user either deletes their server, or is idle for more than the timeout (default 1 hour).
-2. The Hub recieves the request from the user, or from the culler, and deletes the pod.
+2. The Hub receives the request from the user, or from the culler, and deletes the pod.
 3. If the Node is now empty (drained) Karpenter deletes the Node/EC2 instance.
 
 ## Traffic
@@ -34,6 +34,6 @@ Below we see the actions that occur when a user stops using their server.
 ![traffic-routing](static/traffic-routing.png)
 
 All traffic is routed through DNS (AWS Route 53) to a load balancer, which distributes the traffic
-either to the Hub server, or to the a specific JupyterLab Pod.
+either to the Hub server, or to the specific JupyterLab Pod.
 
 
