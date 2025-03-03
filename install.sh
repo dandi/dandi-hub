@@ -18,7 +18,7 @@ source ./scripts/ensure-vars.sh
 
 ENV=$1
 
-./scripts/account-enforcer.sh $ENV
+./scripts/account-enforcer.sh "$ENV"
 
 # TODO preface all env vars
 ENV_DIR="envs/$ENV"
@@ -38,7 +38,7 @@ if [ ! -d "$ENV_DIR" ]; then
   exit 1
 fi
 
-./scripts/merge_config.py $BASE_CONFIG $ENV_OVERRIDE $OUTPUT
+./scripts/merge_config.py $BASE_CONFIG "$ENV_OVERRIDE" "$OUTPUT"
 
 yamllint -d "{extends: default, rules: {line-length: disable, document-start: disable}}" "$OUTPUT"
 if [ $? -ne 0 ]; then
@@ -62,7 +62,7 @@ fi
 # Initialize Terraform with environment-provided backend configuration
 echo "Initializing $ENV..."
 terraform init -reconfigure -backend-config="$ENV_DIR/s3.tfbackend" -var-file="$VARFILE"
-terraform workspace select -or-create $ENV
+terraform workspace select -or-create "$ENV"
 
 # From here forward, we should continue even if there is a failure
 set +e
