@@ -31,7 +31,7 @@ fi
 echo "Initializing ..."
 terraform init -backend-config="$BACKEND_FILE" -var-file="$VARFILE" || echo "\"terraform init\" failed"
 
-terraform workspace select $ENV
+terraform workspace select "$ENV"
 
 targets=(
   "module.eks_data_addons"
@@ -53,7 +53,7 @@ fi
 
 for ns in $terminating_namespaces; do
     echo "Terminating namespace: $ns"
-    kubectl get namespace $ns -o json | sed 's/"kubernetes"//' | kubectl replace --raw "/api/v1/namespaces/$ns/finalize" -f -
+    kubectl get namespace "$ns" -o json | sed 's/"kubernetes"//' | kubectl replace --raw "/api/v1/namespaces/$ns/finalize" -f -
 done
 
 #-------------------------------------------
