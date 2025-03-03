@@ -41,8 +41,7 @@ fi
 
 ./scripts/merge_config.py $BASE_CONFIG "$ENV_OVERRIDE" "$OUTPUT"
 
-yamllint -d "{extends: default, rules: {line-length: disable, document-start: disable}}" "$OUTPUT"
-if [ $? -ne 0 ]; then
+if ! yamllint -d "{extends: default, rules: {line-length: disable, document-start: disable}}" "$OUTPUT"; then
   echo "Invalid YAML file: $OUTPUT"
   exit 1
 fi
