@@ -1,4 +1,6 @@
 hub:
+  db:
+    upgrade: true
   config:
     Authenticator:
       admin_users:

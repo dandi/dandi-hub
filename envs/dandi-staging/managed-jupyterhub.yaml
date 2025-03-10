@@ -32,6 +32,7 @@ hub:
     pvc:
       storage: 50Gi
       storageClassName: gp3
+    upgrade: true
   extraConfig:
     myConfig: |
       # Python executed by jupyterhub at startup
