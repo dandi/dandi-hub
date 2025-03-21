@@ -329,7 +329,7 @@ module "eks_data_addons" {
       singleuser_image_tag        = var.singleuser_image_tag
       dandi_api_credentials       = var.dandi_api_credentials
     })]
-    version                     = "4.1"
+    version                     = "3.3.5"
   }
 
   #---------------------------------------------------------------
