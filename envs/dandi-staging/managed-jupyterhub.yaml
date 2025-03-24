@@ -32,6 +32,7 @@ hub:
     pvc:
       storage: 50Gi
       storageClassName: gp3
+    upgrade: true
   extraConfig:
     myConfig: |
       # Python executed by jupyterhub at startup
@@ -124,6 +125,7 @@ hub:
       c.KubeSpawner.modify_pod_hook = modify_pod_hook  # noqa
       c.JupyterHub.authenticator_class = IsDandiUserAuthenticator  # noqa
       c.GitHubOAuthenticator.enable_auth_state = True  # noqa
+      c.JupyterHub.upgrade_db = True
 prePuller:
   continuous:
     enabled: false
