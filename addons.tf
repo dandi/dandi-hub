@@ -233,7 +233,7 @@ module "eks_blueprints_addons" {
               effect: "NoSchedule"
             - key: nvidia.com/gpu
               effect: "NoSchedule"
-          amiFamily: Ubuntu
+          amiFamily: AL2
           capacityTypes: ["spot"]
         EOT
       ]

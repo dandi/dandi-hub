@@ -374,50 +374,6 @@ singleuser:
               kubespawner_override:
                 image: ${singleuser_image_repo}:${singleuser_image_tag}
           display_name: Image
-    - description: 8 CPU / 30 GB / 1 T4 GPU. May take up to 15 mins to start.
-      display_name: T4 GPU for inference
-      kubespawner_override:
-        cpu_guarantee: 6
-        cpu_limit: 8
-        extra_resource_limits:
-          nvidia.com/gpu: '1'
-        image_pull_policy: Always
-        mem_guarantee: 25G
-        mem_limit: 31G
-        node_selector:
-          NodePool: gpu
-          node.kubernetes.io/instance-type: g4dn.2xlarge
-        tolerations:
-          - effect: NoSchedule
-            key: nvidia.com/gpu
-            operator: Exists
-          - effect: NoSchedule
-            key: hub.jupyter.org/dedicated
-            operator: Equal
-            value: user
-      profile_options:
-        image:
-          choices:
-            allensdk:
-              default: true
-              display_name: AllenSDK GPU
-              kubespawner_override:
-                image: ${singleuser_image_repo}:${singleuser_image_tag}-gpu-allensdk
-            matlab:
-              display_name: MATLAB GPU (must provide your own license)
-              kubespawner_override:
-                image: ${singleuser_image_repo}:${singleuser_image_tag}-gpu-matlab
-            openscope:
-              default: true
-              display_name: OpenScope
-              kubespawner_override:
-                image: ${singleuser_image_repo}:${singleuser_image_tag}-openscope
-            standard:
-              default: true
-              display_name: Standard GPU
-              kubespawner_override:
-                image: ${singleuser_image_repo}:${singleuser_image_tag}-gpu
-          display_name: Image
   serviceAccountName: ${jupyter_single_user_sa_name}
   startTimeout: 2400
   storage:
