@@ -69,7 +69,7 @@ singleuser:
         mem_guarantee: 0.5G
         node_selector:
           NodePool: default
-    # - display_name: "MIT Workshop (tmp)"
+    # - display_name: "COSYNE Workshop (tmp)"
     #   description: "6 CPU / 16 GB up to 12C/32G. May take up to 15 mins to start."
     #   profile_options:
     #     image:
@@ -82,14 +82,16 @@ singleuser:
     #             image: "${singleuser_image_repo}:${singleuser_image_tag}"
     #         allensdk:
     #           display_name: "AllenSDK"
-    #           default: true
     #           kubespawner_override:
     #             image: "${singleuser_image_repo}:${singleuser_image_tag}-allensdk"
     #         matlab:
     #           display_name: "MATLAB (must provide your own license)"
     #           kubespawner_override:
     #             image: "${singleuser_image_repo}:${singleuser_image_tag}-matlab"
-    #   default: true
+    #         openscope:
+    #           display_name: "OpenScope"
+    #           kubespawner_override:
+    #             image: "${singleuser_image_repo}:${singleuser_image_tag}-openscope"
     #   kubespawner_override:
     #     image_pull_policy: Always
     #     cpu_limit: 12
@@ -199,50 +201,50 @@ singleuser:
         mem_guarantee: 64G
         node_selector:
           NodePool: default
-    - display_name: "T4 GPU for inference"
-      description: "8 CPU / 30 GB / 1 T4 GPU. May take up to 15 mins to start."
-      profile_options:
-        image:
-          display_name: "Image"
-          choices:
-            standard:
-              display_name: "Standard GPU"
-              default: true
-              kubespawner_override:
-                image: "${singleuser_image_repo}:${singleuser_image_tag}-gpu"
-            allensdk:
-              display_name: "AllenSDK GPU"
-              default: true
-              kubespawner_override:
-                image: "${singleuser_image_repo}:${singleuser_image_tag}-gpu-allensdk"
-            openscope:
-              display_name: "OpenScope"
-              default: true
-              kubespawner_override:
-                image: "${singleuser_image_repo}:${singleuser_image_tag}-openscope"
-            matlab:
-              display_name: "MATLAB GPU (must provide your own license)"
-              kubespawner_override:
-                image: "${singleuser_image_repo}:${singleuser_image_tag}-gpu-matlab"
-      kubespawner_override:
-        image_pull_policy: Always
-        cpu_limit: 8
-        cpu_guarantee: 6
-        mem_limit: 31G
-        mem_guarantee: 25G
-        extra_resource_limits:
-          nvidia.com/gpu: "1"
-        node_selector:
-          NodePool: gpu
-          node.kubernetes.io/instance-type: g4dn.2xlarge
-        tolerations:
-          - key: "nvidia.com/gpu"
-            operator: "Exists"
-            effect: "NoSchedule"
-          - key: "hub.jupyter.org/dedicated" # According to optimization docs https://z2jh.jupyter.org/en/latest/administrator/optimization.html
-            operator: "Equal"
-            value: "user"
-            effect: "NoSchedule"
+    # - display_name: "T4 GPU for inference"
+    #   description: "8 CPU / 30 GB / 1 T4 GPU. May take up to 15 mins to start."
+    #   profile_options:
+    #     image:
+    #       display_name: "Image"
+    #       choices:
+    #         standard:
+    #           display_name: "Standard GPU"
+    #           default: true
+    #           kubespawner_override:
+    #             image: "${singleuser_image_repo}:${singleuser_image_tag}-gpu"
+    #         allensdk:
+    #           display_name: "AllenSDK GPU"
+    #           default: true
+    #           kubespawner_override:
+    #             image: "${singleuser_image_repo}:${singleuser_image_tag}-gpu-allensdk"
+    #         openscope:
+    #           display_name: "OpenScope"
+    #           default: true
+    #           kubespawner_override:
+    #             image: "${singleuser_image_repo}:${singleuser_image_tag}-openscope"
+    #         matlab:
+    #           display_name: "MATLAB GPU (must provide your own license)"
+    #           kubespawner_override:
+    #             image: "${singleuser_image_repo}:${singleuser_image_tag}-gpu-matlab"
+    #   kubespawner_override:
+    #     image_pull_policy: Always
+    #     cpu_limit: 8
+    #     cpu_guarantee: 6
+    #     mem_limit: 31G
+    #     mem_guarantee: 25G
+    #     extra_resource_limits:
+    #       nvidia.com/gpu: "1"
+    #     node_selector:
+    #       NodePool: gpu
+    #       node.kubernetes.io/instance-type: g4dn.2xlarge
+    #     tolerations:
+    #       - key: "nvidia.com/gpu"
+    #         operator: "Exists"
+    #         effect: "NoSchedule"
+    #       - key: "hub.jupyter.org/dedicated" # According to optimization docs https://z2jh.jupyter.org/en/latest/administrator/optimization.html
+    #         operator: "Equal"
+    #         value: "user"
+    #         effect: "NoSchedule"
   defaultUrl: "/lab"
   memory:
     limit: 16G
