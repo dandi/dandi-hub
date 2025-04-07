@@ -78,7 +78,7 @@ generateCore();  % Generate the most recent nwb-schema \n\
 clear" >> ${STARTUP_SCRIPT}
 
 # Variables for addons management that are tied to a specific release
-ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/refs/tags/v2.7.0.zip \
+ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/refs/tags/2.8.0.zip \
                      https://github.com/schnitzer-lab/EXTRACT-public/archive/refs/heads/master.zip \
                      https://github.com/bahanonu/ciatah/archive/refs/heads/master.zip"
 
