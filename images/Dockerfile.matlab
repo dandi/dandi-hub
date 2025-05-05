@@ -72,13 +72,13 @@ addons = setdiff({addons([addons.isdir]).name}, {'.', '..'}); \n\
 for addon_idx = 1:numel(addons) \n\
     addpath(genpath(strcat('${ADDONS_DIR}/', addons{addon_idx}))); \n\
 end \n\
-generateCore();  % Generate the most recent nwb-schema \n\
+% generateCore();  % Generate the most recent nwb-schema \n\
 % ciapkg.io.loadDependencies('guiEnabled', 0);  % Load dependencies for CIAtah \n\
 % ADD HERE EXTRA ACTIONS FOR YOUR ADD-ON IF REQUIRED! \n\
 clear" >> ${STARTUP_SCRIPT}
 
-# Variables for addons management that are tied to a specific release
-ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/refs/tags/2.8.0.zip \
+# Variables for addons management that are tied to a specific release or latest master
+ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/refs/heads/master.zip \
                      https://github.com/schnitzer-lab/EXTRACT-public/archive/refs/heads/master.zip \
                      https://github.com/bahanonu/ciatah/archive/refs/heads/master.zip"
 
