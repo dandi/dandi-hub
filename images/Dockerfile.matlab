@@ -77,7 +77,7 @@ end \n\
 % ADD HERE EXTRA ACTIONS FOR YOUR ADD-ON IF REQUIRED! \n\
 clear" >> ${STARTUP_SCRIPT}
 
-# Variables for addons management that are tied to a specific release or latest master
+# Variables for addons management that are tied to a specific release or commit
 ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/2c3a4e13c9504724c08f3d937c08c730accf7685.zip \
                      https://github.com/schnitzer-lab/EXTRACT-public/archive/refs/heads/master.zip \
                      https://github.com/bahanonu/ciatah/archive/refs/heads/master.zip"
