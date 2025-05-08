@@ -14,7 +14,8 @@ if ! aws sts get-caller-identity &>/dev/null; then
 fi
 
 # Set variables
-AWS_REGION="us-east-2"
+# unused
+# AWS_REGION="us-east-2"
 # TODO document that this key needs to be created
 KEY_NAME="dandihub-gh-actions"
 # TODO create if DNE
@@ -95,11 +96,9 @@ echo "export PUBLIC_IP=$PUBLIC_IP" >> $ENV_FILE
 
 # Upload scripts to EC2 instance
 echo "Uploading scripts to EC2 instance..."
-scp -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" \
+if scp -i "$EC2_SSH_KEY" -o "StrictHostKeyChecking=no" \
   $LOCAL_SCRIPTS_DIR/calculate-directory-stats.py $LOCAL_SCRIPTS_DIR/create-file-index.py \
-  ec2-user@"$PUBLIC_IP":"$REMOTE_SCRIPTS_DIR/"
-
-if [ $? -eq 0 ]; then
+  ec2-user@"$PUBLIC_IP":"$REMOTE_SCRIPTS_DIR/"; then
   echo "Scripts uploaded successfully to $REMOTE_SCRIPTS_DIR on the instance."
 else
   echo "Error: Failed to upload scripts to the instance."
