@@ -6,7 +6,12 @@ USER root
 # install extra apps, add extra folder and fix ownership in case apt-get messed with it
 ARG EXTRA_DIR=/opt/extras
 RUN apt-get update \
-    && apt-get install -y htop curl git build-essential \
+    && apt-get install -y \
+        htop \
+        libnss-wrapper \
+        curl \
+        git \
+        build-essential \
     && rm -rf /tmp/* \
     && mkdir ${EXTRA_DIR} \
     && chown -R $NB_UID:$NB_GID $HOME ${EXTRA_DIR}

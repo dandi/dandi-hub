@@ -32,6 +32,7 @@ RUN curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://br
         brave-browser \
         tigervnc-standalone-server \
         tigervnc-xorg-extension \
+        libnss-wrapper \
     # chown $HOME to workaround that the xorg installation creates a
     # /home/jovyan/.cache directory owned by root
    && chown -R $NB_UID:$NB_GID $HOME \
