@@ -72,5 +72,5 @@ RUN apt-get install -y coreutils libgl1 libglx-mesa0 libglib2.0-0 && rm -rf /var
 USER $NB_USER
 
 RUN cd /tmp \
-  && git clone https://github.com/AllenInstitute/openscope_databook.git \
+  && git clone --filter='blob:none' https://github.com/AllenInstitute/openscope_databook.git \
   && pip install --no-cache-dir -e './openscope_databook[dev]'
