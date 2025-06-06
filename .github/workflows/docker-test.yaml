@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'images/Dockerfile*'
+      - '.github/workflows/docker-test.yaml'
   workflow_dispatch:
 
 jobs:

@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'images/Dockerfile*'
+      - '.github/workflows/docker-push.yaml'
   workflow_dispatch:
 
 jobs:
