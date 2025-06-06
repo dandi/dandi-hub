@@ -37,6 +37,7 @@ RUN curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://br
        xorg \
        xubuntu-icon-theme \
        brave-browser \
+       libnss-wrapper \
     && rm -rf /tmp/*
 
 # Remove light-locker to prevent screen lock
