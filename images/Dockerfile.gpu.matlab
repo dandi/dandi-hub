@@ -6,25 +6,25 @@ ARG VERSION="1.1.5"
 
 ARG EXTRA_DIR=/opt/extras
 
-RUN apt update \
+RUN df -h && apt update \
  && apt install -y software-properties-common \
  && add-apt-repository -y 'ppa:apptainer/ppa' \
  && apt update \
  && apt install -y apptainer-suid \
  && rm -rf /var/lib/apt/lists/* && rm -rf /tmp/*
 
-RUN apt-get update && apt-get install -y ca-certificates libseccomp2 \
+RUN df -h && apt-get update && apt-get install -y ca-certificates libseccomp2 \
    uidmap squashfs-tools squashfuse fuse2fs fuse-overlayfs fakeroot \
    s3fs netbase less parallel tmux screen vim emacs htop curl \
    git build-essential \
    && rm -rf /tmp/*
 
-RUN curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+RUN df -h && curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
   -o "awscliv2.zip" && unzip awscliv2.zip \
   && ./aws/install && rm -rf ./aws awscliv2.zip
 
 # Install jupyter server proxy and desktop
-RUN curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg \
+RUN df -h && curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg \
    && echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list \
    && apt-get -y update \
    && apt-get install -y  \
@@ -42,7 +42,7 @@ RUN curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://br
 
 # Remove light-locker to prevent screen lock
 ARG TURBOVNC_VERSION=3.0.2
-RUN wget -q "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O turbovnc_${TURBOVNC_VERSION}_amd64.deb && \
+RUN df -h && wget -q "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O turbovnc_${TURBOVNC_VERSION}_amd64.deb && \
    apt-get install -y -q ./turbovnc_${TURBOVNC_VERSION}_amd64.deb && \
    apt-get remove -y -q light-locker && \
    rm ./turbovnc_${TURBOVNC_VERSION}_amd64.deb && \
@@ -50,16 +50,16 @@ RUN wget -q "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}
     && rm -rf /tmp/*
 
 # apt-get may result in root-owned directories/files under $HOME
-RUN mkdir ${EXTRA_DIR} && chown -R $NB_UID:$NB_GID $HOME ${EXTRA_DIR}
+RUN df -h && mkdir ${EXTRA_DIR} && chown -R $NB_UID:$NB_GID $HOME ${EXTRA_DIR}
 
 USER $NB_USER
 
-RUN pip install --no-cache-dir jupyter-remote-desktop-proxy jupyterlab_nvdashboard
+RUN df -h && pip install --no-cache-dir jupyter-remote-desktop-proxy jupyterlab_nvdashboard
 
 ENV MAMBA_NO_LOW_SPEED_LIMIT=1
 
 # Install CUDA toolkit and extension for GPU usage display
-RUN CONDA_OVERRIDE_CUDA="12.3" mamba install --yes -c "nvidia/label/cuda-12.3.0" cuda-toolkit cudnn \
+RUN df -h && CONDA_OVERRIDE_CUDA="12.3" mamba install --yes -c "nvidia/label/cuda-12.3.0" cuda-toolkit cudnn \
   && conda clean --all -f -y && rm -rf /tmp/*
 
 # RUN echo -e "\n\
@@ -68,12 +68,12 @@ RUN CONDA_OVERRIDE_CUDA="12.3" mamba install --yes -c "nvidia/label/cuda-12.3.0"
 # c.Spawner.env.update('LD_LIBRARY_PATH') \n\
 # " >> ~/.jupyter/jupyter_notebook_config.py
 
-RUN mamba install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes websockify \
+RUN df -h && mamba install --yes datalad rclone 'h5py>3.3=mpi*' ipykernel zarr blosc gcc eccodes websockify \
   && wget --quiet https://raw.githubusercontent.com/DanielDent/git-annex-remote-rclone/v0.7/git-annex-remote-rclone \
   && chmod +x git-annex-remote-rclone && mv git-annex-remote-rclone /opt/conda/bin \
   && conda clean --all -f -y && rm -rf /tmp/*
 
-RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad_container \
+RUN df -h && pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad_container \
     datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
     'pydra>=0.25' 'pynwb>=2.8.3' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]"  \
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
@@ -81,10 +81,10 @@ RUN pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpuller datalad
     tensorstore anndata "tensorflow[and-cuda]==2.14"
 
 # Ensure OpenSSL is up-to-date
-RUN pip install -U pyopenssl
+RUN df -h && pip install -U pyopenssl
 
 # Install the jupyter-matlab kernel and matlab-proxy
-RUN pip install --no-cache-dir jupyter-matlab-proxy
+RUN df -h && pip install --no-cache-dir jupyter-matlab-proxy
 
 # Install the required Toolboxes with user root
 # Optimization toolbox is a required dependency
@@ -103,9 +103,9 @@ ARG TOOLBOXES="Bioinformatics_Toolbox \
                Financial_Toolbox \
                Wavelet_Toolbox \
                Deep_Learning_Toolbox_Converter_for_TensorFlow_models"
-RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
+RUN df -h && wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
     chmod +x mpm
-RUN ./mpm install \
+RUN df -h && ./mpm install \
     --release=${MATLAB_RELEASE} \
     --destination=/opt/matlab \
     --products ${TOOLBOXES} && \
@@ -124,7 +124,7 @@ ARG STARTUP_SCRIPT=/opt/conda/lib/python3.10/site-packages/matlab_proxy/matlab/s
 # Install the live-scripts examples
 # RUN git clone https://github.com/INCF/example-live-scripts ${ADDONS_DIR}/example-live-scripts
 
-RUN echo -e "\n\
+RUN df -h && echo -e "\n\
 % Sets the number of workers for 'Processes' to 5\n\
 cluster = parcluster('Processes'); \n\
 cluster.NumWorkers = 5; \n\
@@ -154,7 +154,7 @@ ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/r
                      https://github.com/bahanonu/ciatah/archive/refs/heads/master.zip"
 
 # Add add-ons for Dandi: create the addons folder and download/unzip the addons
-RUN mkdir -p ${ADDONS_DIR} && \
+RUN df -h && mkdir -p ${ADDONS_DIR} && \
     cd ${ADDONS_DIR} && \
     for addon in $ADDONS_RELEASES; do \
        wget -O addon.zip $addon \
@@ -166,7 +166,7 @@ RUN mkdir -p ${ADDONS_DIR} && \
 ARG ADDONS_LATEST="https://github.com/emeyers/Brain-Observatory-Toolbox"
 
 # Add add-ons for Dandi: detect/download/unzip the last release version
-RUN cd ${ADDONS_DIR} && \
+RUN df -h && cd ${ADDONS_DIR} && \
     for addon in $ADDONS_LATEST; do \
        wget -O addon.zip $(echo "$addon/releases/latest" | sed 's/\/github.com\//\/api.github.com\/repos\//' | xargs wget -qO- |  grep zipball_url | cut -d '"' -f 4) \
        && unzip addon.zip \

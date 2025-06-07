@@ -5,7 +5,7 @@ USER root
 
 # install extra apps, add extra folder and fix ownership in case apt-get messed with it
 ARG EXTRA_DIR=/opt/extras
-RUN apt-get update \
+RUN df -h && apt-get update \
     && apt-get install -y \
         htop \
         libnss-wrapper \
@@ -16,7 +16,7 @@ RUN apt-get update \
     && mkdir ${EXTRA_DIR} \
     && chown -R $NB_UID:$NB_GID $HOME ${EXTRA_DIR}
 
-RUN pip install --no-cache-dir datalad 'h5py>3.3' zarr pyopenssl plotly jupyter_bokeh jupytext nbgitpuller datalad_container \
+RUN df -h && pip install --no-cache-dir datalad 'h5py>3.3' zarr pyopenssl plotly jupyter_bokeh jupytext nbgitpuller datalad_container \
     datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
     'pydra>=0.25' 'pynwb>=2.8.3' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]"  \
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
@@ -39,7 +39,7 @@ ARG TOOLBOXES="Bioinformatics_Toolbox \
                Financial_Toolbox \
                Wavelet_Toolbox \
                Deep_Learning_Toolbox_Converter_for_TensorFlow_models"
-RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
+RUN df -h && wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
     chmod +x mpm && \
     ./mpm install \
     --release=${MATLAB_RELEASE} \
@@ -58,7 +58,7 @@ ARG ADDONS_DIR=${EXTRA_DIR}/dandi
 ARG STARTUP_SCRIPT=/opt/conda/lib/python3.11/site-packages/matlab_proxy/matlab/startup.m
 
 # Generate MATLAB startup script
-RUN echo -e "\n\
+RUN df -h && echo -e "\n\
 % Set the number of workers for 'Processes' to 5\n\
 cluster = parcluster('Processes'); \n\
 cluster.NumWorkers = 5; \n\
@@ -88,7 +88,7 @@ ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/2
                      https://github.com/bahanonu/ciatah/archive/refs/heads/master.zip"
 
 # Add add-ons for Dandi: create the addons folder and download/unzip the addons
-RUN mkdir -p ${ADDONS_DIR} && \
+RUN df -h && mkdir -p ${ADDONS_DIR} && \
     cd ${ADDONS_DIR} && \
     for addon in $ADDONS_RELEASES; do \
        wget -O addon.zip $addon \
@@ -100,7 +100,7 @@ RUN mkdir -p ${ADDONS_DIR} && \
 ARG ADDONS_LATEST="https://github.com/emeyers/Brain-Observatory-Toolbox"
 
 # Add add-ons for Dandi: detect/download/unzip the last release version
-RUN cd ${ADDONS_DIR} && \
+RUN df -h && cd ${ADDONS_DIR} && \
     for addon in $ADDONS_LATEST; do \
        wget -O addon.zip $(echo "$addon/releases/latest" | sed 's/\/github.com\//\/api.github.com\/repos\//' | xargs wget -qO- |  grep zipball_url | cut -d '"' -f 4) \
        && unzip addon.zip \
