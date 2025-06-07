@@ -73,4 +73,5 @@ USER $NB_USER
 
 RUN df -h && cd /tmp \
   && git clone --filter='blob:none' https://github.com/AllenInstitute/openscope_databook.git \
-  && pip install --no-cache-dir -e './openscope_databook[dev]'
+  && pip install --no-cache-dir -e './openscope_databook[dev]' \
+  && rm -rf /tmp/*

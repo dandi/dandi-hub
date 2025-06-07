@@ -71,4 +71,5 @@ RUN df -h && pip install --no-cache-dir -U plotly jupyter_bokeh jupytext nbgitpu
     tensorstore anndata && rm -rf /tmp/*
 
 RUN df -h && pip install --no-cache-dir multiscale_spatial_image jupyterlab-git \
-        datalad-fuse jupyterlab_nvdashboard
+        datalad-fuse jupyterlab_nvdashboard && \
+    rm -rf /tmp/*

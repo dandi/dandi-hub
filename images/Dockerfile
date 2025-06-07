@@ -60,6 +60,7 @@ RUN df -h && pip install --no-cache-dir -U plotly jupyter_bokeh jupytext nbgitpu
     tensorstore anndata
 
 RUN df -h && pip install --no-cache-dir multiscale_spatial_image jupyterlab-git \
-        datalad-fuse
+        datalad-fuse && \
+    rm -rf /tmp/*
 
 RUN df -h && pip install --no-cache-dir brainrender napari

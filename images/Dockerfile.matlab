@@ -21,7 +21,8 @@ RUN df -h && pip install --no-cache-dir datalad 'h5py>3.3' zarr pyopenssl plotly
     'pydra>=0.25' 'pynwb>=2.8.3' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]"  \
     aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
-    tensorstore anndata tensorflow
+    tensorstore anndata tensorflow && \
+    rm -rf /tmp/*
 
 # Install the required Toolboxes with user root
 # Optimization toolbox is a required dependency

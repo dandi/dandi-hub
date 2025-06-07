@@ -17,7 +17,7 @@ RUN df -h && apt-get update && apt-get install -y ca-certificates libseccomp2 \
    uidmap squashfs-tools squashfuse fuse2fs fuse-overlayfs fakeroot \
    s3fs netbase less parallel tmux screen vim emacs htop curl \
    git build-essential \
-   && rm -rf /tmp/*
+   && rm -rf /tmp/* /var/lib/apt/lists/*
 
 RUN df -h && curl --silent --show-error "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
   -o "awscliv2.zip" && unzip awscliv2.zip \
@@ -38,7 +38,7 @@ RUN df -h && curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg h
        xubuntu-icon-theme \
        brave-browser \
        libnss-wrapper \
-    && rm -rf /tmp/*
+    && rm -rf /tmp/* /var/lib/apt/lists/*
 
 # Remove light-locker to prevent screen lock
 ARG TURBOVNC_VERSION=3.0.2
@@ -81,10 +81,12 @@ RUN df -h && pip install --no-cache-dir plotly jupyter_bokeh jupytext nbgitpulle
     tensorstore anndata "tensorflow[and-cuda]==2.14"
 
 # Ensure OpenSSL is up-to-date
-RUN df -h && pip install -U pyopenssl
+RUN df -h && pip install -U pyopenssl && \
+    rm -rf /tmp/*
 
 # Install the jupyter-matlab kernel and matlab-proxy
-RUN df -h && pip install --no-cache-dir jupyter-matlab-proxy
+RUN df -h && pip install --no-cache-dir jupyter-matlab-proxy && \
+    rm -rf /tmp/*
 
 # Install the required Toolboxes with user root
 # Optimization toolbox is a required dependency
