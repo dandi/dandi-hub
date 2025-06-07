@@ -43,9 +43,12 @@ RUN df -h && mkdir /opt/extras && chown -R $NB_UID:$NB_GID $HOME /opt/extras
 
 USER $NB_USER
 
-RUN df -h && pip install --no-cache-dir jupyter-remote-desktop-proxy
-
 ENV MAMBA_NO_LOW_SPEED_LIMIT=1
+
+RUN df -h && mamba install --yes -c "nvidia/label/cuda-11.8.0" cuda-toolkit cudnn \
+  && conda clean --all -f -y && rm -rf /tmp/*
+
+RUN df -h && pip install --no-cache-dir jupyter-remote-desktop-proxy
 
 # Install Allen SDK
 RUN df -h && mamba create --yes -n allen -c conda-forge python=3.11 pip ipykernel 'h5py>=3.4=mpi*' \
@@ -66,9 +69,6 @@ RUN df -h && pip install --no-cache-dir -U plotly jupyter_bokeh jupytext nbgitpu
     aicsimageio kerchunk cloud-volume ipywidgets ome-zarr \
     webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
     tensorstore anndata && rm -rf /tmp/*
-
-RUN df -h && mamba install --yes -c "nvidia/label/cuda-11.8.0" cuda-toolkit cudnn \
-  && conda clean --all -f -y && rm -rf /tmp/*
 
 RUN df -h && pip install --no-cache-dir multiscale_spatial_image jupyterlab-git \
         datalad-fuse jupyterlab_nvdashboard

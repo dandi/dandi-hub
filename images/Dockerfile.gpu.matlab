@@ -54,13 +54,13 @@ RUN df -h && mkdir ${EXTRA_DIR} && chown -R $NB_UID:$NB_GID $HOME ${EXTRA_DIR}
 
 USER $NB_USER
 
-RUN df -h && pip install --no-cache-dir jupyter-remote-desktop-proxy jupyterlab_nvdashboard
-
 ENV MAMBA_NO_LOW_SPEED_LIMIT=1
 
 # Install CUDA toolkit and extension for GPU usage display
 RUN df -h && CONDA_OVERRIDE_CUDA="12.3" mamba install --yes -c "nvidia/label/cuda-12.3.0" cuda-toolkit cudnn \
   && conda clean --all -f -y && rm -rf /tmp/*
+
+RUN df -h && pip install --no-cache-dir jupyter-remote-desktop-proxy jupyterlab_nvdashboard
 
 # RUN echo -e "\n\
 # import os \n\
