@@ -24,8 +24,6 @@ ENV=$1
 ENV_DIR="envs/$ENV"
 
 VARFILE="$ENV_DIR/terraform.tfvars"
-# unused
-# BACKEND_FILE="$ENV_DIR/backend.tf"
 
 BASE_CONFIG="envs/shared/jupyterhub.yaml"
 ENV_OVERRIDE="$ENV_DIR/jupyterhub-overrides.yaml"

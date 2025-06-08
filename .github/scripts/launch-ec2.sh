@@ -14,8 +14,6 @@ if ! aws sts get-caller-identity &>/dev/null; then
 fi
 
 # Set variables
-# unused
-# AWS_REGION="us-east-2"
 # TODO document that this key needs to be created
 KEY_NAME="dandihub-gh-actions"
 # TODO create if DNE
