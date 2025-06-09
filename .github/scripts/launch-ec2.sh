@@ -13,6 +13,9 @@ if ! aws sts get-caller-identity &>/dev/null; then
   exit 1
 fi
 
+# Used by aws CLI
+${AWS_REGION:?Environment variable AWS_REGION must be set}
+
 # Set variables
 # TODO document that this key needs to be created
 KEY_NAME="dandihub-gh-actions"
