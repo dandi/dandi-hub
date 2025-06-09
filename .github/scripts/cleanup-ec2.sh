@@ -6,6 +6,7 @@ set -eu
 ENV_FILE=".ec2-session.env"
 if [ -f "$ENV_FILE" ]; then
   echo "Loading environment variables from $ENV_FILE..."
+  # shellcheck disable=SC1090
   source "$ENV_FILE"
 else
   echo "Warning: Environment file $ENV_FILE not found."
