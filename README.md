@@ -33,6 +33,9 @@ envsubst < nebari-production-config.yaml > nebari-config-deploy.yaml
 
 3. Determine drift (e.g. essentially a terraform plan) of your current config changes
 
+WARNING: Do not use `-o`, everything should go to `stages/`. 
+The deploy step does not always respect the custom path, and can be destructive.
+
 ```
 nebari render --config nebari-config-deploy.yaml
 ```
