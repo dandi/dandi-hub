@@ -8,6 +8,8 @@
 
 ## Steps for Deployment / Updating Deployments / Etc
 
+0. Checkout custom Nebari branch: from the [dandi-fork](https://github.com/dandi/nebari), branch: `deploy` and pip install.
+
 1. Be in the root directory where you have `stages` and the config file
 
 2. Create a `.env` file with the following:
