@@ -1,0 +1,13 @@
+name: dandi
+channels:
+  - conda-forge
+dependencies:
+  - python==3.12
+  - ipykernel
+  - ipywidgets
+  - pip
+  - pip:
+    - dandi
+    - seaborn
+    - plotly
+    - pynwb > 3.0.0

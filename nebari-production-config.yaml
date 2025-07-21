@@ -1,0 +1,222 @@
+provider: aws
+namespace: hub
+nebari_version: 2025.6.2
+project_name: dandi
+domain: hub.dandiarchive.org
+ci_cd:
+  type: none
+terraform_state:
+  type: remote
+security:
+  keycloak:
+    initial_root_password: ${KEYCLOAK_INITIAL_PASSWORD}
+  authentication:
+    type: GitHub
+    config:
+      client_id: ${GITHUB_CLIENT_ID}
+      client_secret: ${GITHUB_CLIENT_SECRET}
+
+
+certificate:
+  type: lets-encrypt
+  acme_email: satra@mit.edu
+  acme_server: https://acme-v02.api.letsencrypt.org/directory
+
+storage:
+  conda_store: 200Gi
+  shared_filesystem: 2000Gi
+
+theme:
+  jupyterhub:
+    logo: https://raw.githubusercontent.com/dandi/artwork/refs/heads/master/pics/dandi-logo.svg
+    favicon: https://raw.githubusercontent.com/dandi/dandi-archive/refs/heads/master/web/public/favicon.ico
+    hub_title: JupyterHub for DANDI, EMBER, and LINC
+    welcome: >
+      Welcome to JupyterHub for DANDI, EMBER, and LINC! If you have been provided a code to register
+      please visit <a href="https://hub.dandiarchive.org/registration" target="_blank">https://hub.dandiarchive.org/registration</a>.
+      Otherwise, sign in with your Github account that you used to register with DANDI, EMBER, and/or LINC.
+    hub_subtitle: Your open source data science platform, hosted on Amazon Web Services
+
+amazon_web_services:
+  eks_kms_arn: arn:aws:kms:us-east-2:278212569472:key/80a8cec7-80c2-45e2-acd3-bc1f520e4972
+
+  kubernetes_version: '1.31'
+  region: us-east-2
+  availability_zones:
+    - us-east-2a
+    - us-east-2b
+    - us-east-2c
+
+  tags:
+    dandijhub: ${USER}
+
+  node_groups:
+    general:
+      instance: m5.2xlarge,m6a.2xlarge
+      min_nodes: 1
+      max_nodes: 1
+      taints:
+      gpu: false
+      single_subnet: false
+      permissions_boundary:
+      spot: false
+
+    user:
+      instance: m5.2xlarge,m6a.2xlarge
+      min_nodes: 0
+      max_nodes: 10
+      taints:
+      gpu: false
+      single_subnet: false
+      permissions_boundary:
+      spot: false
+
+    worker:
+      instance: m5.2xlarge,m6a.2xlarge
+      min_nodes: 0
+      max_nodes: 10
+      taints:
+      gpu: false
+      single_subnet: false
+      permissions_boundary:
+      spot: false
+
+    gpuTL4:
+      instance: g6.xlarge,g6.2xlarge,g6.4xlarge,g4dn.xlarge,g4dn.2xlarge,g4dn.4xlarge
+      min_nodes: 0
+      max_nodes: 25
+      taints:
+      gpu: true
+      single_subnet: false
+      permissions_boundary:
+      spot: true
+
+    userspot:
+      instance: m5.4xlarge,m5.8xlarge,m5.12xlarge,m6a.4xlarge,m6a.8xlarge,m6a.12xlarge
+      min_nodes: 0
+      max_nodes: 50
+      taints:
+      gpu: false
+      single_subnet: false
+      permissions_boundary:
+      spot: true
+
+    eventgroup:
+      instance: m5zn.metal,m5.metal,m5d.metal,m6i.metal
+      min_nodes: 0
+      max_nodes: 5
+      taints:
+      gpu: false
+      single_subnet: false
+      permissions_boundary:
+      spot: false
+
+jupyterlab:
+  gallery_settings:
+    title: Example repositories
+    destination: examples
+    exhibits:
+      - title: DANDI Notebooks
+        description: >
+          A collection of Jupyter notebooks for use with DANDI
+        git: https://github.com/dandi/example-notebooks.git
+        homepage: https://dandiarchive.org
+
+profiles:
+  jupyterlab:
+    - display_name: Standard Environment
+      description: Instances with 8-16 cpu / 32-64 GB ram
+      default: true
+      profile_options:
+        image:
+          display_name: "Image"
+          choices:
+            dandi:
+              display_name: "DANDI"
+              default: true
+              kubespawner_override:
+                image: dandiarchive/dandihub:latest-nebari
+            standard:
+              display_name: "Standard"
+              default: false
+              kubespawner_override:
+                image: quay.io/nebari/nebari-jupyterlab:2025.6.1
+      kubespawner_override:
+        cpu_limit: 16
+        cpu_guarantee: 7.75
+        mem_limit: 62G
+        mem_guarantee: 30G
+        allow_privilege_escalation: false
+        node_selector:
+          "dedicated": "userspot"
+
+    - display_name: "GPU Environment"
+      description: "GPU-enabled instance"
+      profile_options:
+        image:
+          display_name: "Image"
+          choices:
+            dandi:
+              display_name: "DANDI"
+              default: true
+              kubespawner_override:
+                image: dandiarchive/dandihub:latest-nebari-gpu
+            standard:
+              display_name: "Standard"
+              default: false
+              kubespawner_override:
+                image: quay.io/nebari/nebari-jupyterlab-gpu:2025.6.1
+      kubespawner_override:
+        cpu_guarantee: 3
+        cpu_limit: 7
+        mem_guarantee: 14G
+        mem_limit: 30G
+        allow_privilege_escalation: false
+        extra_resource_limits:
+          nvidia.com/gpu: 1
+        node_selector:
+          "dedicated": "gpuTL4"
+
+    - display_name: Event Environment
+      description: Pods with 4 cpu / 16 GB ram
+      default: false
+      access: yaml
+      groups:
+        - africa-large
+      profile_options:
+        image:
+          display_name: "Image"
+          choices:
+            dandi:
+              display_name: "DANDI"
+              default: true
+              kubespawner_override:
+                image: dandiarchive/dandihub:latest-nebari
+            standard:
+              display_name: "Standard"
+              default: false
+              kubespawner_override:
+                image: quay.io/nebari/nebari-jupyterlab:2025.6.1
+      kubespawner_override:
+        cpu_limit: 4
+        cpu_guarantee: 4
+        mem_limit: 16G
+        mem_guarantee: 16G
+        allow_privilege_escalation: false
+        node_selector:
+          "dedicated": "eventgroup"
+
+argo_workflows:
+  enabled: false
+
+dns:
+  provider: aws
+  auto_provision: false
+
+self_registration:
+  coupons:
+    africa2025:
+      approved_domains:
+        - '*'
+      account_expiration_days: 10
+      registration_groups: [africa-large]

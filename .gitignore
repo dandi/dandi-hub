@@ -11,3 +11,9 @@ scripts/__pycache__/
 *.env
 
 .DS_Store
+
+# Nebari stages
+stages/
+
+# templated config with secrets
+nebari-*-deploy.yaml

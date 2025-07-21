@@ -1,0 +1,10 @@
+name: openscope
+channels:
+  - conda-forge
+dependencies:
+  - python==3.10
+  - ipykernel
+  - pip
+  - pip:
+    - databook_utils @ https://github.com/AllenInstitute/openscope_databook/archive/refs/tags/v1.3.0.zip
+    - pynwb > 3.0.0
