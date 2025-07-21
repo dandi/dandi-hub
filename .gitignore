@@ -14,3 +14,6 @@ scripts/__pycache__/
 
 # Nebari stages
 stages/
+
+# templated config with secrets
+nebari-*-deploy.yaml
