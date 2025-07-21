@@ -11,3 +11,6 @@ scripts/__pycache__/
 *.env
 
 .DS_Store
+
+# Nebari stages
+stages/
