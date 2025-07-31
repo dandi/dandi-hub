@@ -1,6 +1,0 @@
-name = "eks-linchub"
-singleuser_image_repo = "dandiarchive/dandihub"
-region = "us-east-2"
-singleuser_image_tag = "latest"
-jupyterhub_domain = "hub.lincbrain.org"
-dandi_api_domain = "https://api.lincbrain.org"
