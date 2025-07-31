@@ -9,7 +9,7 @@ declare -A ENV_TO_PROFILE=(
 
 if [ $# -ne 1 ]; then
   echo "Usage: $0 <environment>"
-  echo "Environments: ${!ENV_TO_PROFILE[@]}"
+  echo "Environments: ${!ENV_TO_PROFILE[*]}"
   exit 1
 fi
 
@@ -18,7 +18,7 @@ CORRECT=${ENV_TO_PROFILE[$ENV]}
 
 if [ -z "$CORRECT" ]; then
   echo "Error: Invalid environment '$ENV'"
-  echo "Valid environments: ${!ENV_TO_PROFILE[@]}"
+  echo "Valid environments: ${!ENV_TO_PROFILE[*]}"
   exit 1
 fi
 

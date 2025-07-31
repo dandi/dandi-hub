@@ -1,8 +1,9 @@
+#!/bin/bash
+#
 # Derived from Data On EKS under Apache License 2.0.
 # Source: https://github.com/awslabs/data-on-eks/tree/main/ai-ml/jupyterhub
 # See LICENSE file in the root directory of this source code or at http://www.apache.org/licenses/LICENSE-2.0.html.
 
-#!/bin/bash
 set -o errexit
 set -o pipefail
 
@@ -31,7 +32,7 @@ fi
 echo "Initializing ..."
 terraform init -backend-config="$BACKEND_FILE" -var-file="$VARFILE" || echo "\"terraform init\" failed"
 
-terraform workspace select $ENV
+terraform workspace select "$ENV"
 
 targets=(
   "module.eks_data_addons"
@@ -53,7 +54,7 @@ fi
 
 for ns in $terminating_namespaces; do
     echo "Terminating namespace: $ns"
-    kubectl get namespace $ns -o json | sed 's/"kubernetes"//' | kubectl replace --raw "/api/v1/namespaces/$ns/finalize" -f -
+    kubectl get namespace "$ns" -o json | sed 's/"kubernetes"//' | kubectl replace --raw "/api/v1/namespaces/$ns/finalize" -f -
 done
 
 #-------------------------------------------
