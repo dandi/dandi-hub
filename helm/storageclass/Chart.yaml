@@ -1,8 +1,0 @@
-# Derived from Data On EKS under Apache License 2.0.
-# Source: https://github.com/awslabs/data-on-eks/tree/main/ai-ml/jupyterhub
-# See LICENSE file in the root directory of this source code or at http://www.apache.org/licenses/LICENSE-2.0.html.
-apiVersion: v2
-name: storage
-description: Helm chart for storage options on the cluster
-version: 0.0.1
-appVersion: 0.0.1
