@@ -10,8 +10,30 @@ This folder contains Dockerfiles to build various Docker images for Dandi:
 The MATLAB Docker image relies on the [MATLAB Integration for Jupyter in a Docker Container](https://github.com/mathworks-ref-arch/matlab-integration-for-jupyter).
 It is shipped with [MATLAB-proxy](https://github.com/mathworks/matlab-proxy) which enables communication with MATLAB from a web-browser, and with [MATLAB-proxy-jupyter](https://github.com/mathworks/jupyter-matlab-proxy) which adds MATLAB integration for Jupyter.
 
-This Dockerfile includes the following add-ons:
+This Dockerfile includes the following package, including platform products, toolbox products, and support packages from MathWorks(R) obtained via MATLAB Package Manager [(MPM)](https://www.mathworks.com/products/mpm.html), and additional add-on packages obtained from File Exchange and/or GitHub:
 
+| # | Package | Source | Version | Projected Update Strategy |
+| --- | --- | ---- | --- | --- |
+| 1 | MATLAB | MPM | R2025a | Penultimate MathWorks Release |
+| 2 | Bioinformatics Toolbox | MPM | R2025a | Penultimate MathWorks Release | 
+| 3 | Computer Vision Toolbpx | MPM | R2025a | Penultimate MathWorks Release | 
+| 4 | Curve Fitting Toolbox | MPM | R2025a | Penultimate MathWorks Release | 
+| 5 | Deep Learning Toolbox | MPM | R2025a | Penultimate MathWorks Release | 
+| 6 | Econometrics Toolbox | MPM | R2025a | Penultimate MathWorks Release | 
+| 7 | Financial Toolbox | MPM | R2025a | Penultimate MathWorks Release | 
+| 8 | Image Processing Toolbox | MPM | R2025a | Penultimate MathWorks Release| 
+| 9 | Parallel Computing Toolbox | MPM | R2025a | Penultimate MathWorks Release |
+| 10 | Signal Processing Toolbox | MPM | R2025a | Penultimate MathWorks Release |
+| 11 | Statistics & Machine Learning Toolbox | MPM | R2025a | Penultimate MathWorks Release |
+| 12 | Wavelet Toolbox | MPM | R2025a | Penultimate MathWorks Release |
+| 13 | Deep Learning Toolbox Converter for TensorFlow Models | MPM | R2025a | Penultimate MathWorks Release
+| 14 | MatNWB | GitHub | Latest Commit | Latest Release |
+| 15 | Brain Observatory Toolbox | TODO | TODO |
+
+
+
+
+ 
 * matnwb v2.6.0.0
 * Brain-Observatory-Toolbox v0.9.2
 
