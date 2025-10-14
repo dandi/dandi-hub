@@ -15,18 +15,18 @@ This Dockerfile includes the following package, including platform products, too
 | # | Package | Source | Current Version | Projected Update Strategy |
 | --- | :--- | :---- | :--- | :--- |
 | 1 | MATLAB | MPM | R2025a | Penultimate MathWorks Release |
-| 2 | Bioinformatics Toolbox | MPM | R2025a | Penultimate MathWorks Release | 
-| 3 | Computer Vision Toolbpx | MPM | R2025a | Penultimate MathWorks Release | 
-| 4 | Curve Fitting Toolbox | MPM | R2025a | Penultimate MathWorks Release | 
-| 5 | Deep Learning Toolbox | MPM | R2025a | Penultimate MathWorks Release | 
-| 6 | Econometrics Toolbox | MPM | R2025a | Penultimate MathWorks Release | 
-| 7 | Financial Toolbox | MPM | R2025a | Penultimate MathWorks Release | 
-| 8 | Image Processing Toolbox | MPM | R2025a | Penultimate MathWorks Release| 
-| 9 | Parallel Computing Toolbox | MPM | R2025a | Penultimate MathWorks Release |
-| 10 | Signal Processing Toolbox | MPM | R2025a | Penultimate MathWorks Release |
-| 11 | Statistics & Machine Learning Toolbox | MPM | R2025a | Penultimate MathWorks Release |
-| 12 | Wavelet Toolbox | MPM | R2025a | Penultimate MathWorks Release |
-| 13 | Deep Learning Toolbox Converter for TensorFlow Models | MPM | R2025a | Penultimate MathWorks Release
+| 2 | Bioinformatics Toolbox | MPM | R2025b | Penultimate MathWorks Release | 
+| 3 | Computer Vision Toolbpx | MPM | R2025b | Penultimate MathWorks Release | 
+| 4 | Curve Fitting Toolbox | MPM | R2025b | Penultimate MathWorks Release | 
+| 5 | Deep Learning Toolbox | MPM | R2025b | Penultimate MathWorks Release | 
+| 6 | Econometrics Toolbox | MPM | R2025b | Penultimate MathWorks Release | 
+| 7 | Financial Toolbox | MPM | R2025b | Penultimate MathWorks Release | 
+| 8 | Image Processing Toolbox | MPM | R2025b | Penultimate MathWorks Release| 
+| 9 | Parallel Computing Toolbox | MPM | R2025b | Penultimate MathWorks Release |
+| 10 | Signal Processing Toolbox | MPM | R2025b | Penultimate MathWorks Release |
+| 11 | Statistics & Machine Learning Toolbox | MPM | R2025b | Penultimate MathWorks Release |
+| 12 | Wavelet Toolbox | MPM | R2025b | Penultimate MathWorks Release |
+| 13 | Deep Learning Toolbox Converter for TensorFlow Models | MPM | R2025b | Penultimate MathWorks Release
 | 14 | [MatNWB](https://github.com/NeurodataWithoutBorders/matnwb) | GitHub | Commit 2c3a4e | Latest Release |
 | 15 | [Brain Observatory Toolbox](https://github.com/MATLAB-Community-Toolboxes-at-INCF/Brain-Observatory-Toolbox) | GitHub | v0.9.4.2 | Latest Release |
 | 16 | [Deep Interpolation Toolbox](https://github.com/MATLAB-Community-Toolboxes-at-INCF/DeepInterpolation-MATLAB) | GitHub | v0.9.1 | Latest Release |
