@@ -14,7 +14,7 @@ This Dockerfile includes the following package, including platform products, too
 
 | # | Package | Source | Current Version | Projected Update Strategy |
 | --- | :--- | :---- | :--- | :--- |
-| 1 | MATLAB | MPM | R2025a | Penultimate MathWorks Release |
+| 1 | MATLAB | MPM | R2025b | Penultimate MathWorks Release |
 | 2 | Bioinformatics Toolbox | MPM | R2025b | Penultimate MathWorks Release | 
 | 3 | Computer Vision Toolbpx | MPM | R2025b | Penultimate MathWorks Release | 
 | 4 | Curve Fitting Toolbox | MPM | R2025b | Penultimate MathWorks Release | 
