@@ -1,12 +1,11 @@
-ARG MATLAB_RELEASE=r2024b
+ARG MATLAB_RELEASE=r2025b
 FROM --platform=linux/amd64 ghcr.io/mathworks-ref-arch/matlab-integration-for-jupyter/jupyter-matlab-notebook:${MATLAB_RELEASE}
 
 USER root
-
-# install extra apps, add extra folder and fix ownership in case apt-get messed with it
+# install extra apps, add extra folder and fix ownership in case apt messed with it
 ARG EXTRA_DIR=/opt/extras
-RUN df -h && apt-get update \
-    && apt-get install -y \
+RUN df -h && apt update \
+    && apt install -y \
         htop \
         libnss-wrapper \
         curl \
@@ -17,12 +16,13 @@ RUN df -h && apt-get update \
     && chown -R $NB_UID:$NB_GID $HOME ${EXTRA_DIR}
 
 RUN df -h && pip install --no-cache-dir datalad 'h5py>3.3' zarr pyopenssl plotly jupyter_bokeh jupytext nbgitpuller datalad_container \
-    datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
-    'pydra>=0.25' 'pynwb>=2.8.3' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]"  \
-    aicsimageio kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr \
-    webio_jupyter_extension https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip \
-    tensorstore anndata tensorflow && \
-    rm -rf /tmp/*
+                datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
+                'pydra>=0.25' 'pynwb>=2.8.3' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]" \
+                lxml kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr webio_jupyter_extension \
+                tensorstore anndata tensorflow \
+                xmlschema \
+          && pip install --no-cache-dir https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip --no-deps && \
+          rm -rf /tmp/*
 
 # Install the required Toolboxes with user root
 # Optimization toolbox is a required dependency
@@ -32,13 +32,13 @@ ARG TOOLBOXES="Bioinformatics_Toolbox \
                Curve_Fitting_Toolbox \
                Deep_Learning_Toolbox \
                Econometrics_Toolbox \
-               Image_Processing_Toolbox \
-               Optimization_Toolbox \
-               Statistics_and_Machine_Learning_Toolbox \
-               Signal_Processing_Toolbox \
-               Parallel_Computing_Toolbox \
                Financial_Toolbox \
+               Image_Processing_Toolbox \
+               Parallel_Computing_Toolbox \
+               Signal_Processing_Toolbox \
+               Statistics_and_Machine_Learning_Toolbox \
                Wavelet_Toolbox \
+               Optimization_Toolbox \
                Deep_Learning_Toolbox_Converter_for_TensorFlow_models"
 RUN df -h && wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
     chmod +x mpm && \
@@ -48,15 +48,15 @@ RUN df -h && wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
     --products ${TOOLBOXES} && \
     rm -f mpm /tmp/mathworks_root.log
 
-# Switch to NB_USER for addons and live-scripts installations
-USER $NB_USER
+# Switch to NB_UID for addons and live-scripts installations
+USER $NB_UID
 
 ## Adds add-ons and register them in the Matlab instance
 # Patch startup.m to automatically register the addons
 # The registration process simply iterate over all entries from the ADDONS_DIR folder
 # and add them to the "path"
 ARG ADDONS_DIR=${EXTRA_DIR}/dandi
-ARG STARTUP_SCRIPT=/opt/conda/lib/python3.11/site-packages/matlab_proxy/matlab/startup.m
+ARG STARTUP_SCRIPT=/opt/conda/lib/python3.13/site-packages/matlab_proxy/matlab/startup.m
 
 # Generate MATLAB startup script
 RUN df -h && echo -e "\n\
@@ -84,8 +84,7 @@ end \n\
 clear" >> ${STARTUP_SCRIPT}
 
 # Variables for addons management that are tied to a specific release or commit
-ARG ADDONS_RELEASES="https://github.com/NeurodataWithoutBorders/matnwb/archive/2c3a4e13c9504724c08f3d937c08c730accf7685.zip \
-                     https://github.com/schnitzer-lab/EXTRACT-public/archive/refs/heads/master.zip \
+ARG ADDONS_RELEASES="https://github.com/schnitzer-lab/EXTRACT-public/archive/refs/heads/master.zip \
                      https://github.com/bahanonu/ciatah/archive/refs/heads/master.zip"
 
 # Add add-ons for Dandi: create the addons folder and download/unzip the addons
@@ -98,7 +97,9 @@ RUN df -h && mkdir -p ${ADDONS_DIR} && \
     done
 
 # Variables for addons management that always takes the last release
-ARG ADDONS_LATEST="https://github.com/emeyers/Brain-Observatory-Toolbox"
+ARG ADDONS_LATEST="https://github.com/NeurodataWithoutBorders/matnwb \
+                   https://github.com/MATLAB-Community-Toolboxes-at-INCF/Brain-Observatory-Toolbox \
+                   https://github.com/MATLAB-Community-Toolboxes-at-INCF/DeepInterpolation-MATLAB"
 
 # Add add-ons for Dandi: detect/download/unzip the last release version
 RUN df -h && cd ${ADDONS_DIR} && \
