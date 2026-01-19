@@ -15,12 +15,8 @@ RUN apt update \
     && mkdir ${EXTRA_DIR} \
     && chown -R $NB_UID:$NB_GID $HOME ${EXTRA_DIR}
 
-RUN pip install --no-cache-dir datalad 'h5py>3.3' zarr pyopenssl plotly jupyter_bokeh jupytext nbgitpuller datalad_container \
-                datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
-                'pydra>=0.25' 'pynwb>=2.8.3' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]" \
-                lxml kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr webio_jupyter_extension \
-                tensorstore anndata tensorflow \
-                xmlschema \
+COPY matlab-requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt \
           && pip install --no-cache-dir https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip --no-deps && \
           rm -rf /tmp/*
 
