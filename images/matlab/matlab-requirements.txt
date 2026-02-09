@@ -1,0 +1,38 @@
+# required by the Deep Learning Toolbox Converter for TensorFlow models
+tensorstore
+tensorflow
+
+# required for dandi-io
+datalad_container
+dandi
+datalad-osf
+datalad
+lxml
+xmlschema
+
+# pyopenssl
+# plotly
+# jupyter_bokeh
+# jupytext
+# nbgitpuller
+# nibabel
+# nilearn
+# pybids
+# spikeinterface
+# neo
+# pydra>=0.25
+# nwbwidgets>=0.10.2
+# s3fs
+# h5netcdf
+# xarray[io]
+# kerchunk
+# neuroglancer>=2.28
+# cloud-volume
+# ipywidgets
+# webio_jupyter_extension
+# anndata
+# pynwb
+# h5py
+# hdf5plugin
+# ome-zarr
+# zarr
