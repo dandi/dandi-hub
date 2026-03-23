@@ -1,12 +1,12 @@
 ARG MATLAB_RELEASE=r2025b
-FROM --platform=linux/amd64 ghcr.io/mathworks-ref-arch/matlab-integration-for-jupyter/jupyter-matlab-notebook:${MATLAB_RELEASE}
+FROM ghcr.io/mathworks-ref-arch/matlab-integration-for-jupyter/jupyter-matlab-notebook:${MATLAB_RELEASE}
 
 USER root
+
 # install extra apps, add extra folder and fix ownership in case apt messed with it
 ARG EXTRA_DIR=/opt/extras
-RUN df -h && apt update \
-    && apt install -y \
-        htop \
+RUN apt update \
+    && apt install -y --no-install-recommends \
         libnss-wrapper \
         curl \
         git \
@@ -15,12 +15,8 @@ RUN df -h && apt update \
     && mkdir ${EXTRA_DIR} \
     && chown -R $NB_UID:$NB_GID $HOME ${EXTRA_DIR}
 
-RUN df -h && pip install --no-cache-dir datalad 'h5py>3.3' zarr pyopenssl plotly jupyter_bokeh jupytext nbgitpuller datalad_container \
-                datalad-osf dandi nibabel nilearn pybids spikeinterface neo \
-                'pydra>=0.25' 'pynwb>=2.8.3' 'nwbwidgets>=0.10.2' hdf5plugin s3fs h5netcdf "xarray[io]" \
-                lxml kerchunk 'neuroglancer>=2.28' cloud-volume ipywidgets ome-zarr webio_jupyter_extension \
-                tensorstore anndata tensorflow \
-                xmlschema \
+COPY matlab-requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt \
           && pip install --no-cache-dir https://github.com/balbasty/dandi-io/archive/refs/heads/main.zip --no-deps && \
           rm -rf /tmp/*
 
@@ -40,7 +36,7 @@ ARG TOOLBOXES="Bioinformatics_Toolbox \
                Wavelet_Toolbox \
                Optimization_Toolbox \
                Deep_Learning_Toolbox_Converter_for_TensorFlow_models"
-RUN df -h && wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
+RUN wget -q https://www.mathworks.com/mpm/glnxa64/mpm && \
     chmod +x mpm && \
     ./mpm install \
     --release=${MATLAB_RELEASE} \
@@ -59,7 +55,7 @@ ARG ADDONS_DIR=${EXTRA_DIR}/dandi
 ARG STARTUP_SCRIPT=/opt/conda/lib/python3.13/site-packages/matlab_proxy/matlab/startup.m
 
 # Generate MATLAB startup script
-RUN df -h && echo -e "\n\
+RUN echo -e "\n\
 % Set the number of workers for 'Processes' to 5\n\
 cluster = parcluster('Processes'); \n\
 cluster.NumWorkers = 5; \n\
@@ -83,12 +79,13 @@ end \n\
 % ADD HERE EXTRA ACTIONS FOR YOUR ADD-ON IF REQUIRED! \n\
 clear" >> ${STARTUP_SCRIPT}
 
-# Variables for addons management that are tied to a specific release or commit
+# Variables for addons management that are tied to a specific release, commit or bleeding edge
 ARG ADDONS_RELEASES="https://github.com/schnitzer-lab/EXTRACT-public/archive/refs/heads/master.zip \
-                     https://github.com/bahanonu/ciatah/archive/refs/heads/master.zip"
+                     https://github.com/bahanonu/ciatah/archive/refs/heads/master.zip \
+                     https://github.com/NeurodataWithoutBorders/matnwb/archive/refs/tags/2.9.0.zip"
 
 # Add add-ons for Dandi: create the addons folder and download/unzip the addons
-RUN df -h && mkdir -p ${ADDONS_DIR} && \
+RUN mkdir -p ${ADDONS_DIR} && \
     cd ${ADDONS_DIR} && \
     for addon in $ADDONS_RELEASES; do \
        wget -O addon.zip $addon \
@@ -97,14 +94,17 @@ RUN df -h && mkdir -p ${ADDONS_DIR} && \
     done
 
 # Variables for addons management that always takes the last release
-ARG ADDONS_LATEST="https://github.com/NeurodataWithoutBorders/matnwb \
-                   https://github.com/MATLAB-Community-Toolboxes-at-INCF/Brain-Observatory-Toolbox \
+ARG ADDONS_LATEST="https://github.com/MATLAB-Community-Toolboxes-at-INCF/Brain-Observatory-Toolbox \
                    https://github.com/MATLAB-Community-Toolboxes-at-INCF/DeepInterpolation-MATLAB"
 
 # Add add-ons for Dandi: detect/download/unzip the last release version
-RUN df -h && cd ${ADDONS_DIR} && \
+RUN cd ${ADDONS_DIR} && \
     for addon in $ADDONS_LATEST; do \
        wget -O addon.zip $(echo "$addon/releases/latest" | sed 's/\/github.com\//\/api.github.com\/repos\//' | xargs wget -qO- |  grep zipball_url | cut -d '"' -f 4) \
        && unzip addon.zip \
        && rm addon.zip; \
     done
+
+# Clear the ENTRYPOINT so Nebari can control startup
+ENTRYPOINT []
+CMD ["/bin/bash"]
